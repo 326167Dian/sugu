@@ -1,0 +1,134 @@
+/* General Style */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e9ecef;
+    margin: 0;
+    padding: 40px 0;
+    color: #333;
+}
+
+.page-container {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    background: white;
+    padding: 20mm;
+    box-shadow: 0 0 20px rgba(0,0,0,0.15);
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.main-title {
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 0;
+    letter-spacing: 1px;
+}
+
+.header-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.title-container {
+    flex: 1;
+}
+
+.logo-container {
+    margin-left: 20px;
+    flex-shrink: 0;
+}
+
+.logo {
+    width: 2cm;
+    height: 2cm;
+    object-fit: contain;
+    display: block;
+}
+
+/* Identitas */
+.info-group {
+    display: flex;
+    margin-bottom: 10px;
+}
+.label { width: 120px; }
+.colon { width: 20px; }
+.value { flex-grow: 1; }
+
+.fill-input {
+    border: none;
+    border-bottom: 1px solid #ccc;
+    width: 100%;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+}
+.fill-input:focus { border-bottom: 1px solid #007bff; }
+
+/* Tabel */
+.medication-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+.medication-table th, .medication-table td {
+    border: 1px solid black;
+    padding: 8px;
+}
+.medication-table th { font-weight: bold; font-size: 12px; }
+
+.table-input, .table-area {
+    width: 100%;
+    border: none;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    resize: none;
+}
+
+/* Tanda Tangan */
+.signature-section {
+    margin-top: 50px;
+    float: right;
+    width: 350px;
+    text-align: right;
+}
+.signature-box {
+    margin-top: 70px;
+    text-align: center;
+}
+
+/* Tombol-Tombol */
+.control-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 999;
+}
+.control-panel button {
+    padding: 12px 20px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.btn-pdf { background-color: #007bff; }
+.btn-print { background-color: #6c757d; }
+.btn-reset { background-color: #dc3545; }
+.btn-add { background-color: #28a745; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; }
+
+/* Print Mode */
+@media print {
+    body { background: none; padding: 0; }
+    .page-container { box-shadow: none; width: 100%; padding: 10mm; margin: 0; }
+    .no-print { display: none !important; }
+    .control-panel { display: none !important; }
+    .fill-input { border-bottom: none; }
+}

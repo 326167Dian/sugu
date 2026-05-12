@@ -1,0 +1,98 @@
+body {
+    font-family: 'Times New Roman', Times, serif;
+    background-color: #f4f4f4;
+    padding: 20px;
+}
+
+.container {
+    background: #fff;
+    width: 210mm; /* Standar Lebar A4 */
+    min-height: 297mm;
+    margin: auto;
+    padding: 20mm;
+    box-sizing: border-box;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+/* Header Section */
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.form-number {
+    text-align: right;
+    font-weight: bold;
+}
+
+h1 {
+    font-size: 1.5rem;
+    margin: 10px 0;
+    text-decoration: none;
+}
+
+/* Patient Data Section */
+.patient-data {
+    margin-bottom: 20px;
+}
+
+.patient-data table {
+    border: none;
+    font-size: 1.1rem;
+}
+
+.patient-data td {
+    padding: 2px 5px;
+}
+
+/* Main Table Section */
+.main-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.main-table th, .main-table td {
+    border: 1px solid #000;
+    padding: 10px;
+    vertical-align: top;
+    text-align: left;
+}
+
+.main-table th {
+    text-align: center;
+    background-color: #fcfcfc;
+}
+
+/* Specific styling for the 'Catatan Pengobatan Pasien' column */
+.no-padding {
+    padding: 0 !important;
+}
+
+.sub-row {
+    padding: 10px;
+    border-bottom: 1px solid #000;
+    min-height: 80px; /* Memberikan ruang untuk menulis */
+}
+
+.no-border {
+    border-bottom: none;
+}
+
+.center {
+    text-align: center;
+}
+
+/* Footer Section */
+.footer-sign {
+    float: right;
+    margin-top: 50px;
+    text-align: center;
+    width: 250px;
+}
+
+/* Print Setting */
+@media print {
+    body { background: none; padding: 0; }
+    .container { box-shadow: none; margin: 0; width: 100%; }
+}

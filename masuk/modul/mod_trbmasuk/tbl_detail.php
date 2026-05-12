@@ -1,0 +1,356 @@
+<style>
+.table-condensed {
+font-size: 13px;
+}
+
+.table-akum {
+font-size: 11px;
+}
+
+.judul-table{
+
+text-align: center; 
+font-weight: bold; 
+font-size: 13px;
+background-color: #008000;
+color: white;
+
+}
+
+.qty-dtrbmasuk-inline {
+width: 80px;
+text-align: right;
+margin-left: auto;
+padding: 2px 6px;
+}
+
+</style>
+
+<?php
+    include "../../../configurasi/koneksi.php";
+	include "../../../configurasi/fungsi_rupiah.php";
+	include "../../../configurasi/fungsi_indotgl.php";
+
+	$kd_trbmasuk = isset($_POST['kd_trbmasuk'])? $_POST['kd_trbmasuk'] : '';
+
+	//AMBIL DATA UNTUK FOOTER
+	$dfoot = $db->prepare("SELECT * FROM trbmasuk WHERE kd_trbmasuk=?");
+	$dfoot->execute([$kd_trbmasuk]);
+	$rf = $dfoot->fetch(PDO::FETCH_ASSOC);
+
+	if ($rf === false) {
+		$rf = ['jatuhtempo' => '', 'dp_bayar' => 0];
+	}
+							
+?>
+			<div class="box-body table-responsive">
+					<table id="example5" class="table table-condensed table-bordered table-striped table-hover" >
+						<thead>
+							<tr class="judul-table">
+								<th style="vertical-align: middle; background-color: #008000; text-align: center; ">No</th>
+								<th style="vertical-align: middle; background-color: #008000; text-align: left; ">Kode Barang</th>
+								<th style="vertical-align: middle; background-color: #008000; text-align: left; ">Nama Barang</th>
+								<th style="vertical-align: middle; background-color: #008000; text-align: right; ">Qty</th>
+								<th style="vertical-align: middle; background-color: #008000; text-align: center; ">Satuan</th>
+								<th style="vertical-align: middle; background-color: #008000; text-align: center; ">No. Batch</th>
+								<th style="vertical-align: middle; background-color: #008000; text-align: center; ">Exp. Date</th>
+								<?php if($rf['jatuhtempo']==""):?>
+								<th style="vertical-align: middle; background-color: #008000; text-align: right; ">Hrg Beli</th>
+								<th style="vertical-align: middle; background-color: #008000; text-align: right; ">Hrg Jual</th>
+								<?php elseif($rf['jatuhtempo']!=""):?>
+								<th style="vertical-align: middle; background-color: #008000; text-align: right; ">HNA</th>
+                                <th style="vertical-align: middle; background-color: #008000; text-align: right; ">Disc</th>
+                                <th style="vertical-align: middle; background-color: #008000; text-align: right; ">HNA+Disc</th>
+                                <th style="vertical-align: middle; background-color: #008000; text-align: right; ">Harga Jual</th>
+                                <?php endif;?>
+								<th style="vertical-align: middle; background-color: #008000; text-align: right; ">Total</th>
+								<th style="vertical-align: middle; background-color: #008000; text-align: center; ">Aksi</th>
+							</tr>
+						</thead>
+						<tbody>
+						<?php 
+						    
+                			if ($rf && isset($rf['dp_bayar'])) {
+                				$dp_bayar = format_rupiah($rf['dp_bayar']);
+                			} else {
+                				$dp_bayar = format_rupiah(0);
+                			}
+                			
+                			
+							/**$dp_bayar = format_rupiah($rf['dp_bayar']);
+							$carabayar = $rf['carabayar'];**/
+
+							$sumprice = $db->prepare("SELECT kd_trbmasuk, SUM(hrgttl_dtrbmasuk) as grandnya FROM trbmasuk_detail 
+							                           WHERE kd_trbmasuk=?");
+							$sumprice->execute([$kd_trbmasuk]);
+							$ttlprice = $sumprice->fetch(PDO::FETCH_ASSOC);
+							$grandnya = format_rupiah($ttlprice['grandnya']);
+						
+						    $noreq = $db->prepare("SELECT * FROM trbmasuk_detail 
+                        							   WHERE kd_trbmasuk=?
+                        							   ORDER BY id_dtrbmasuk ASC");
+                        	$noreq->execute([$kd_trbmasuk]);
+                        	$no=1;
+							while ($r = $noreq->fetch(PDO::FETCH_ASSOC)){
+								
+								$kdbarang = $r['kd_barang'];
+								$brg = $db->prepare("SELECT hrgjual_barang FROM barang WHERE kd_barang =?");
+								$brg->execute([$kdbarang]);
+								$rbrg = $brg->fetch(PDO::FETCH_ASSOC);
+								
+								$hrgsat_dtrbmasuk = format_rupiah($r['hrgsat_dtrbmasuk']);
+								$hrgjual = ($r['hrgjual_dtrbmasuk']==0)?$rbrg['hrgjual_barang']:$r['hrgjual_dtrbmasuk'];
+								// $hrgjual_dtrbmasuk = format_rupiah($r['hrgjual_dtrbmasuk']);
+								$hrgjual_dtrbmasuk = format_rupiah($hrgjual);
+								$hrgttl_dtrbmasuk = format_rupiah($r['hrgttl_dtrbmasuk']);
+								
+								$hnasat_dtrbmasuk = format_rupiah($r['hnasat_dtrbmasuk']);
+								$hnadisc = $r['hnasat_dtrbmasuk'] * (1 - ($r['diskon'] / 100));
+								$hnadisc1 = format_rupiah($hnadisc);
+								
+								echo "<tr style='font-size: 13px;'>
+											<td align=center>$no</td>           
+											 <td align=left>$r[kd_barang]</td>
+											 <td>$r[nmbrg_dtrbmasuk]</td>
+										 <td align=right>
+										 	<input type='number' min='1' step='1' class='form-control input-sm qty-dtrbmasuk-inline' value='$r[qty_dtrbmasuk]'
+										 		data-id_dtrbmasuk='$r[id_dtrbmasuk]'
+										 		data-qty_lama='$r[qty_dtrbmasuk]'
+										 		title='Ubah qty lalu tekan Enter'>
+										 </td>
+											 <td align=center>$r[sat_dtrbmasuk]</td>
+											 <td align=center>$r[no_batch]</td>
+											 <td align=center>".tgl_indo($r['exp_date'])."</td>
+											 ";
+								
+								if($rf['jatuhtempo']!=""){
+								    echo "<td align=right>$hnasat_dtrbmasuk</td>
+											 <td align=right>$r[diskon]</td>
+											 <td align=right>$hnadisc1</td>
+											 <td align=right>$hrgjual_dtrbmasuk</td>";
+								} elseif($rf['jatuhtempo']=="") {
+								    echo "<td align=right>$hrgsat_dtrbmasuk</td>
+											 <td align=right>$hrgjual_dtrbmasuk</td>";
+								}
+								echo "			 
+											 
+											 <td align=right>$hrgttl_dtrbmasuk</td>
+											 <td align=center>
+											 <button class='btn btn-xs btn-danger' id='hapusdetail' 
+												 data-id_dtrbmasuk='$r[id_dtrbmasuk]'>
+												 <i class='glyphicon glyphicon-remove'></i>
+												 </button>
+												
+											</td>
+										</tr>";
+									
+								$no++;
+								}
+						echo "</tbody></table>
+						
+							<p>
+						<legend class='scheduler-border'></legend>
+							<div class='col-md-6'>	
+							
+							</div>
+							
+							
+							<div class='col-lg-6'>	
+								
+								<div class='text-right'>
+									<label class='col-sm-6 control-label'>SUB TOTAL</label>        		
+									 <div class='col-sm-6'>
+										<input type='text' name='ttl_trkasir' id='ttl_trkasir' value='$grandnya' class='form-control input-validation-error' style='font-size: 18px; color: #fff; font-weight: bold; text-align: right; background: #000000;' autocomplete='off' readonly>
+									 </div>
+								</div>
+								
+								<div class='text-right'>
+									<label class='col-sm-6 control-label'>DISKON % & Nominal</label>        		
+									 <div class='col-sm-6'>
+    									 <div class='btn-group btn-group-justified' role='group' aria-label='...'>
+                                            <div class='btn-group' role='group'>
+                                                <input type='text' name='diskon2' id='diskon2' value='' class='form-control'  style='font-size: 18px; color: #000000; font-weight: bold; text-align: right;' autocomplete='off'>
+                                            </div>
+                                            <div class='btn-group' role='group'>
+                                                <input type='text' name='dp_bayar' id='dp_bayar' value='' class='form-control'  style='font-size: 18px; color: #000000; font-weight: bold; text-align: right;' autocomplete='off'>
+                                            </div>
+                                            <div class='btn-group' role='group'>
+                                                <button type='button' class='btn btn-primary' id='diskon_enter'>Enter</button>
+                                              </div>
+                                        </div>
+                                    </div>
+									
+								</div>
+								
+								<div class='text-right'>
+									<label class='col-sm-6 control-label'>Total Tagihan</label>        		
+									 <div class='col-sm-6'>
+										<input type='text' name='sisa_bayar' id='sisa_bayar' class='form-control' style='font-size: 18px; color: #fff; font-weight: bold; text-align: right; background: #000000;' autocomplete='off' readonly>
+									 </div>
+								</div>
+								
+								<div class='text-right'>
+									<label class='col-sm-6 control-label'>CARA BAYAR</label>        		
+									 <div class='col-sm-6'>
+										<select name='carabayar' id='carabayar' class='form-control' 
+										style='font-size: 13px; color: #000000; font-weight: bold;'>
+										    <option value='KREDIT'>KREDIT</option>
+										    <option value='LUNAS'>TUNAI</option>                                            
+                                            <option value='KONSINYASI'>KONSINYASI</option>
+                                         </select>  
+										
+									 </div>
+								</div>
+							</div>
+						      
+					</div>";
+					?>
+<script>
+
+
+    $(document).ready(function () {
+        HitungDP();
+        $("#example5").DataTable();
+
+        $('.qty-dtrbmasuk-inline').on('focus', function () {
+            $(this).select();
+        });
+
+        $('.qty-dtrbmasuk-inline').on('keydown', function (e) {
+            if (e.which == 13) {
+                e.preventDefault();
+                $(this).blur();
+            }
+        });
+
+        $('.qty-dtrbmasuk-inline').on('change', function () {
+            var input = $(this);
+            var id_dtrbmasuk = input.data('id_dtrbmasuk');
+            var qty_lama = input.data('qty_lama');
+            var qty_dtrbmasuk = $.trim(input.val());
+
+            if (qty_dtrbmasuk === '' || isNaN(qty_dtrbmasuk) || parseFloat(qty_dtrbmasuk) <= 0) {
+                alert('Qty tidak valid');
+                input.val(qty_lama);
+                return;
+            }
+
+            input.prop('readonly', true);
+
+            $.ajax({
+                type: 'post',
+                url: 'modul/mod_trbmasuk/simpandetail_qty.php',
+                data: {
+                    id_dtrbmasuk: id_dtrbmasuk,
+                    qty_dtrbmasuk: qty_dtrbmasuk
+                },
+                success: function () {
+                    tabel_detail();
+                },
+                error: function (xhr) {
+                    alert(xhr.responseText || 'Gagal mengubah qty');
+                    input.val(qty_lama);
+                },
+                complete: function () {
+                    input.prop('readonly', false);
+                }
+            });
+        });
+    });
+		
+		
+		//hitung dp
+		$('#dp_bayar').keydown(function(e) {
+		if (e.which == 13) { // e.which == 13 merupakan kode yang mendeteksi ketika anda   // menekan tombol enter di keyboard
+			//letakan fungsi anda disini
+   
+			HitungDP();
+				
+		}
+		}); 
+		
+		//rubah format rupiah
+			function formatRupiah(angka){
+			 var reverse = angka.toString().split('').reverse().join(''),
+			 ribuan = reverse.match(/\d{1,3}/g);
+			 ribuan = ribuan.join('.').split('').reverse().join('');
+			 return ribuan;
+			}
+			
+			
+	function HitungDP(){
+	
+		var ttl_trkasir = document.getElementById('ttl_trkasir').value;
+			var dp_bayar = document.getElementById('dp_bayar').value;
+			
+			if(ttl_trkasir == ""){
+			var ttl_trkasir = "0";
+			}else{
+			}
+			
+			if(dp_bayar == ""){
+			var dp_bayar = "0";
+			}else{
+			}
+			
+					var res1 = ttl_trkasir.replace(".", "");
+					var res2 = dp_bayar.replace(".", "");
+					
+					var res1x = res1.replace(".", "");
+					var res2x = res2.replace(".", "");
+					
+			var total2 = parseInt(res1x) - parseInt(res2x);
+			
+			document.getElementById("dp_bayar").value = formatRupiah(dp_bayar);
+			document.getElementById("sisa_bayar").value = formatRupiah(total2);
+	
+	}
+        //hitung diskon2
+        $('#diskon2').keydown(function(e) {
+            if (e.which == 13) { // e.which == 13 merupakan kode yang mendeteksi ketika anda   // menekan tombol enter di keyboard
+                //letakan fungsi anda disini
+
+                hitungdiskon();
+
+            }
+        });
+function hitungdiskon(){
+
+    var sisa_bayar = document.getElementById('sisa_bayar').value;
+    var diskon2 = document.getElementById('diskon2').value;
+
+    if(diskon2 == ""){
+        var diskon2 = "0";
+    }else{
+    }
+
+    var res1 = sisa_bayar.replace(".", "");
+    var res4 = diskon2.replace(".", "");
+
+    var res1x = res1.replace(".", "");
+    var res4x = res4.replace(".", "");
+
+    var total5 = parseInt(res1x) * ( 1- (parseInt(res4x)/100));
+
+    document.getElementById("diskon2").value = formatRupiah(diskon2);
+    document.getElementById("sisa_bayar").value = formatRupiah(total5);
+
+}
+
+    $('#diskon_enter').on('click', function(){
+        let diskon = $('#dp_bayar').val();
+    	let diskon2 = $('#diskon2').val();
+    		    
+    	if(diskon > 0 && diskon2 == 0){
+            HitungDP();
+            $('#dp_bayar').attr('disabled', true);
+            $('#diskon2').attr('disabled', true);
+    	} else if(diskon == 0 && diskon2 > 0){
+    	    hitungdiskon();
+    	    $('#dp_bayar').attr('disabled', true);
+            $('#diskon2').attr('disabled', true);
+    	} else {
+    	    alert('Hanya dibolehkan 1 opsi diskon !!!')
+    	}
+    })
+</script>

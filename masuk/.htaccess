@@ -1,0 +1,5 @@
+<IfModule mod_rewrite.c>
+RewriteEngine on
+php_flag register_globals on
+Options All -Indexes
+</IfModule>

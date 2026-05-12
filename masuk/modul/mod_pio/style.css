@@ -1,0 +1,136 @@
+body {
+    font-family: "Times New Roman", Times, serif;
+    background-color: #f0f0f0;
+    padding: 20px;
+    font-size: 14px;
+    color: #000;
+}
+
+.container {
+    width: 210mm;
+    margin: 0 auto;
+    background: white;
+    padding: 15mm;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.main-border {
+    border: 1.5px solid black;
+}
+
+.row.section-top {
+    display: flex;
+    align-items: flex-start;
+    padding: 10px;
+    border-bottom: 1px solid black;
+}
+
+.logo-container {
+    margin-left: auto;
+    padding-left: 15px;
+}
+
+.logo {
+    width: 2cm;
+    height: 2cm;
+    object-fit: contain;
+    display: block;
+}
+
+h3 {
+    text-align: center;
+    border-bottom: 1.5px solid black;
+    margin: 0;
+    padding: 12px 0;
+    font-size: 16px;
+}
+
+.section-title {
+    background-color: transparent;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    padding: 3px 10px;
+    font-style: italic;
+    font-weight: bold;
+}
+
+.flex-row {
+    display: flex;
+}
+
+.content-row {
+    padding: 5px 10px;
+}
+
+/* Styling Input agar menyatu dengan teks */
+.input-line {
+    border: none;
+    border-bottom: 1px dotted #000;
+    font-family: inherit;
+    font-size: inherit;
+    outline: none;
+    padding: 0 5px;
+}
+
+.input-area {
+    width: calc(100% - 20px);
+    margin: 5px 10px;
+    border: none;
+    font-family: inherit;
+    font-size: inherit;
+    resize: none;
+    outline: none;
+    line-height: 1.6;
+    background-image: linear-gradient(transparent, transparent 27px, #333 28px);
+    background-size: 100% 28px;
+}
+
+/* Tabel */
+.question-grid {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.question-grid td {
+    border: 1px solid black;
+    padding: 4px 8px;
+}
+
+.checkbox-cell {
+    width: 25px;
+    text-align: center;
+}
+
+.section-row {
+    padding: 8px 10px;
+    border-top: 1px solid black;
+}
+
+.border-bottom {
+    border-bottom: 1px solid black;
+}
+
+.footer-section {
+    padding: 10px 0 20px 0;
+}
+
+/* CSS Khusus Cetak */
+@media print {
+    body { background: none; padding: 0; }
+    .container { 
+        box-shadow: none; 
+        width: 100%; 
+        padding: 0; 
+    }
+    .no-print { display: none; }
+    .input-line { border-bottom: 1px dotted black; }
+    .input-area { background-image: none; border-bottom: 1px dotted black; }
+    
+    /* Menghilangkan background input default browser */
+    input, textarea, select {
+        background-color: transparent !important;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+}

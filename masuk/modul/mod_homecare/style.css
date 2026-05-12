@@ -1,0 +1,123 @@
+/* General Setup */
+body {
+    font-family: 'Times New Roman', serif;
+    background: #525659;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.form-page {
+    background: white;
+    width: 210mm;
+    min-height: 297mm;
+    padding: 15mm;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    margin-bottom: 50px;
+    box-sizing: border-box;
+}
+
+/* Navigasi */
+.main-nav {
+    background: #333;
+    padding: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    text-align: center;
+}
+
+.main-nav button {
+    padding: 8px 15px;
+    margin: 0 5px;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+}
+
+.main-nav button.active {
+    background: #007bff;
+    color: white;
+}
+
+/* Typography */
+.center-title { text-align: center; font-size: 16px; margin-bottom: 30px; }
+.form-code { text-align: center; margin: 0; font-size: 14px; }
+.title-box { text-align: center; border-bottom: 2px solid black; margin: 0; padding: 10px; font-size: 16px; }
+
+/* Layout Grid */
+.outer-border { border: 2px solid black; }
+.row { display: flex; }
+.col { flex: 1; padding: 5px; border-right: 1px solid #ccc; }
+.col:last-child { border-right: none; }
+.border-bottom { border-bottom: 1px solid black; }
+.section-label { background: #f0f0f0; border-top: 1px solid black; border-bottom: 1px solid black; padding: 2px 10px; font-style: italic; }
+.padding-box { padding: 10px; }
+
+/* Form Elements */
+.input-inline {
+    border: none;
+    border-bottom: 1px dotted black;
+    font-family: inherit;
+    font-size: inherit;
+    outline: none;
+    width: 100px;
+}
+
+.auto-line {
+    width: 100%;
+    border: none;
+    border-bottom: 1px dotted #ccc;
+    resize: none;
+    font-family: inherit;
+    outline: none;
+    line-height: 1.8;
+}
+
+/* Table Style */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.data-table th, .data-table td {
+    border: 1px solid black;
+    padding: 8px;
+    vertical-align: top;
+}
+
+.id-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Floating Tools */
+.floating-tools {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-pdf { background: #28a745; color: white; padding: 15px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; }
+.btn-reset { background: #dc3545; color: white; padding: 10px; border: none; border-radius: 50px; cursor: pointer; }
+.btn-add { margin-top: 10px; background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+
+/* Print Mode */
+@media print {
+    .no-print { display: none !important; }
+    body { background: white; }
+    .form-page { box-shadow: none; margin: 0; padding: 0; width: 100%; }
+    .input-inline { border-bottom: none; }
+}

@@ -1,0 +1,898 @@
+[06-Jul-2022 19:36:00 UTC] PHP Notice:  Undefined index: username in /home/nadapagi/public_html/masuk/cek_login.php on line 8
+[06-Jul-2022 19:36:00 UTC] PHP Notice:  Undefined index: password in /home/nadapagi/public_html/masuk/cek_login.php on line 9
+[09-Jul-2022 02:01:44 UTC] PHP Warning:  mysqli_connect(): (HY000/1045): Access denied for user 'nadapagi'@'selopamioro.idweb.host' (using password: YES) in /home/nadapagi/public_html/configurasi/koneksi.php on line 7
+[09-Jul-2022 02:01:50 UTC] PHP Warning:  mysqli_connect(): (HY000/1045): Access denied for user 'nadapagi'@'selopamioro.idweb.host' (using password: YES) in /home/nadapagi/public_html/configurasi/koneksi.php on line 7
+[09-Jul-2022 02:01:56 UTC] PHP Warning:  mysqli_connect(): (HY000/1045): Access denied for user 'nadapagi'@'selopamioro.idweb.host' (using password: YES) in /home/nadapagi/public_html/configurasi/koneksi.php on line 7
+[09-Jul-2022 02:02:06 UTC] PHP Warning:  mysqli_connect(): (HY000/1045): Access denied for user 'nadapagi'@'selopamioro.idweb.host' (using password: YES) in /home/nadapagi/public_html/configurasi/koneksi.php on line 7
+[09-Jul-2022 02:02:21 UTC] PHP Warning:  mysqli_connect(): (HY000/1045): Access denied for user 'nadapagi'@'selopamioro.idweb.host' (using password: YES) in /home/nadapagi/public_html/configurasi/koneksi.php on line 7
+[09-Jul-2022 02:03:14 UTC] PHP Warning:  mysqli_connect(): (HY000/1045): Access denied for user 'nadapagi'@'selopamioro.idweb.host' (using password: YES) in /home/nadapagi/public_html/configurasi/koneksi.php on line 7
+[09-Jul-2022 02:06:46 UTC] PHP Warning:  mysqli_connect(): (HY000/1045): Access denied for user 'nadapagi'@'selopamioro.idweb.host' (using password: YES) in /home/nadapagi/public_html/configurasi/koneksi.php on line 7
+[09-Jul-2022 02:07:06 UTC] PHP Warning:  mysqli_connect(): (HY000/1045): Access denied for user 'nadapagi'@'selopamioro.idweb.host' (using password: YES) in /home/nadapagi/public_html/configurasi/koneksi.php on line 7
+[09-Jul-2022 02:07:10 UTC] PHP Warning:  mysqli_connect(): (HY000/1045): Access denied for user 'nadapagi'@'selopamioro.idweb.host' (using password: YES) in /home/nadapagi/public_html/configurasi/koneksi.php on line 7
+[09-Jul-2022 02:08:07 UTC] PHP Warning:  mysqli_connect(): (HY000/1045): Access denied for user 'nadapagi'@'selopamioro.idweb.host' (using password: YES) in /home/nadapagi/public_html/configurasi/koneksi.php on line 7
+[09-Jul-2022 02:08:24 UTC] PHP Warning:  mysqli_connect(): (HY000/1045): Access denied for user 'nadapagi'@'selopamioro.idweb.host' (using password: YES) in /home/nadapagi/public_html/configurasi/koneksi.php on line 7
+[09-Jul-2022 02:26:39 UTC] PHP Warning:  mysqli_connect(): (HY000/1045): Access denied for user 'nadapagi'@'selopamioro.idweb.host' (using password: YES) in /home/nadapagi/public_html/configurasi/koneksi.php on line 7
+[09-Jul-2022 03:17:49 UTC] PHP Notice:  Undefined index: username in /home/nadapagi/public_html/masuk/cek_login.php on line 8
+[09-Jul-2022 03:17:49 UTC] PHP Notice:  Undefined index: password in /home/nadapagi/public_html/masuk/cek_login.php on line 9
+[02-Aug-2022 07:28:05 UTC] PHP Warning:  mysqli_connect(): (HY000/2002): Connection refused in /home/nadapagi/public_html/configurasi/koneksi.php on line 7
+[02-Aug-2022 07:28:50 UTC] PHP Warning:  mysqli_connect(): (HY000/2002): Connection refused in /home/nadapagi/public_html/configurasi/koneksi.php on line 7
+[03-Aug-2022 08:39:29 UTC] PHP Notice:  Undefined index: username in /home/cahaya36/public_html/masuk/cek_login.php on line 8
+[03-Aug-2022 08:39:29 UTC] PHP Notice:  Undefined index: password in /home/cahaya36/public_html/masuk/cek_login.php on line 9
+[31-Aug-2022 02:48:25 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[31-Aug-2022 02:48:25 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[31-Aug-2022 02:48:46 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[31-Aug-2022 02:48:46 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[31-Aug-2022 02:48:50 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[31-Aug-2022 02:48:50 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[31-Aug-2022 02:48:54 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[31-Aug-2022 02:48:54 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[31-Aug-2022 06:19:55 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[31-Aug-2022 06:19:55 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[31-Aug-2022 06:32:51 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[31-Aug-2022 06:32:51 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[31-Aug-2022 07:38:03 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[31-Aug-2022 07:38:03 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[31-Aug-2022 08:43:55 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[31-Aug-2022 08:43:55 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[31-Aug-2022 10:52:25 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[31-Aug-2022 10:52:25 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[31-Aug-2022 10:52:59 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[31-Aug-2022 10:52:59 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[31-Aug-2022 11:41:46 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[31-Aug-2022 11:41:46 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[31-Aug-2022 11:43:54 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[31-Aug-2022 11:43:54 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[31-Aug-2022 11:48:29 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[31-Aug-2022 11:48:29 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[31-Aug-2022 12:51:35 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[31-Aug-2022 12:51:35 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[31-Aug-2022 13:01:12 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[31-Aug-2022 13:01:12 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[31-Aug-2022 14:13:48 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[31-Aug-2022 14:13:48 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[01-Sep-2022 01:45:03 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[01-Sep-2022 01:45:03 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[01-Sep-2022 01:45:36 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[01-Sep-2022 01:45:36 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[01-Sep-2022 01:46:29 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[01-Sep-2022 01:46:29 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[01-Sep-2022 01:48:01 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[01-Sep-2022 01:48:01 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[01-Sep-2022 01:48:49 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[01-Sep-2022 01:48:49 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[01-Sep-2022 01:49:03 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 60
+[01-Sep-2022 01:49:03 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 66
+[04-Sep-2022 11:49:43 UTC] PHP Warning:  mysqli::__construct(): (HY000/1040): Too many connections in /home/cahaya36/public_html/configurasi/koneksi.php on line 9
+[04-Sep-2022 11:49:43 UTC] PHP Notice:  Undefined index: username in /home/cahaya36/public_html/masuk/cek_login.php on line 8
+[04-Sep-2022 11:49:43 UTC] PHP Notice:  Undefined index: password in /home/cahaya36/public_html/masuk/cek_login.php on line 9
+[04-Sep-2022 11:49:44 UTC] PHP Warning:  mysqli_connect(): (08004/1040): Too many connections in /home/cahaya36/public_html/configurasi/koneksi.php on line 7
+[04-Sep-2022 11:49:59 UTC] PHP Warning:  mysqli_connect(): (08004/1040): Too many connections in /home/cahaya36/public_html/configurasi/koneksi.php on line 7
+[04-Sep-2022 11:50:50 UTC] PHP Notice:  Undefined index: username in /home/cahaya36/public_html/masuk/cek_login.php on line 8
+[04-Sep-2022 11:50:50 UTC] PHP Notice:  Undefined index: password in /home/cahaya36/public_html/masuk/cek_login.php on line 9
+[11-Sep-2022 12:29:29 UTC] PHP Notice:  Undefined index: username in /home/cahaya36/public_html/masuk/cek_login.php on line 8
+[11-Sep-2022 12:29:29 UTC] PHP Notice:  Undefined index: password in /home/cahaya36/public_html/masuk/cek_login.php on line 9
+[17-Oct-2022 01:30:17 UTC] PHP Notice:  Undefined index: username in /home/cahaya36/public_html/masuk/cek_login.php on line 8
+[17-Oct-2022 01:30:17 UTC] PHP Notice:  Undefined index: password in /home/cahaya36/public_html/masuk/cek_login.php on line 9
+[17-Oct-2022 01:43:44 UTC] PHP Notice:  Undefined index: username in /home/cahaya36/public_html/masuk/cek_login.php on line 8
+[17-Oct-2022 01:43:44 UTC] PHP Notice:  Undefined index: password in /home/cahaya36/public_html/masuk/cek_login.php on line 9
+[18-Oct-2022 15:39:32 UTC] PHP Notice:  Undefined index: username in /home/cahaya36/public_html/masuk/cek_login.php on line 8
+[18-Oct-2022 15:39:32 UTC] PHP Notice:  Undefined index: password in /home/cahaya36/public_html/masuk/cek_login.php on line 9
+[01-Nov-2022 02:09:19 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 64
+[01-Nov-2022 02:09:19 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 70
+[01-Nov-2022 02:09:23 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 64
+[01-Nov-2022 02:09:23 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 70
+[01-Nov-2022 15:51:03 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 64
+[01-Nov-2022 15:51:03 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 70
+[01-Nov-2022 15:51:51 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 64
+[01-Nov-2022 15:51:51 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 70
+[01-Nov-2022 15:53:15 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - headers already sent in /home/cahaya36/public_html/masuk/cek_login.php on line 64
+[01-Nov-2022 15:53:15 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/cahaya36/public_html/masuk/cek_login.php:25) in /home/cahaya36/public_html/masuk/cek_login.php on line 70
+[08-Nov-2022 02:18:35 UTC] PHP Warning:  session_start(): Cannot start session when headers already sent in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 24
+[08-Nov-2022 02:18:35 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - session is not active in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 64
+[08-Nov-2022 02:18:35 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/mysifaap/public_html/nazia/configurasi/koneksi.php:1) in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 70
+[08-Nov-2022 02:26:57 UTC] PHP Warning:  session_start(): Cannot start session when headers already sent in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 24
+[08-Nov-2022 02:26:57 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - session is not active in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 64
+[08-Nov-2022 02:26:57 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/mysifaap/public_html/nazia/configurasi/koneksi.php:1) in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 70
+[08-Nov-2022 02:29:16 UTC] PHP Warning:  session_start(): Cannot start session when headers already sent in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 24
+[08-Nov-2022 02:29:16 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - session is not active in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 64
+[08-Nov-2022 02:29:16 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/mysifaap/public_html/nazia/configurasi/koneksi.php:1) in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 70
+[08-Nov-2022 02:38:08 UTC] PHP Warning:  session_start(): Cannot start session when headers already sent in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 24
+[08-Nov-2022 02:38:08 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - session is not active in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 64
+[08-Nov-2022 02:38:08 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/mysifaap/public_html/nazia/configurasi/koneksi.php:1) in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 70
+[08-Nov-2022 02:52:49 UTC] PHP Warning:  session_start(): Cannot start session when headers already sent in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 24
+[08-Nov-2022 02:52:49 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - session is not active in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 64
+[08-Nov-2022 02:52:49 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/mysifaap/public_html/nazia/configurasi/koneksi.php:1) in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 70
+[08-Nov-2022 02:54:08 UTC] PHP Warning:  session_start(): Cannot start session when headers already sent in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 24
+[08-Nov-2022 02:54:08 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - session is not active in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 64
+[08-Nov-2022 02:54:08 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/mysifaap/public_html/nazia/configurasi/koneksi.php:1) in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 70
+[08-Nov-2022 02:55:52 UTC] PHP Warning:  session_start(): Cannot start session when headers already sent in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 24
+[08-Nov-2022 02:55:52 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - session is not active in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 64
+[08-Nov-2022 02:55:52 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/mysifaap/public_html/nazia/configurasi/koneksi.php:1) in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 70
+[08-Nov-2022 03:02:19 UTC] PHP Warning:  session_start(): Cannot start session when headers already sent in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 24
+[08-Nov-2022 03:02:19 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - session is not active in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 64
+[08-Nov-2022 03:02:19 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/mysifaap/public_html/nazia/configurasi/koneksi.php:1) in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 70
+[08-Nov-2022 03:04:33 UTC] PHP Warning:  session_start(): Cannot start session when headers already sent in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 24
+[08-Nov-2022 03:04:33 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - session is not active in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 64
+[08-Nov-2022 03:04:33 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/mysifaap/public_html/nazia/configurasi/koneksi.php:1) in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 70
+[08-Nov-2022 03:04:54 UTC] PHP Warning:  session_start(): Cannot start session when headers already sent in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 24
+[08-Nov-2022 03:04:54 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - session is not active in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 64
+[08-Nov-2022 03:04:54 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/mysifaap/public_html/nazia/configurasi/koneksi.php:1) in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 70
+[08-Nov-2022 03:05:47 UTC] PHP Warning:  session_start(): Cannot start session when headers already sent in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 24
+[08-Nov-2022 03:05:47 UTC] PHP Warning:  session_regenerate_id(): Cannot regenerate session id - session is not active in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 64
+[08-Nov-2022 03:05:47 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/mysifaap/public_html/nazia/configurasi/koneksi.php:1) in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 70
+[08-Nov-2022 03:07:43 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function mysqli_connect() in /home/mysifaap/public_html/nazia/configurasi/koneksi.php:8
+Stack trace:
+#0 /home/mysifaap/public_html/nazia/masuk/cek_login.php(2): include()
+#1 {main}
+  thrown in /home/mysifaap/public_html/nazia/configurasi/koneksi.php on line 8
+[08-Nov-2022 03:07:51 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function mysqli_connect() in /home/mysifaap/public_html/nazia/configurasi/koneksi.php:8
+Stack trace:
+#0 /home/mysifaap/public_html/nazia/masuk/cek_login.php(2): include()
+#1 {main}
+  thrown in /home/mysifaap/public_html/nazia/configurasi/koneksi.php on line 8
+[08-Nov-2022 03:07:58 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function mysqli_connect() in /home/mysifaap/public_html/nazia/configurasi/koneksi.php:8
+Stack trace:
+#0 /home/mysifaap/public_html/nazia/masuk/cek_login.php(2): include()
+#1 {main}
+  thrown in /home/mysifaap/public_html/nazia/configurasi/koneksi.php on line 8
+[08-Nov-2022 03:08:31 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 55
+[08-Nov-2022 03:09:16 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 55
+[08-Nov-2022 23:43:56 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 55
+[09-Nov-2022 00:23:13 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 55
+[09-Nov-2022 00:24:50 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/public_html/nazia/masuk/cek_login.php on line 55
+[09-Nov-2022 00:39:48 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 01:24:03 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 01:28:41 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 02:30:27 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 02:30:32 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 03:28:27 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 04:01:52 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 04:25:31 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 04:57:56 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 04:58:29 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 04:59:22 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 04:59:35 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 05:54:24 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 06:09:27 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 07:00:25 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 08:03:34 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 08:07:26 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 08:30:17 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 08:31:20 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 08:37:59 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 08:57:42 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 10:06:43 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 10:07:25 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 10:52:34 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 11:59:39 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 12:04:51 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 12:47:23 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 13:07:35 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 13:40:06 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 13:47:41 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 14:53:31 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 15:33:07 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[09-Nov-2022 15:33:53 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 00:33:39 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 01:09:47 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 01:20:06 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 01:59:42 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 02:00:15 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 02:01:51 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 02:11:59 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 03:08:17 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 03:10:14 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 03:31:21 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 03:38:34 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 03:55:13 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 04:37:05 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 06:38:40 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 07:08:09 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 08:31:36 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 08:42:16 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 08:50:13 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 08:59:53 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 11:33:22 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 11:38:42 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 12:40:55 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 12:43:43 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 14:27:33 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 14:44:39 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 15:01:21 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 15:04:41 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[10-Nov-2022 15:29:46 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 01:17:37 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 02:13:56 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 03:51:03 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 04:45:29 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 04:47:15 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 06:00:03 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 06:17:20 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 06:18:13 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 07:48:16 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 07:59:59 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 08:13:57 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 09:08:12 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 09:57:25 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 10:01:09 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 10:30:15 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 11:03:43 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 11:11:45 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 11:37:19 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 11:39:49 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 12:00:36 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 12:32:32 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 13:30:20 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 13:32:03 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 14:04:34 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 14:28:00 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 14:55:28 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[11-Nov-2022 15:03:39 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 01:29:53 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 01:40:45 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 01:53:24 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 02:11:57 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 02:37:33 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 03:12:31 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 03:21:39 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 03:21:40 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 03:53:04 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 04:29:00 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 04:30:49 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 05:16:56 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 06:07:01 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 07:58:32 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 08:02:27 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 09:07:38 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 09:45:53 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 09:59:41 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 10:29:13 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 12:13:07 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 13:35:32 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 14:22:47 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 15:44:03 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 15:51:01 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 16:01:35 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 16:10:14 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 16:15:52 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 21:21:53 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 22:01:31 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 22:06:19 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[12-Nov-2022 23:04:34 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 00:59:50 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 01:24:52 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 02:36:54 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 03:59:27 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 03:59:54 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 04:38:43 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 04:41:24 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 05:23:13 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 05:25:00 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 05:35:38 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 06:57:51 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 07:18:53 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 07:34:04 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 07:58:07 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 08:12:42 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 08:20:13 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 08:53:17 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 08:55:39 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 09:12:51 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 09:39:36 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 09:58:15 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 10:43:36 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 10:48:18 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 11:03:56 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 11:10:13 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 11:10:36 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 11:14:22 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 11:21:46 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 11:22:00 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 11:27:55 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 12:01:23 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 12:01:25 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 12:04:34 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 12:38:10 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 13:37:41 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 13:45:05 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 14:17:26 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 15:10:20 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[13-Nov-2022 15:49:14 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 00:30:42 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 00:44:33 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 00:53:16 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 01:14:52 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 01:48:40 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 01:57:24 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 02:05:04 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 02:09:33 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 02:16:13 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 02:20:15 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 02:38:18 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 02:44:39 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 02:45:05 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 02:52:54 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 03:29:15 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 05:03:30 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 05:04:01 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 05:20:19 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 05:38:32 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 06:01:52 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 06:32:59 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 06:33:18 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 07:02:06 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 07:08:03 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 07:17:01 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 08:47:45 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 08:53:51 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 09:50:16 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 10:15:00 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 10:15:44 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 11:50:46 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 12:06:15 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 12:14:52 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 12:47:22 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 13:31:59 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 13:50:19 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 14:14:53 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 14:47:18 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 15:35:43 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[14-Nov-2022 22:26:01 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 00:01:23 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 00:15:20 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 00:28:30 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 01:22:40 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 01:23:57 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 01:24:36 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 01:43:25 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 02:49:59 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 02:55:13 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 03:01:33 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 04:23:27 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 05:43:44 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 05:51:12 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 06:32:07 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 07:07:38 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 07:12:00 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 07:12:01 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 07:12:21 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 07:22:13 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 07:28:05 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 07:31:15 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 07:34:05 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 07:34:06 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 07:34:39 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 08:10:02 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 08:16:56 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 08:33:51 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 08:42:09 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 09:01:23 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 09:10:34 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 09:22:12 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 09:22:12 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 09:56:06 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 10:29:32 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 11:18:44 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 11:24:58 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 11:24:59 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 11:29:59 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 11:31:39 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 11:40:27 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 11:56:50 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 11:58:56 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 11:59:33 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 12:22:20 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 12:22:20 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 12:25:00 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 12:39:29 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 12:43:23 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 12:43:48 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 13:22:20 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 13:58:48 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 15:15:59 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 15:17:14 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 23:22:00 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[15-Nov-2022 23:57:28 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 00:07:09 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 00:35:07 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 00:47:24 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 01:07:17 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 01:35:32 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 01:39:05 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 02:01:19 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 02:36:11 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 02:53:56 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 02:55:30 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 04:05:44 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 06:22:21 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 06:27:25 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 07:14:08 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 08:06:25 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 08:44:31 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 08:56:05 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 09:22:16 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 09:29:01 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 09:58:34 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 10:59:24 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 11:08:26 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 11:29:31 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 11:40:44 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 13:04:24 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 13:12:50 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 13:29:33 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 14:03:49 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 15:18:19 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 15:20:40 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 19:37:07 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[16-Nov-2022 23:54:19 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 02:19:27 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 02:36:26 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 02:44:51 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 03:16:18 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 03:27:32 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 04:13:03 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 05:43:18 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 06:28:11 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 07:34:39 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 08:27:18 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 08:34:19 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 09:01:00 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 09:48:52 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 10:06:15 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 10:17:37 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 10:21:24 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 10:25:12 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 10:27:32 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 10:35:55 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 10:35:59 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 10:38:41 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 10:51:49 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 11:03:22 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 11:33:15 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 11:33:16 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 12:51:59 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 12:58:32 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 13:14:14 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 13:56:13 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 14:16:40 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 14:58:49 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 14:59:12 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Nov-2022 15:50:39 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 00:09:57 UTC] PHP Notice:  Undefined index: username in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 8
+[18-Nov-2022 00:09:57 UTC] PHP Notice:  Undefined index: password in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 9
+[18-Nov-2022 00:11:18 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 01:09:37 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 01:21:03 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 05:07:20 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 05:15:02 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 07:37:33 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 07:45:35 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 07:49:56 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 07:51:00 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 07:54:37 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 08:20:02 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 08:22:48 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 08:24:14 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 08:30:06 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 08:49:19 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 08:51:18 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 09:07:08 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 09:10:39 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 09:31:43 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 09:33:27 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 09:34:50 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 09:35:05 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 09:44:45 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 09:51:00 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 09:56:25 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 09:57:51 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 10:05:51 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 10:14:03 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 10:14:45 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 10:14:45 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 10:20:51 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 10:38:18 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 11:50:32 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 11:57:06 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 13:17:53 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 13:22:36 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 13:32:46 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 14:05:46 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 14:51:35 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 14:56:51 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 15:09:11 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 16:33:29 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[18-Nov-2022 18:41:10 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 00:11:19 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 00:27:02 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 01:06:10 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 01:17:39 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 01:50:27 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 01:51:10 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 02:06:28 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 02:11:25 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 02:30:18 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 02:36:29 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 02:37:11 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 02:38:02 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 02:47:48 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 02:58:36 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 02:58:50 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 03:10:45 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 03:11:14 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 03:50:56 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 03:54:24 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 04:37:27 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 04:43:05 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 05:12:48 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 05:54:33 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 06:35:35 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 07:04:23 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 07:57:13 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 08:00:30 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 08:02:56 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 08:09:54 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 09:04:31 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 09:16:30 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 09:17:27 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 09:37:00 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 09:46:40 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 11:31:26 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 11:39:34 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 12:59:06 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 13:09:48 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 13:26:38 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 13:49:56 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 14:05:35 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 15:21:47 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[19-Nov-2022 15:25:23 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 00:40:40 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 00:50:20 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 01:24:10 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 02:12:41 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 03:08:57 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 03:11:02 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 03:37:22 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 05:23:41 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 05:35:56 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 06:02:14 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 06:33:47 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 08:40:39 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 08:47:22 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 09:24:28 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 09:39:24 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 09:48:58 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 09:55:48 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 10:11:57 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 10:19:15 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 10:27:28 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 10:27:28 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 10:36:36 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 10:40:01 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 10:40:19 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 10:41:08 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 10:43:52 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 10:47:45 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 10:47:45 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 11:12:59 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 11:29:57 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 11:32:49 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 12:12:55 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 12:31:05 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 12:36:06 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 12:36:57 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 12:46:06 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 12:55:08 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 12:55:08 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 13:06:18 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 13:11:09 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 13:13:47 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 13:24:17 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 13:31:10 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 13:34:13 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 13:37:42 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 13:41:55 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 14:21:43 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 14:33:46 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[20-Nov-2022 14:41:56 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 00:10:56 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 00:46:36 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 01:05:06 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 01:24:23 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 02:03:47 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 02:21:41 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 02:54:12 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 02:56:27 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 02:59:41 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 03:22:08 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 03:31:13 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 03:58:37 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 04:00:33 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 06:04:55 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 06:04:57 UTC] PHP Notice:  Undefined index: username in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 8
+[21-Nov-2022 06:04:57 UTC] PHP Notice:  Undefined index: password in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 9
+[21-Nov-2022 06:34:22 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 06:56:58 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 06:59:39 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 07:08:28 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 07:51:30 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 08:21:58 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 08:56:17 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 09:33:24 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 10:16:49 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 10:43:51 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 11:57:38 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 12:21:49 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 12:23:44 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 12:24:30 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 13:06:37 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 14:55:29 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 16:35:39 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[21-Nov-2022 16:37:46 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 00:26:37 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 00:38:02 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 00:46:54 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 00:49:04 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 00:49:38 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 00:49:52 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 00:50:53 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 00:53:25 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 00:53:41 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 00:56:41 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 01:06:32 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 01:09:20 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 01:10:01 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 01:21:35 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 01:44:15 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 02:33:01 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 03:12:22 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 03:38:16 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 08:00:39 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 08:01:23 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 08:01:43 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 08:03:29 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 08:06:50 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 08:20:16 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 08:24:00 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 08:25:55 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 08:36:57 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 08:42:11 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 08:47:19 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 08:50:13 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 09:03:28 UTC] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 17:13:39 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 17:16:17 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 17:22:10 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 17:39:17 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 17:45:10 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 18:47:53 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 19:03:16 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 19:20:28 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 19:29:29 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 19:59:34 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[22-Nov-2022 23:04:54 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 07:26:03 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 07:27:22 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 07:30:08 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 07:37:22 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 07:45:59 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 07:46:10 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 07:54:30 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 08:01:28 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 08:02:27 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 08:08:44 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 08:17:48 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 08:47:13 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 08:58:56 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 09:49:03 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 12:55:02 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 13:54:05 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 14:06:19 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 14:34:08 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 14:34:59 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 14:36:13 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 14:43:49 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 15:06:00 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 15:06:30 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 15:30:05 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 15:35:07 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 15:51:13 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 16:40:09 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 17:43:43 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 18:48:43 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 20:02:07 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 22:59:11 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 23:20:45 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[23-Nov-2022 23:24:17 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 07:15:08 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 07:17:24 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 08:04:49 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 08:39:22 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 09:06:14 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 09:17:39 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 09:23:49 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 10:29:31 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 10:59:58 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 11:08:27 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 11:29:23 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 11:43:06 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 11:58:12 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 12:40:42 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 13:06:30 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 16:41:18 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 17:23:21 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 17:40:23 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 19:44:39 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 19:52:53 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 20:08:45 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 21:03:52 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 21:08:50 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 21:37:16 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 21:59:49 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 21:59:57 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 22:02:02 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[24-Nov-2022 22:05:51 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 07:22:56 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 07:34:36 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 07:41:11 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 07:52:38 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 07:54:51 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 07:55:42 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 08:04:36 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 09:10:40 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 09:21:34 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 09:27:51 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 10:01:34 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 10:23:18 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 10:48:56 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 10:49:11 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 13:26:54 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 14:31:44 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 15:11:23 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 18:12:14 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 18:30:49 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 19:39:08 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 19:39:17 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[25-Nov-2022 20:25:15 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 06:58:48 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 07:05:32 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 07:54:08 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 08:45:31 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 08:55:36 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 09:26:15 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 09:30:20 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 10:57:49 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 11:13:07 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 11:19:39 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 12:50:58 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 12:56:32 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 12:58:31 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 12:59:54 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 13:00:48 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 13:02:35 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 13:32:03 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 13:56:54 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 14:06:30 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 15:24:05 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 15:24:29 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 15:24:30 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 15:25:36 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 15:33:15 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 15:49:14 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 16:14:26 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 16:17:47 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 16:19:17 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 16:32:08 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 17:02:39 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 17:05:41 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 17:42:39 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 18:00:10 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 18:50:55 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 18:53:05 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 19:21:49 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 19:38:26 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 20:24:19 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 20:32:16 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 22:48:41 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[26-Nov-2022 22:55:53 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 06:55:55 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 07:18:21 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 07:50:57 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 08:05:15 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 08:08:04 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 08:40:07 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 09:29:07 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 09:34:23 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 11:15:21 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 11:48:06 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 11:49:15 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 12:25:40 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 12:30:43 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 12:36:57 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 13:40:13 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 13:54:24 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 14:33:14 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 15:00:57 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 15:05:18 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 15:18:39 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 15:35:46 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 15:36:50 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 17:06:13 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 17:49:19 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 18:34:01 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 20:02:35 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 21:45:08 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[27-Nov-2022 22:42:33 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[28-Nov-2022 07:58:22 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[28-Nov-2022 08:05:50 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[28-Nov-2022 11:15:00 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[28-Nov-2022 11:16:50 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[28-Nov-2022 12:44:00 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[28-Nov-2022 13:29:30 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[28-Nov-2022 13:45:01 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[28-Nov-2022 14:40:40 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[28-Nov-2022 15:01:05 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[28-Nov-2022 15:35:23 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[28-Nov-2022 16:46:36 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[28-Nov-2022 17:01:23 Asia/jakarta] PHP Notice:  Undefined index: soharian in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 55
+[17-Dec-2022 16:49:15 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 8
+[17-Dec-2022 16:49:15 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 9
+[17-Dec-2022 16:49:21 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 8
+[17-Dec-2022 16:49:21 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 9
+[17-Dec-2022 16:56:38 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 8
+[17-Dec-2022 16:56:38 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 9
+[18-Dec-2022 19:20:58 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 8
+[18-Dec-2022 19:20:58 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 9
+[21-Dec-2022 14:30:16 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 8
+[21-Dec-2022 14:30:16 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 9
+[22-Dec-2022 20:13:17 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 8
+[22-Dec-2022 20:13:17 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 9
+[30-Dec-2022 21:02:47 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 8
+[30-Dec-2022 21:02:47 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 9
+[30-Dec-2022 21:03:05 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 8
+[30-Dec-2022 21:03:05 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 9
+[06-Jan-2023 21:57:56 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 8
+[06-Jan-2023 21:57:56 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 9
+[06-Jan-2023 21:57:59 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 8
+[06-Jan-2023 21:57:59 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 9
+[14-Jan-2023 07:13:02 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 8
+[14-Jan-2023 07:13:02 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 9
+[27-Jan-2023 14:21:16 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 8
+[27-Jan-2023 14:21:17 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 9
+[27-Jan-2023 14:21:19 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 8
+[27-Jan-2023 14:21:19 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 9
+[27-Jan-2023 14:21:20 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 8
+[27-Jan-2023 14:21:20 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 9
+[06-Feb-2023 13:24:09 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 8
+[06-Feb-2023 13:24:09 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/naziafarma.my.id/masuk/cek_login.php on line 9
+[06-Mar-2023 06:55:00 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 8
+[06-Mar-2023 06:55:00 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 9
+[06-Mar-2023 06:55:00 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 8
+[06-Mar-2023 06:55:00 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 9
+[06-Mar-2023 06:55:01 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 8
+[06-Mar-2023 06:55:01 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 9
+[06-Mar-2023 06:55:01 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 8
+[06-Mar-2023 06:55:01 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 9
+[06-Mar-2023 06:55:01 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 8
+[06-Mar-2023 06:55:01 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 9
+[06-Mar-2023 06:55:01 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 8
+[06-Mar-2023 06:55:01 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 9
+[06-Mar-2023 06:55:01 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 8
+[06-Mar-2023 06:55:01 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 9
+[06-Mar-2023 06:55:02 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 8
+[06-Mar-2023 06:55:02 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 9
+[06-Mar-2023 06:55:02 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 8
+[06-Mar-2023 06:55:02 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 9
+[06-Mar-2023 06:55:03 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 8
+[06-Mar-2023 06:55:03 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 9
+[01-Apr-2023 19:30:02 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 8
+[01-Apr-2023 19:30:02 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 9
+[28-Apr-2023 21:05:55 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 8
+[28-Apr-2023 21:05:55 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 9
+[02-May-2023 08:17:55 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 8
+[02-May-2023 08:17:55 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 9
+[10-May-2023 15:06:56 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 8
+[10-May-2023 15:06:56 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 9
+[10-May-2023 20:52:03 Asia/jakarta] PHP Notice:  Undefined index: username in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 8
+[10-May-2023 20:52:03 Asia/jakarta] PHP Notice:  Undefined index: password in /home/mysifaap/apotekyasfi.my.id/masuk/cek_login.php on line 9
+[15-Jun-2023 11:57:53 Asia/jakarta] PHP Warning:  mysqli_connect(): (HY000/1045): Access denied for user 'root'@'localhost' (using password: NO) in /home/mysifaap/apotekcitrasehatdramaga.my.id/configurasi/koneksi.php on line 8

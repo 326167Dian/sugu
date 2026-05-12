@@ -1,0 +1,18 @@
+1;OTC1;Obat Bebas Sediaan Padat
+2;OTC2;Obat Bebas Sediaan Cair
+3;OTC3;Obat Bebas untuk Kulit
+4;OTC4;Obat Bebas khusus Konsinyasi
+5;ETC1;Obat Resep Sediaan Padat
+6;ETC2;Obat Resep Sediaan Cair
+7;ETC3;Obat Resep Sediaan Kulit
+8;ETC4;Obat Resep Sediaan Injeksi
+9;ETC5;Obat Resep Sediaan Suppo dan Ovula
+10;ETC6;Obat Resep Khusus Konsinyasi
+11;HRB1;Obat Tradisional sediaan padat
+12;HRB2;Obat Tradisional sediaan cair
+13;ALK;Alat Kesehatan
+14;PKRT;Perlengkapan Kesehatan Rumah Tangga
+15;SUSU;SUSU
+16;KONS;Barang Titipan 
+17;KMTK;Kosmetika
+18;MNMK;Minuman dan Makanan

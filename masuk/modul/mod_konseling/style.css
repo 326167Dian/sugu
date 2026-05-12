@@ -1,0 +1,77 @@
+body {
+    font-family: serif; /* Menggunakan font serif agar mirip dokumen resmi */
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.container {
+    width: 210mm; /* Standar lebar kertas A4 */
+    background: white;
+    padding: 20px;
+}
+
+.form-number {
+    text-align: center;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.border-box {
+    border: 2px solid black;
+    padding: 30px;
+    min-height: 280mm;
+    position: relative;
+}
+
+.logo {
+    position: absolute;
+    top: 20px;
+    left: 40px;
+    width: 2cm;
+    height: 2cm;
+    object-fit: contain;
+}
+
+h1 {
+    text-align: center;
+    text-decoration: underline;
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+.form-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.form-table td {
+    border: 1px solid black;
+    padding: 8px;
+    vertical-align: top;
+}
+
+.tall-row {
+    height: 120px; /* Menyesuaikan tinggi kotak yang lebih besar */
+}
+
+.content-area {
+    height: 80%;
+}
+
+.signature-section {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 50px;
+    padding: 0 20px;
+}
+
+.signature-box {
+    text-align: center;
+    width: 300px;
+}
+
+.dot-line {
+    margin-top: 60px;
+}
