@@ -660,6 +660,11 @@ try {
             throw new Exception('Metode pembayaran tidak valid.');
         }
 
+        $uangKembalian = $jumlahBayar - $totalBelanja;
+        if ($uangKembalian < 0) {
+            $uangKembalian = 0;
+        }
+
         $sisaBayar = $totalBelanja - $jumlahBayar;
         if ($sisaBayar < 0) {
             $sisaBayar = 0;

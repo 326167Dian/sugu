@@ -1017,6 +1017,11 @@ if ($showKasir) {
                         <input id="mobile_bayar_input" type="text" name="jumlah_bayar" class="form-control mobile-form-input" placeholder="Contoh: 50000" required>
                     </div>
 
+                    <div class="form-group mb-2">
+                        <label for="mobile_kembalian_display" class="mobile-form-label">Uang Kembalian</label>
+                        <input id="mobile_kembalian_display" type="text" class="form-control mobile-form-input" readonly style="background-color:#f5f5f5; font-weight:700; color:#28a745;">
+                    </div>
+
                     <div class="form-group mb-3">
                         <label for="mobile_carabayar_select" class="mobile-form-label">Metode Pembayaran</label>
                         <select id="mobile_carabayar_select" name="id_carabayar" class="form-control mobile-form-input" required>
@@ -1034,6 +1039,55 @@ if ($showKasir) {
                 </form>
             </div>
         </div>
+
+        <script>
+            (function() {
+                var bayarInput = document.getElementById('mobile_bayar_input');
+                var kembalianDisplay = document.getElementById('mobile_kembalian_display');
+                var totalKeranjangNode = document.getElementById('mobile_total_keranjang');
+
+                function formatRupiahMobile(value) {
+                    var number = Number(value || 0);
+                    return 'Rp ' + number.toLocaleString('id-ID', {maximumFractionDigits: 0});
+                }
+
+                function sanitizeNumberMobile(value) {
+                    var cleaned = String(value || '').replace(/[^0-9.,-]/g, '');
+                    cleaned = cleaned.replace('.', '').replace(',', '.');
+                    return parseFloat(cleaned) || 0;
+                }
+
+                function getKeranjangTotalFromDom() {
+                    if (!totalKeranjangNode) {
+                        return 0;
+                    }
+                    var text = totalKeranjangNode.textContent || '';
+                    var sanitized = sanitizeNumberMobile(text);
+                    return sanitized;
+                }
+
+                function updateKembalian() {
+                    var bayarValue = sanitizeNumberMobile(bayarInput.value);
+                    var totalKeranjang = getKeranjangTotalFromDom();
+                    var kembalian = bayarValue - totalKeranjang;
+
+                    if (kembalian < 0) {
+                        kembalianDisplay.value = formatRupiahMobile(0);
+                        kembalianDisplay.style.color = '#dc3545';
+                    } else {
+                        kembalianDisplay.value = formatRupiahMobile(kembalian);
+                        kembalianDisplay.style.color = '#28a745';
+                    }
+                }
+
+                if (bayarInput) {
+                    bayarInput.addEventListener('input', updateKembalian);
+                    bayarInput.addEventListener('change', updateKembalian);
+                }
+
+                kembalianDisplay.value = formatRupiahMobile(0);
+            })();
+        </script>
 
         <div class="mobile-section-title">Omzet Kasir Harian</div>
         <div class="card mobile-list-card mb-3">
