@@ -305,6 +305,81 @@ try {
         throw new Exception('Anda tidak memiliki akses ke kasir mobile.');
     }
 
+    if ($action === 'delete_transaction') {
+        if (!isset($_SESSION['level']) || $_SESSION['level'] !== 'pemilik') {
+            throw new Exception('Hanya pemilik yang bisa menghapus transaksi.');
+        }
+
+        $idTrkasir = isset($_POST['id_trkasir']) ? (int)$_POST['id_trkasir'] : 0;
+        if ($idTrkasir <= 0) {
+            throw new Exception('ID transaksi tidak valid.');
+        }
+
+        $stmtInduk = $db->prepare("SELECT * FROM trkasir WHERE id_trkasir = ? LIMIT 1");
+        $stmtInduk->execute(array($idTrkasir));
+        $trxInduk = $stmtInduk->fetch(PDO::FETCH_ASSOC);
+        if (!$trxInduk) {
+            throw new Exception('Data transaksi tidak ditemukan.');
+        }
+
+        $kdTrx = isset($trxInduk['kd_trkasir']) ? (string)$trxInduk['kd_trkasir'] : '';
+        if ($kdTrx === '') {
+            throw new Exception('Kode transaksi tidak valid.');
+        }
+
+        $stmtDetail = $db->prepare("SELECT * FROM trkasir_detail WHERE kd_trkasir = ?");
+        $stmtDetail->execute(array($kdTrx));
+        $detailRows = $stmtDetail->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($detailRows as $detail) {
+            $idBarang = isset($detail['id_barang']) ? (int)$detail['id_barang'] : 0;
+            $qtyDetail = isset($detail['qty_dtrkasir']) ? (float)$detail['qty_dtrkasir'] : 0;
+            $idDetail = isset($detail['id_dtrkasir']) ? (int)$detail['id_dtrkasir'] : 0;
+
+            if ($idBarang > 0 && $qtyDetail > 0) {
+                $stmtRestoreStok = $db->prepare("UPDATE barang SET stok_barang = stok_barang + ? WHERE id_barang = ?");
+                $stmtRestoreStok->execute(array($qtyDetail, $idBarang));
+            }
+
+            if (mobileTableExists($db, 'komisi_pegawai') && $idDetail > 0) {
+                $stmtDelKomisi = $db->prepare("DELETE FROM komisi_pegawai WHERE id_dtrkasir = ?");
+                $stmtDelKomisi->execute(array($idDetail));
+            }
+        }
+
+        if (mobileTableExists($db, 'batch')) {
+            $stmtDelBatch = $db->prepare("DELETE FROM batch WHERE kd_transaksi = ? AND status = 'keluar'");
+            $stmtDelBatch->execute(array($kdTrx));
+        }
+
+        $stmtDelDetail = $db->prepare("DELETE FROM trkasir_detail WHERE kd_trkasir = ?");
+        $stmtDelDetail->execute(array($kdTrx));
+
+        if (mobileTableExists($db, 'pelanggan') && isset($trxInduk['id_pelanggan']) && (int)$trxInduk['id_pelanggan'] > 0) {
+            $tambahanPoin = isset($trxInduk['tambahan_poin']) ? (float)$trxInduk['tambahan_poin'] : 0;
+            $redeemPoin = isset($trxInduk['redeem_poin']) ? (float)$trxInduk['redeem_poin'] : 0;
+            $idPelanggan = (int)$trxInduk['id_pelanggan'];
+
+            $stmtUpdatePoin = $db->prepare("UPDATE pelanggan SET total_poin = (total_poin - :tambahan_poin) + :redeem_poin WHERE id_pelanggan = :id_pelanggan");
+            $stmtUpdatePoin->execute(array(
+                ':tambahan_poin' => $tambahanPoin,
+                ':redeem_poin' => $redeemPoin,
+                ':id_pelanggan' => $idPelanggan,
+            ));
+        }
+
+        if (mobileTableExists($db, 'kartu_stok')) {
+            $stmtDelKartu = $db->prepare("DELETE FROM kartu_stok WHERE kode_transaksi = ?");
+            $stmtDelKartu->execute(array($kdTrx));
+        }
+
+        $stmtDelTrx = $db->prepare("DELETE FROM trkasir WHERE id_trkasir = ?");
+        $stmtDelTrx->execute(array($idTrkasir));
+
+        $db->commit();
+        mobileRedirectKasir('success', 'Transaksi berhasil dihapus.', $returnModule);
+    }
+
     $shiftAktif = '0';
     if (mobileTableExists($db, 'waktukerja')) {
         $shiftStmt = $db->prepare("SELECT shift FROM waktukerja WHERE tanggal = CURDATE() AND status = 'ON' LIMIT 1");
@@ -321,6 +396,20 @@ try {
     if ($action === 'add_item') {
         $barcode = trim(isset($_POST['barcode']) ? $_POST['barcode'] : '');
         $qty = (float)(isset($_POST['qty']) ? $_POST['qty'] : 0);
+        $hargaJualManualRaw = trim(isset($_POST['harga_jual']) ? (string)$_POST['harga_jual'] : '');
+        $hargaJualManual = 0;
+        if ($hargaJualManualRaw !== '') {
+            $hargaJualManualClean = preg_replace('/[^0-9.,-]/', '', $hargaJualManualRaw);
+            if (strpos($hargaJualManualClean, ',') !== false && strpos($hargaJualManualClean, '.') !== false) {
+                $hargaJualManualClean = str_replace('.', '', $hargaJualManualClean);
+                $hargaJualManualClean = str_replace(',', '.', $hargaJualManualClean);
+            } elseif (strpos($hargaJualManualClean, ',') !== false) {
+                $hargaJualManualClean = str_replace(',', '.', $hargaJualManualClean);
+            } else {
+                $hargaJualManualClean = str_replace(',', '', $hargaJualManualClean);
+            }
+            $hargaJualManual = (float)round((float)$hargaJualManualClean, 0);
+        }
         $jenisTransaksi = isset($_POST['jns_transaksi']) ? (int)$_POST['jns_transaksi'] : 1;
         if ($jenisTransaksi < 1 || $jenisTransaksi > 6) {
             $jenisTransaksi = 1;
@@ -342,6 +431,10 @@ try {
         $qtyRounded = floor($qty);
         if ($qtyRounded <= 0) {
             throw new Exception('Qty tidak valid.');
+        }
+
+        if ($hargaJualManualRaw !== '' && $hargaJualManual <= 0) {
+            throw new Exception('Harga jual manual harus lebih besar dari 0.');
         }
 
         $sqlBarang = "SELECT * FROM barang WHERE kd_barang = ? LIMIT 1";
@@ -367,9 +460,6 @@ try {
         $satBarang = isset($barang['sat_barang']) ? $barang['sat_barang'] : 'PCS';
 
         $stokTersedia = isset($barang['stok_barang']) ? (float)$barang['stok_barang'] : 0;
-        if ($stokTersedia < $qtyRounded) {
-            throw new Exception('Stok tidak mencukupi. Stok tersedia: ' . number_format($stokTersedia, 0, ',', '.'));
-        }
 
         $hargaReguler = (isset($barang['hrgjual_barang']) && (float)$barang['hrgjual_barang'] > 0) ? (float)$barang['hrgjual_barang'] : 0;
         $hargaResep = (isset($barang['hrgjual_barang1']) && (float)$barang['hrgjual_barang1'] > 0) ? (float)$barang['hrgjual_barang1'] : 0;
@@ -393,6 +483,11 @@ try {
             $hargaJual = $hargaMarketplace;
         }
 
+        if ($hargaJualManual > 0) {
+            $hargaJual = $hargaJualManual;
+        }
+        $hargaJual = (float)round($hargaJual, 0);
+
         $modal = $hargaModal;
 
         $komisi = 0;
@@ -400,7 +495,7 @@ try {
             $komisi = (float)$barang['komisi'] * $qtyRounded;
         }
 
-        $ttlHarga = $qtyRounded * $hargaJual;
+        $ttlHarga = (float)round($qtyRounded * $hargaJual, 0);
         $profit = $ttlHarga - ($modal * $qtyRounded);
         $lineQty = (float)$qtyRounded;
         $lineSubtotal = (float)$ttlHarga;
@@ -445,10 +540,15 @@ try {
             ));
         }
 
-        $stmtStok = $db->prepare("UPDATE barang SET stok_barang = stok_barang - ? WHERE id_barang = ? AND stok_barang >= ?");
-        $stmtStok->execute(array($qtyRounded, $idBarang, $qtyRounded));
+        $stmtStok = $db->prepare("UPDATE barang SET stok_barang = stok_barang - ? WHERE id_barang = ?");
+        $stmtStok->execute(array($qtyRounded, $idBarang));
         if ($stmtStok->rowCount() <= 0) {
             throw new Exception('Gagal update stok barang. Coba ulangi.');
+        }
+
+        if ($hargaJualManual > 0 && mobileColumnExists($db, 'barang', 'hrgsat_barang')) {
+            $stmtUpdateHargaBarang = $db->prepare("UPDATE barang SET hrgsat_barang = ? WHERE id_barang = ?");
+            $stmtUpdateHargaBarang->execute(array((float)round($hargaJualManual, 0), $idBarang));
         }
 
         if (mobileTableExists($db, 'batch')) {

@@ -291,7 +291,7 @@ if ($showKasir) {
                     $kasirHariIni = $rowKasirHariIni;
                 }
 
-                                $stmtRiwayatKasir = $db->prepare("SELECT kd_trkasir, tgl_trkasir, ttl_trkasir
+                                $stmtRiwayatKasir = $db->prepare("SELECT id_trkasir, kd_trkasir, tgl_trkasir, ttl_trkasir
                                                                                                  FROM trkasir
                                                                                                  WHERE id_user = ?
                                                                                                      AND tgl_trkasir >= CURDATE() - INTERVAL 60 DAY
@@ -301,7 +301,7 @@ if ($showKasir) {
                                 $riwayatKasir = $stmtRiwayatKasir->fetchAll(PDO::FETCH_ASSOC);
 
                                 if (count($riwayatKasir) === 0) {
-                                        $stmtRiwayatKasirFallback = $db->prepare("SELECT kd_trkasir, tgl_trkasir, ttl_trkasir
+                                        $stmtRiwayatKasirFallback = $db->prepare("SELECT id_trkasir, kd_trkasir, tgl_trkasir, ttl_trkasir
                                                                                                                             FROM trkasir
                                                                                                                             WHERE id_user = ?
                                                                                                                             ORDER BY tgl_trkasir DESC
@@ -535,7 +535,7 @@ if ($showKasir) {
                     </div>
                     <div class="form-group mb-2">
                         <label for="mobile_harga_view" class="mobile-form-label">Harga Jual</label>
-                        <input id="mobile_harga_view" type="text" class="form-control mobile-form-input" readonly>
+                        <input id="mobile_harga_view" type="number" name="harga_jual" class="form-control mobile-form-input" min="0" step="1" inputmode="numeric" required>
                     </div>
                     <div class="form-group mb-2">
                         <label for="mobile_resep" class="mobile-form-label">Resep</label>
@@ -616,7 +616,7 @@ if ($showKasir) {
                         return;
                     }
 
-                    hargaView.value = formatRupiahMobile(getActiveHargaByJenis(selectedItem));
+                    hargaView.value = String(getActiveHargaByJenis(selectedItem));
                 }
 
                 function escapeHtml(value) {
@@ -763,7 +763,7 @@ if ($showKasir) {
                     barcodeInput.value = item.kd_barang;
                     kodeView.value = item.kd_barang;
                     satuanView.value = item.sat_barang || '';
-                    hargaView.value = formatRupiahMobile(getActiveHargaByJenis(item));
+                    hargaView.value = String(getActiveHargaByJenis(item));
                     qtyInput.value = 1;
                     suggestionBox.style.display = 'none';
                 }
@@ -1064,9 +1064,19 @@ if ($showKasir) {
                                             | <?php echo mobileRupiah($trx['ttl_trkasir']); ?>
                                         </div>
                                     </div>
-                                    <a href="modul/mod_laporan/struk.php?kd_trkasir=<?php echo urlencode($trx['kd_trkasir']); ?>" target="_blank" class="btn btn-sm btn-outline-success" style="padding:4px 8px; margin-left:8px;" title="Cetak Struk">
-                                        <ion-icon name="print-outline" style="font-size:18px;"></ion-icon>
-                                    </a>
+                                    <div style="display:flex; align-items:center; gap:6px; margin-left:8px;">
+                                        <a href="modul/mod_laporan/struk.php?kd_trkasir=<?php echo urlencode($trx['kd_trkasir']); ?>" target="_blank" class="btn btn-sm btn-outline-success" style="padding:4px 8px;" title="Cetak Struk">
+                                            <ion-icon name="print-outline" style="font-size:18px;"></ion-icon>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" style="padding:4px 8px;" title="Edit Transaksi"
+                                                onclick="mobileEditTransaksi(<?php echo (int)$trx['id_trkasir']; ?>)">
+                                            <ion-icon name="create-outline" style="font-size:18px;"></ion-icon>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" style="padding:4px 8px;" title="Hapus Transaksi"
+                                                onclick="mobileDeleteTransaksi(<?php echo (int)$trx['id_trkasir']; ?>, '<?php echo htmlspecialchars($trx['kd_trkasir'], ENT_QUOTES, 'UTF-8'); ?>')">
+                                            <ion-icon name="trash-outline" style="font-size:18px;"></ion-icon>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </li>
@@ -1080,6 +1090,53 @@ if ($showKasir) {
                 <?php } ?>
             </ul>
         </div>
+        <script>
+            function mobileEditTransaksi(idTrkasir) {
+                if (!idTrkasir || Number(idTrkasir) <= 0) {
+                    alert('ID transaksi tidak valid.');
+                    return;
+                }
+
+                window.location.href = 'media_admin.php?module=trkasir&act=ubah&id=' + encodeURIComponent(String(idTrkasir));
+            }
+
+            function mobileDeleteTransaksi(idTrkasir, kodeTrx) {
+                if (!idTrkasir || Number(idTrkasir) <= 0) {
+                    alert('ID transaksi tidak valid.');
+                    return;
+                }
+
+                var labelKode = kodeTrx || ('ID ' + String(idTrkasir));
+                if (!window.confirm('Hapus transaksi ' + labelKode + '?')) {
+                    return;
+                }
+
+                var formData = new FormData();
+                formData.append('mobile_action', 'delete_transaction');
+                formData.append('return_module', 'kasir');
+                formData.append('id_trkasir', String(idTrkasir));
+                formData.append('ajax', '1');
+
+                fetch('../masuk/mobile/kasir_mobile_action.php', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                }).then(function (response) {
+                    return response.json();
+                }).then(function (json) {
+                    if (!json || json.status !== 'success') {
+                        alert((json && json.message) ? json.message : 'Gagal menghapus transaksi.');
+                        return;
+                    }
+                    window.location.reload();
+                }).catch(function () {
+                    alert('Terjadi kendala jaringan saat menghapus transaksi.');
+                });
+            }
+        </script>
         <?php
     }
 }
