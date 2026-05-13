@@ -307,10 +307,19 @@ if ($showKasir) {
                 $stmtDraft = $db->prepare("SELECT d.kd_trkasir
                                            FROM trkasir_detail d
                                            LEFT JOIN trkasir t ON t.kd_trkasir = d.kd_trkasir
-                                           WHERE d.idadmin = ? AND t.kd_trkasir IS NULL
+                                           WHERE t.kd_trkasir IS NULL
+                                             AND (
+                                                d.idadmin = ?
+                                                OR EXISTS(
+                                                    SELECT 1
+                                                    FROM kdtk k
+                                                    WHERE k.kd_trkasir = d.kd_trkasir
+                                                      AND k.id_admin = ?
+                                                )
+                                             )
                                            ORDER BY d.id_dtrkasir DESC
                                            LIMIT 1");
-                $stmtDraft->execute(array($_SESSION['idadmin']));
+                $stmtDraft->execute(array($_SESSION['idadmin'], $_SESSION['idadmin']));
                 $draftKode = $stmtDraft->fetchColumn();
                 if (!empty($draftKode)) {
                     $transaksiAktif = $draftKode;
@@ -319,6 +328,7 @@ if ($showKasir) {
 
             if (!empty($transaksiAktif) && mobileTableExists($db, 'trkasir_detail')) {
                 $stmtDetail = $db->prepare("SELECT d.nmbrg_dtrkasir,
+                                                   d.id_dtrkasir,
                                                    d.kd_barang,
                                                    d.sat_dtrkasir,
                                                    d.qty_dtrkasir,
@@ -405,15 +415,17 @@ if ($showKasir) {
         <div class="card mobile-list-card mb-3" style="margin-top:12px;">
             <div class="card-body" style="padding:14px;">
                 <div class="text-muted">Kode Transaksi Aktif</div>
-                <h3 style="margin:6px 0 0; font-weight:800;"><?php echo !empty($transaksiAktif) ? htmlspecialchars($transaksiAktif) : 'Belum ada transaksi aktif'; ?></h3>
+                <h3 id="mobile_active_kd" style="margin:6px 0 0; font-weight:800;"><?php echo !empty($transaksiAktif) ? htmlspecialchars($transaksiAktif) : 'Belum ada transaksi aktif'; ?></h3>
                 <?php if (empty($transaksiAktif)) { ?>
-                    <div class="text-muted" style="margin-top:6px; font-size:13px;">Kode transaksi akan dibuat otomatis saat input barcode pertama.</div>
+                    <div id="mobile_draft_hint" class="text-muted" style="margin-top:6px; font-size:13px;">Kode transaksi akan dibuat otomatis saat input barcode pertama.</div>
                 <?php } ?>
                 <?php if (!empty($transaksiAktif)) { ?>
-                    <div class="text-muted" style="margin-top:6px; font-size:13px;">
+                    <div id="mobile_draft_summary" class="text-muted" style="margin-top:6px; font-size:13px;">
                         Draft keranjang: <?php echo number_format($totalBarisKeranjang, 0, ',', '.'); ?> baris item,
                         total qty <?php echo number_format($totalQtyKeranjang, 0, ',', '.'); ?>.
                     </div>
+                <?php } else { ?>
+                    <div id="mobile_draft_summary" class="text-muted" style="display:none; margin-top:6px; font-size:13px;"></div>
                 <?php } ?>
             </div>
         </div>
@@ -471,7 +483,8 @@ if ($showKasir) {
         <div class="mobile-section-title">Input Barang</div>
         <div class="card mobile-list-card mb-3">
             <div class="card-body mobile-form-body">
-                <form method="post" action="mobile/kasir_mobile_action.php">
+                <div id="mobile_add_item_feedback" style="display:none; margin-bottom:10px;"></div>
+                <form id="mobile_add_item_form" method="post" action="mobile/kasir_mobile_action.php">
                     <input type="hidden" name="mobile_action" value="add_item">
                     <input type="hidden" name="return_module" value="kasir">
                     <input type="hidden" name="barcode" id="mobile_selected_barcode" value="">
@@ -496,7 +509,7 @@ if ($showKasir) {
                         <label for="mobile_qty_input" class="mobile-form-label">Qty</label>
                         <input id="mobile_qty_input" type="number" name="qty" class="form-control mobile-form-input" min="1" step="1" value="1" required>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block mobile-submit-btn">
+                    <button id="mobile_add_item_button" type="submit" class="btn btn-primary btn-block mobile-submit-btn">
                         <ion-icon name="add-circle-outline"></ion-icon>
                         Tambah Ke Keranjang
                     </button>
@@ -512,6 +525,15 @@ if ($showKasir) {
                 var satuanView = document.getElementById('mobile_satuan_view');
                 var hargaView = document.getElementById('mobile_harga_view');
                 var qtyInput = document.getElementById('mobile_qty_input');
+                var form = document.getElementById('mobile_add_item_form');
+                var submitButton = document.getElementById('mobile_add_item_button');
+                var feedbackNode = document.getElementById('mobile_add_item_feedback');
+                // Elemen-elemen ini berada di bawah tag <script> sehingga harus di-lookup secara lazy
+                function getDetailList() { return document.getElementById('mobile_detail_list'); }
+                function getTotalKeranjangNode() { return document.getElementById('mobile_total_keranjang'); }
+                function getKodeTransaksiNode() { return document.getElementById('mobile_active_kd'); }
+                function getDraftHintNode() { return document.getElementById('mobile_draft_hint'); }
+                function getDraftSummaryNode() { return document.getElementById('mobile_draft_summary'); }
                 var debounceTimer = null;
                 var currentItems = [];
 
@@ -525,6 +547,105 @@ if ($showKasir) {
                     kodeView.value = '';
                     satuanView.value = '';
                     hargaView.value = '';
+                }
+
+                function escapeHtml(value) {
+                    return String(value || '')
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#39;');
+                }
+
+                function formatAngka(value) {
+                    var number = Number(value || 0);
+                    return number.toLocaleString('id-ID');
+                }
+
+                function showFeedback(message, isSuccess) {
+                    if (!feedbackNode) {
+                        return;
+                    }
+
+                    feedbackNode.style.display = 'block';
+                    feedbackNode.className = isSuccess ? 'text-success' : 'text-danger';
+                    feedbackNode.style.fontWeight = '700';
+                    feedbackNode.textContent = message;
+                    feedbackNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+                function buildDetailItemHtml(item) {
+                    var idRow = Number(item.id_dtrkasir || 0);
+                    var namaTampil = item.nm_barang_tampil || item.nm_barang || '-';
+                    var satTampil = item.sat_dtrkasir || item.sat_barang || '-';
+                    var qtyTampil = item.qty_dtrkasir || item.qty || 0;
+                    var hargaTampil = item.hrgjual_dtrkasir || item.harga || 0;
+                    var subtotalTampil = item.hrgttl_dtrkasir || item.subtotal || 0;
+
+                    return '<li data-row-id="' + String(idRow) + '">' +
+                        '<div class="item">' +
+                        '<div class="icon-box bg-success"><ion-icon name="bag-check-outline"></ion-icon></div>' +
+                        '<div class="in">' +
+                        '<div>' +
+                        escapeHtml(namaTampil) +
+                        '<div class="text-muted" style="font-size:13px;">' +
+                        'Kode: ' + escapeHtml(item.kd_barang || '-') +
+                        ' | Sat: ' + escapeHtml(satTampil) +
+                        '</div>' +
+                        '<div class="text-muted" style="font-size:13px;">' +
+                        'Qty: ' + formatAngka(qtyTampil) +
+                        ' | Harga: ' + formatRupiahMobile(hargaTampil) +
+                        ' | Subtotal: ' + formatRupiahMobile(subtotalTampil) +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</li>';
+                }
+
+                function refreshCartUiFromAjax(data) {
+                    if (!data || !data.cart || !data.item) {
+                        return;
+                    }
+
+                    var kodeTransaksiNode = getKodeTransaksiNode();
+                    var draftHintNode = getDraftHintNode();
+                    var draftSummaryNode = getDraftSummaryNode();
+                    var totalKeranjangNode = getTotalKeranjangNode();
+                    var detailList = getDetailList();
+
+                    if (kodeTransaksiNode && data.cart.kd_trkasir) {
+                        kodeTransaksiNode.textContent = data.cart.kd_trkasir;
+                    }
+
+                    if (draftHintNode) {
+                        draftHintNode.style.display = 'none';
+                    }
+
+                    if (draftSummaryNode) {
+                        draftSummaryNode.style.display = 'block';
+                        draftSummaryNode.textContent = 'Draft keranjang: ' + formatAngka(data.cart.total_baris || 0) + ' baris item, total qty ' + formatAngka(data.cart.total_qty || 0) + '.';
+                    }
+
+                    if (totalKeranjangNode) {
+                        totalKeranjangNode.textContent = 'Total Keranjang Aktif: ' + formatRupiahMobile(data.cart.total_harga || 0);
+                    }
+
+                    if (!detailList || !data.cart) {
+                        return;
+                    }
+
+                    var allRows = Array.isArray(data.cart.details) ? data.cart.details : [];
+                    if (allRows.length > 0) {
+                        var html = '';
+                        allRows.forEach(function (row) {
+                            html += buildDetailItemHtml(row);
+                        });
+                        detailList.innerHTML = html;
+                    } else {
+                        detailList.innerHTML = '<li data-empty="1"><div class="item"><div class="in">Belum ada item pada transaksi aktif.</div></div></li>';
+                    }
                 }
 
                 function renderSuggestions(items) {
@@ -616,24 +737,62 @@ if ($showKasir) {
                     }
                 });
 
-                var form = namaInput.closest('form');
                 form.addEventListener('submit', function (event) {
                     if (!barcodeInput.value) {
                         event.preventDefault();
                         alert('Pilih barang dari daftar autocomplete terlebih dahulu.');
                         return false;
                     }
-                    return true;
+
+                    event.preventDefault();
+
+                    submitButton.disabled = true;
+                    var originalText = submitButton.innerHTML;
+                    submitButton.innerHTML = '<ion-icon name="hourglass-outline"></ion-icon> Menyimpan...';
+
+                    var formData = new FormData(form);
+                    formData.append('ajax', '1');
+
+                    fetch(form.getAttribute('action'), {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: formData
+                    }).then(function (response) {
+                        return response.json();
+                    }).then(function (json) {
+                        if (!json || json.status !== 'success') {
+                            showFeedback((json && json.message) ? json.message : 'Gagal menambah barang ke keranjang.', false);
+                            return;
+                        }
+
+                        showFeedback(json.message || 'Barang berhasil ditambahkan ke keranjang aktif.', true);
+                        refreshCartUiFromAjax(json);
+                        clearSelection();
+                        namaInput.value = '';
+                        qtyInput.value = 1;
+                        suggestionBox.style.display = 'none';
+                        namaInput.focus();
+                    }).catch(function () {
+                        showFeedback('Terjadi kendala jaringan. Coba lagi.', false);
+                    }).finally(function () {
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalText;
+                    });
+
+                    return false;
                 });
             })();
         </script>
 
         <div class="mobile-section-title">Detail Keranjang Aktif</div>
         <div class="card mobile-list-card mb-3">
-            <ul class="listview flush transparent no-line image-listview">
+            <ul id="mobile_detail_list" class="listview flush transparent no-line image-listview">
                 <?php if (count($detailAktif) > 0) { ?>
                     <?php foreach ($detailAktif as $detail) { ?>
-                        <li>
+                        <li data-row-id="<?php echo (int)$detail['id_dtrkasir']; ?>">
                             <div class="item">
                                 <div class="icon-box bg-success">
                                     <ion-icon name="bag-check-outline"></ion-icon>
@@ -656,7 +815,7 @@ if ($showKasir) {
                         </li>
                     <?php } ?>
                 <?php } else { ?>
-                    <li>
+                    <li data-empty="1">
                         <div class="item">
                             <div class="in">Belum ada item pada transaksi aktif.</div>
                         </div>
@@ -668,7 +827,7 @@ if ($showKasir) {
         <div class="mobile-section-title" id="payment">Proses Pembayaran</div>
         <div class="card mobile-list-card mb-3">
             <div class="card-body mobile-form-body">
-                <div class="mobile-payment-total">Total Keranjang Aktif: <?php echo mobileRupiah($totalKeranjangAktif); ?></div>
+                <div id="mobile_total_keranjang" class="mobile-payment-total">Total Keranjang Aktif: <?php echo mobileRupiah($totalKeranjangAktif); ?></div>
                 <form method="post" action="mobile/kasir_mobile_action.php">
                     <input type="hidden" name="mobile_action" value="process_payment">
                     <input type="hidden" name="return_module" value="kasir">
@@ -793,10 +952,19 @@ if ($showKeranjang) {
                 $stmtDraft = $db->prepare("SELECT d.kd_trkasir
                                            FROM trkasir_detail d
                                            LEFT JOIN trkasir t ON t.kd_trkasir = d.kd_trkasir
-                                           WHERE d.idadmin = ? AND t.kd_trkasir IS NULL
+                                           WHERE t.kd_trkasir IS NULL
+                                             AND (
+                                                d.idadmin = ?
+                                                OR EXISTS(
+                                                    SELECT 1
+                                                    FROM kdtk k
+                                                    WHERE k.kd_trkasir = d.kd_trkasir
+                                                      AND k.id_admin = ?
+                                                )
+                                             )
                                            ORDER BY d.id_dtrkasir DESC
                                            LIMIT 1");
-                $stmtDraft->execute(array($_SESSION['idadmin']));
+                $stmtDraft->execute(array($_SESSION['idadmin'], $_SESSION['idadmin']));
                 $draftKode = $stmtDraft->fetchColumn();
                 if (!empty($draftKode)) {
                     $transaksiAktif = $draftKode;

@@ -11,6 +11,29 @@ function mobileRedirectKasir($status, $message, $targetModule = 'kasir', $extraP
     $allowedModules = array('kasir', 'keranjang');
     $module = in_array($targetModule, $allowedModules, true) ? $targetModule : 'kasir';
 
+    $acceptHeader = isset($_SERVER['HTTP_ACCEPT']) ? strtolower((string)$_SERVER['HTTP_ACCEPT']) : '';
+    $requestedWith = isset($_SERVER['HTTP_X_REQUESTED_WITH']) ? strtolower((string)$_SERVER['HTTP_X_REQUESTED_WITH']) : '';
+    $isAjax = (isset($_POST['ajax']) && $_POST['ajax'] === '1') || $requestedWith === 'xmlhttprequest' || strpos($acceptHeader, 'application/json') !== false;
+
+    if ($isAjax) {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $response = array(
+            'status' => $status,
+            'message' => $message,
+            'module' => $module,
+        );
+
+        if (is_array($extraParams) && count($extraParams) > 0) {
+            foreach ($extraParams as $key => $value) {
+                $response[$key] = $value;
+            }
+        }
+
+        echo json_encode($response);
+        exit;
+    }
+
     $query = array(
         'module' => $module,
         'status' => $status,
@@ -300,39 +323,27 @@ try {
             $komisi = (float)$barang['komisi'] * $qtyRounded;
         }
 
-        $stmtDetail = $db->prepare("SELECT * FROM trkasir_detail WHERE kd_trkasir = ? AND id_barang = ? AND (no_batch IS NULL OR no_batch = '') ORDER BY id_dtrkasir DESC LIMIT 1");
-        $stmtDetail->execute(array($kdTrkasir, $idBarang));
-        $detailLama = $stmtDetail->fetch(PDO::FETCH_ASSOC);
+        $ttlHarga = $qtyRounded * $hargaJual;
+        $profit = $ttlHarga - ($modal * $qtyRounded);
+        $lineQty = (float)$qtyRounded;
+        $lineSubtotal = (float)$ttlHarga;
 
-        if ($detailLama) {
-            $qtyBaru = (float)$detailLama['qty_dtrkasir'] + $qtyRounded;
-            $ttlBaru = $qtyBaru * $hargaJual;
-            $profitBaru = $ttlBaru - ($modal * $qtyBaru);
-            $komisiBaru = (float)$detailLama['komisi'] + $komisi;
-
-            $stmtUpdate = $db->prepare("UPDATE trkasir_detail SET qty_dtrkasir = ?, hrgjual_dtrkasir = ?, hrgttl_dtrkasir = ?, modal = ?, profit = ?, komisi = ?, waktu = ? WHERE id_dtrkasir = ?");
-            $stmtUpdate->execute(array($qtyBaru, $hargaJual, $ttlBaru, $modal, $profitBaru, $komisiBaru, date('Y-m-d H:i:s'), $detailLama['id_dtrkasir']));
-        } else {
-            $ttlHarga = $qtyRounded * $hargaJual;
-            $profit = $ttlHarga - ($modal * $qtyRounded);
-
-            $stmtInsert = $db->prepare("INSERT INTO trkasir_detail (kd_trkasir, id_barang, kd_barang, nmbrg_dtrkasir, qty_dtrkasir, sat_dtrkasir, hrgjual_dtrkasir, disc, modal, profit, waktu, hrgttl_dtrkasir, tipe, komisi, idadmin) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, 1, ?, ?)");
-            $stmtInsert->execute(array(
-                $kdTrkasir,
-                $idBarang,
-                $kdBarang,
-                $nmBarang,
-                $qtyRounded,
-                $satBarang,
-                $hargaJual,
-                $modal,
-                $profit,
-                date('Y-m-d H:i:s'),
-                $ttlHarga,
-                $komisi,
-                $idAdmin
-            ));
-        }
+        $stmtInsert = $db->prepare("INSERT INTO trkasir_detail (kd_trkasir, id_barang, kd_barang, nmbrg_dtrkasir, qty_dtrkasir, sat_dtrkasir, hrgjual_dtrkasir, disc, modal, profit, waktu, hrgttl_dtrkasir, tipe, komisi, idadmin) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, 1, ?, ?)");
+        $stmtInsert->execute(array(
+            $kdTrkasir,
+            $idBarang,
+            $kdBarang,
+            $nmBarang,
+            $qtyRounded,
+            $satBarang,
+            $hargaJual,
+            $modal,
+            $profit,
+            date('Y-m-d H:i:s'),
+            $ttlHarga,
+            $komisi,
+            $idAdmin
+        ));
 
         $stmtStok = $db->prepare("UPDATE barang SET stok_barang = stok_barang - ? WHERE id_barang = ? AND stok_barang >= ?");
         $stmtStok->execute(array($qtyRounded, $idBarang, $qtyRounded));
@@ -340,8 +351,57 @@ try {
             throw new Exception('Gagal update stok barang. Coba ulangi.');
         }
 
+        $stmtCartSummary = $db->prepare("SELECT COUNT(*) AS total_baris, COALESCE(SUM(qty_dtrkasir), 0) AS total_qty, COALESCE(SUM(hrgttl_dtrkasir), 0) AS total_harga FROM trkasir_detail WHERE kd_trkasir = ?");
+        $stmtCartSummary->execute(array($kdTrkasir));
+        $cartSummary = $stmtCartSummary->fetch(PDO::FETCH_ASSOC);
+
+        $stmtCartDetails = $db->prepare("SELECT d.id_dtrkasir,
+                                                d.kd_barang,
+                                                d.sat_dtrkasir,
+                                                d.qty_dtrkasir,
+                                                d.hrgjual_dtrkasir,
+                                                d.hrgttl_dtrkasir,
+                                                COALESCE(b.nm_barang, d.nmbrg_dtrkasir) AS nm_barang_tampil
+                                         FROM trkasir_detail d
+                                         LEFT JOIN barang b ON b.id_barang = d.id_barang
+                                         WHERE d.kd_trkasir = ?
+                                         ORDER BY d.id_dtrkasir DESC
+                                         LIMIT 500");
+        $stmtCartDetails->execute(array($kdTrkasir));
+        $cartDetailsRows = $stmtCartDetails->fetchAll(PDO::FETCH_ASSOC);
+        $cartDetails = array();
+        foreach ($cartDetailsRows as $row) {
+            $cartDetails[] = array(
+                'id_dtrkasir' => isset($row['id_dtrkasir']) ? (int)$row['id_dtrkasir'] : 0,
+                'kd_barang' => isset($row['kd_barang']) ? (string)$row['kd_barang'] : '',
+                'nm_barang_tampil' => isset($row['nm_barang_tampil']) ? (string)$row['nm_barang_tampil'] : '',
+                'sat_dtrkasir' => isset($row['sat_dtrkasir']) ? (string)$row['sat_dtrkasir'] : '',
+                'qty_dtrkasir' => isset($row['qty_dtrkasir']) ? (float)$row['qty_dtrkasir'] : 0,
+                'hrgjual_dtrkasir' => isset($row['hrgjual_dtrkasir']) ? (float)$row['hrgjual_dtrkasir'] : 0,
+                'hrgttl_dtrkasir' => isset($row['hrgttl_dtrkasir']) ? (float)$row['hrgttl_dtrkasir'] : 0,
+            );
+        }
+
+        $extraAjaxData = array(
+            'cart' => array(
+                'kd_trkasir' => $kdTrkasir,
+                'total_baris' => isset($cartSummary['total_baris']) ? (int)$cartSummary['total_baris'] : 0,
+                'total_qty' => isset($cartSummary['total_qty']) ? (float)$cartSummary['total_qty'] : 0,
+                'total_harga' => isset($cartSummary['total_harga']) ? (float)$cartSummary['total_harga'] : 0,
+                'details' => $cartDetails,
+            ),
+            'item' => array(
+                'kd_barang' => $kdBarang,
+                'nm_barang' => $nmBarang,
+                'sat_barang' => $satBarang,
+                'qty' => $lineQty,
+                'harga' => (float)$hargaJual,
+                'subtotal' => $lineSubtotal,
+            ),
+        );
+
         $db->commit();
-        mobileRedirectKasir('success', 'Barang berhasil ditambahkan ke keranjang aktif.', $returnModule);
+        mobileRedirectKasir('success', 'Barang berhasil ditambahkan ke keranjang aktif.', $returnModule, $extraAjaxData);
     }
 
     if ($action === 'process_payment') {
