@@ -19,24 +19,33 @@ if (!function_exists('mobileHasAccess')) {
 
 function mobileTableExists($db, $tableName)
 {
-    try {
-        $stmt = $db->prepare("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?");
-        $stmt->execute(array($tableName));
-        return (int)$stmt->fetchColumn() > 0;
-    } catch (Exception $e) {
-        return false;
+    static $cache = array();
+    if (isset($cache[$tableName])) {
+        return $cache[$tableName];
     }
+    try {
+        $result = $db->query("SHOW TABLES LIKE " . $db->quote($tableName));
+        $cache[$tableName] = $result && $result->rowCount() > 0;
+    } catch (Exception $e) {
+        $cache[$tableName] = false;
+    }
+    return $cache[$tableName];
 }
 
 function mobileColumnExists($db, $tableName, $columnName)
 {
-    try {
-        $stmt = $db->prepare("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?");
-        $stmt->execute(array($tableName, $columnName));
-        return (int)$stmt->fetchColumn() > 0;
-    } catch (Exception $e) {
-        return false;
+    static $cache = array();
+    $key = $tableName . '.' . $columnName;
+    if (isset($cache[$key])) {
+        return $cache[$key];
     }
+    try {
+        $result = $db->query("SHOW COLUMNS FROM `" . str_replace('`', '', $tableName) . "` LIKE " . $db->quote($columnName));
+        $cache[$key] = $result && $result->rowCount() > 0;
+    } catch (Exception $e) {
+        $cache[$key] = false;
+    }
+    return $cache[$key];
 }
 
 function mobileScalar($db, $sql, $default = 0)
@@ -275,16 +284,31 @@ if ($showKasir) {
 
         try {
             if (mobileTableExists($db, 'trkasir')) {
-                $stmtKasirHariIni = $db->prepare("SELECT COUNT(*) AS jumlah_transaksi, COALESCE(SUM(ttl_trkasir), 0) AS total_omzet FROM trkasir WHERE DATE(tgl_trkasir) = CURDATE() AND id_user = ?");
+                $stmtKasirHariIni = $db->prepare("SELECT COUNT(*) AS jumlah_transaksi, COALESCE(SUM(ttl_trkasir), 0) AS total_omzet FROM trkasir WHERE tgl_trkasir >= CURDATE() AND tgl_trkasir < CURDATE() + INTERVAL 1 DAY AND id_user = ?");
                 $stmtKasirHariIni->execute(array($_SESSION['idadmin']));
                 $rowKasirHariIni = $stmtKasirHariIni->fetch(PDO::FETCH_ASSOC);
                 if ($rowKasirHariIni) {
                     $kasirHariIni = $rowKasirHariIni;
                 }
 
-                $stmtRiwayatKasir = $db->prepare("SELECT kd_trkasir, tgl_trkasir, ttl_trkasir FROM trkasir WHERE id_user = ? ORDER BY tgl_trkasir DESC LIMIT 10");
-                $stmtRiwayatKasir->execute(array($_SESSION['idadmin']));
-                $riwayatKasir = $stmtRiwayatKasir->fetchAll(PDO::FETCH_ASSOC);
+                                $stmtRiwayatKasir = $db->prepare("SELECT kd_trkasir, tgl_trkasir, ttl_trkasir
+                                                                                                 FROM trkasir
+                                                                                                 WHERE id_user = ?
+                                                                                                     AND tgl_trkasir >= CURDATE() - INTERVAL 60 DAY
+                                                                                                 ORDER BY tgl_trkasir DESC
+                                                                                                 LIMIT 10");
+                                $stmtRiwayatKasir->execute(array($_SESSION['idadmin']));
+                                $riwayatKasir = $stmtRiwayatKasir->fetchAll(PDO::FETCH_ASSOC);
+
+                                if (count($riwayatKasir) === 0) {
+                                        $stmtRiwayatKasirFallback = $db->prepare("SELECT kd_trkasir, tgl_trkasir, ttl_trkasir
+                                                                                                                            FROM trkasir
+                                                                                                                            WHERE id_user = ?
+                                                                                                                            ORDER BY tgl_trkasir DESC
+                                                                                                                            LIMIT 10");
+                                        $stmtRiwayatKasirFallback->execute(array($_SESSION['idadmin']));
+                                        $riwayatKasir = $stmtRiwayatKasirFallback->fetchAll(PDO::FETCH_ASSOC);
+                                }
             }
 
             if (mobileTableExists($db, 'waktukerja')) {
@@ -303,28 +327,34 @@ if ($showKasir) {
                 $transaksiAktif = $stmtAktif->fetchColumn();
             }
 
-            if (empty($transaksiAktif) && mobileTableExists($db, 'trkasir_detail') && mobileTableExists($db, 'trkasir')) {
-                $stmtDraft = $db->prepare("SELECT d.kd_trkasir
-                                           FROM trkasir_detail d
-                                           LEFT JOIN trkasir t ON t.kd_trkasir = d.kd_trkasir
-                                           WHERE t.kd_trkasir IS NULL
-                                             AND (
-                                                d.idadmin = ?
-                                                OR EXISTS(
-                                                    SELECT 1
-                                                    FROM kdtk k
-                                                    WHERE k.kd_trkasir = d.kd_trkasir
-                                                      AND k.id_admin = ?
-                                                )
-                                             )
-                                           ORDER BY d.id_dtrkasir DESC
-                                           LIMIT 1");
-                $stmtDraft->execute(array($_SESSION['idadmin'], $_SESSION['idadmin']));
-                $draftKode = $stmtDraft->fetchColumn();
-                if (!empty($draftKode)) {
-                    $transaksiAktif = $draftKode;
-                }
-            }
+                        if (empty($transaksiAktif) && mobileTableExists($db, 'trkasir_detail') && mobileTableExists($db, 'trkasir')) {
+                                $stmtDraft = $db->prepare("SELECT d.kd_trkasir
+                                                                                     FROM trkasir_detail d
+                                                                                     LEFT JOIN trkasir t ON t.kd_trkasir = d.kd_trkasir
+                                                                                     WHERE t.kd_trkasir IS NULL
+                                                                                         AND d.idadmin = ?
+                                                                                     ORDER BY d.id_dtrkasir DESC
+                                                                                     LIMIT 1");
+                                $stmtDraft->execute(array($_SESSION['idadmin']));
+                                $draftKode = $stmtDraft->fetchColumn();
+
+                                if (empty($draftKode) && mobileTableExists($db, 'kdtk')) {
+                                        $stmtDraftByKdtk = $db->prepare("SELECT d.kd_trkasir
+                                                                                                         FROM kdtk k
+                                                                                                         INNER JOIN trkasir_detail d ON d.kd_trkasir = k.kd_trkasir
+                                                                                                         LEFT JOIN trkasir t ON t.kd_trkasir = d.kd_trkasir
+                                                                                                         WHERE t.kd_trkasir IS NULL
+                                                                                                             AND k.id_admin = ?
+                                                                                                         ORDER BY d.id_dtrkasir DESC
+                                                                                                         LIMIT 1");
+                                        $stmtDraftByKdtk->execute(array($_SESSION['idadmin']));
+                                        $draftKode = $stmtDraftByKdtk->fetchColumn();
+                                }
+
+                                if (!empty($draftKode)) {
+                                        $transaksiAktif = $draftKode;
+                                }
+                        }
 
             if (!empty($transaksiAktif) && mobileTableExists($db, 'trkasir_detail')) {
                 $stmtDetail = $db->prepare("SELECT d.nmbrg_dtrkasir,
@@ -374,17 +404,9 @@ if ($showKasir) {
 
         <?php if ($mobileStatus === 'success' && $mobilePaidFlag === '1' && $mobileTrxCode !== '') { ?>
             <div class="card mobile-list-card mb-3">
-                <div class="card-body mobile-form-body">
-                    <div class="text-success" style="font-weight:700; margin-bottom:8px;">Transaksi tersimpan ke tabel.</div>
-                    <div class="text-muted" style="font-size:13px; margin-bottom:10px;">Kode transaksi: <?php echo htmlspecialchars($mobileTrxCode); ?></div>
-                    <div class="mobile-menu-actions" style="margin:0;">
-                        <a href="modul/mod_laporan/struk.php?kd_trkasir=<?php echo urlencode($mobileTrxCode); ?>" target="_blank" class="btn btn-success">
-                            <ion-icon name="print-outline"></ion-icon>&nbsp; Cetak Struk
-                        </a>
-                        <a href="modul/mod_laporan/kwitansi.php?kd_trkasir=<?php echo urlencode($mobileTrxCode); ?>" target="_blank" class="btn btn-secondary">
-                            <ion-icon name="receipt-outline"></ion-icon>&nbsp; Cetak Kwitansi
-                        </a>
-                    </div>
+                <div class="card-body" style="padding:14px;">
+                    <div class="text-success" style="font-weight:700; margin-bottom:4px;">Transaksi tersimpan ke tabel.</div>
+                    <div class="text-muted" style="font-size:13px;">Kode transaksi: <?php echo htmlspecialchars($mobileTrxCode); ?></div>
                 </div>
             </div>
         <?php } ?>
@@ -1042,6 +1064,9 @@ if ($showKasir) {
                                             | <?php echo mobileRupiah($trx['ttl_trkasir']); ?>
                                         </div>
                                     </div>
+                                    <a href="modul/mod_laporan/struk.php?kd_trkasir=<?php echo urlencode($trx['kd_trkasir']); ?>" target="_blank" class="btn btn-sm btn-outline-success" style="padding:4px 8px; margin-left:8px;" title="Cetak Struk">
+                                        <ion-icon name="print-outline" style="font-size:18px;"></ion-icon>
+                                    </a>
                                 </div>
                             </div>
                         </li>
@@ -1082,17 +1107,9 @@ if ($showKeranjang) {
 
         <?php if ($mobileStatus === 'success' && $mobilePaidFlag === '1' && $mobileTrxCode !== '') { ?>
             <div class="card mobile-list-card mb-3">
-                <div class="card-body mobile-form-body">
-                    <div class="text-success" style="font-weight:700; margin-bottom:8px;">Transaksi tersimpan ke tabel.</div>
-                    <div class="text-muted" style="font-size:13px; margin-bottom:10px;">Kode transaksi: <?php echo htmlspecialchars($mobileTrxCode); ?></div>
-                    <div class="mobile-menu-actions" style="margin:0;">
-                        <a href="modul/mod_laporan/struk.php?kd_trkasir=<?php echo urlencode($mobileTrxCode); ?>" target="_blank" class="btn btn-success">
-                            <ion-icon name="print-outline"></ion-icon>&nbsp; Cetak Struk
-                        </a>
-                        <a href="modul/mod_laporan/kwitansi.php?kd_trkasir=<?php echo urlencode($mobileTrxCode); ?>" target="_blank" class="btn btn-secondary">
-                            <ion-icon name="receipt-outline"></ion-icon>&nbsp; Cetak Kwitansi
-                        </a>
-                    </div>
+                <div class="card-body" style="padding:14px;">
+                    <div class="text-success" style="font-weight:700; margin-bottom:4px;">Transaksi tersimpan ke tabel.</div>
+                    <div class="text-muted" style="font-size:13px;">Kode transaksi: <?php echo htmlspecialchars($mobileTrxCode); ?></div>
                 </div>
             </div>
         <?php } ?>
@@ -1117,28 +1134,34 @@ if ($showKeranjang) {
                 $transaksiAktif = $stmtAktif->fetchColumn();
             }
 
-            if (empty($transaksiAktif) && mobileTableExists($db, 'trkasir_detail') && mobileTableExists($db, 'trkasir')) {
-                $stmtDraft = $db->prepare("SELECT d.kd_trkasir
-                                           FROM trkasir_detail d
-                                           LEFT JOIN trkasir t ON t.kd_trkasir = d.kd_trkasir
-                                           WHERE t.kd_trkasir IS NULL
-                                             AND (
-                                                d.idadmin = ?
-                                                OR EXISTS(
-                                                    SELECT 1
-                                                    FROM kdtk k
-                                                    WHERE k.kd_trkasir = d.kd_trkasir
-                                                      AND k.id_admin = ?
-                                                )
-                                             )
-                                           ORDER BY d.id_dtrkasir DESC
-                                           LIMIT 1");
-                $stmtDraft->execute(array($_SESSION['idadmin'], $_SESSION['idadmin']));
-                $draftKode = $stmtDraft->fetchColumn();
-                if (!empty($draftKode)) {
-                    $transaksiAktif = $draftKode;
-                }
-            }
+                        if (empty($transaksiAktif) && mobileTableExists($db, 'trkasir_detail') && mobileTableExists($db, 'trkasir')) {
+                                $stmtDraft = $db->prepare("SELECT d.kd_trkasir
+                                                                                     FROM trkasir_detail d
+                                                                                     LEFT JOIN trkasir t ON t.kd_trkasir = d.kd_trkasir
+                                                                                     WHERE t.kd_trkasir IS NULL
+                                                                                         AND d.idadmin = ?
+                                                                                     ORDER BY d.id_dtrkasir DESC
+                                                                                     LIMIT 1");
+                                $stmtDraft->execute(array($_SESSION['idadmin']));
+                                $draftKode = $stmtDraft->fetchColumn();
+
+                                if (empty($draftKode) && mobileTableExists($db, 'kdtk')) {
+                                        $stmtDraftByKdtk = $db->prepare("SELECT d.kd_trkasir
+                                                                                                         FROM kdtk k
+                                                                                                         INNER JOIN trkasir_detail d ON d.kd_trkasir = k.kd_trkasir
+                                                                                                         LEFT JOIN trkasir t ON t.kd_trkasir = d.kd_trkasir
+                                                                                                         WHERE t.kd_trkasir IS NULL
+                                                                                                             AND k.id_admin = ?
+                                                                                                         ORDER BY d.id_dtrkasir DESC
+                                                                                                         LIMIT 1");
+                                        $stmtDraftByKdtk->execute(array($_SESSION['idadmin']));
+                                        $draftKode = $stmtDraftByKdtk->fetchColumn();
+                                }
+
+                                if (!empty($draftKode)) {
+                                        $transaksiAktif = $draftKode;
+                                }
+                        }
 
             if (!empty($transaksiAktif) && mobileTableExists($db, 'trkasir_detail')) {
                 $stmtDetail = $db->prepare("SELECT d.nmbrg_dtrkasir,
