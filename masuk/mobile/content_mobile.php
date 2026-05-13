@@ -330,6 +330,8 @@ if ($showKasir) {
                 $stmtDetail = $db->prepare("SELECT d.nmbrg_dtrkasir,
                                                    d.id_dtrkasir,
                                                    d.kd_barang,
+                                                   d.tipe,
+                                                   COALESCE(d.resep, 'TIDAK') AS resep,
                                                    d.sat_dtrkasir,
                                                    d.qty_dtrkasir,
                                                    d.hrgjual_dtrkasir,
@@ -489,6 +491,14 @@ if ($showKasir) {
                     <input type="hidden" name="return_module" value="kasir">
                     <input type="hidden" name="barcode" id="mobile_selected_barcode" value="">
                     <div class="form-group mb-2">
+                        <label for="mobile_jns_transaksi" class="mobile-form-label">Jenis Transaksi</label>
+                        <select id="mobile_jns_transaksi" name="jns_transaksi" class="form-control mobile-form-input" required>
+                            <option value="1">Reguler</option>
+                            <option value="2">Resep</option>
+                            <option value="3">Marketplace</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-2">
                         <label for="mobile_nama_barang_input" class="mobile-form-label">Nama Barang (autocomplete)</label>
                         <input id="mobile_nama_barang_input" type="text" class="form-control mobile-form-input" placeholder="Ketik minimal 2 huruf nama barang" autocomplete="off" required>
                         <div id="mobile_barang_suggestion" class="mobile-suggestion-list"></div>
@@ -504,6 +514,13 @@ if ($showKasir) {
                     <div class="form-group mb-2">
                         <label for="mobile_harga_view" class="mobile-form-label">Harga Jual</label>
                         <input id="mobile_harga_view" type="text" class="form-control mobile-form-input" readonly>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="mobile_resep" class="mobile-form-label">Resep</label>
+                        <select id="mobile_resep" name="resep" class="form-control mobile-form-input" required>
+                            <option value="TIDAK">TIDAK</option>
+                            <option value="YA">YA</option>
+                        </select>
                     </div>
                     <div class="form-group mb-3">
                         <label for="mobile_qty_input" class="mobile-form-label">Qty</label>
@@ -524,6 +541,8 @@ if ($showKasir) {
                 var kodeView = document.getElementById('mobile_kode_barang_view');
                 var satuanView = document.getElementById('mobile_satuan_view');
                 var hargaView = document.getElementById('mobile_harga_view');
+                var jenisTransaksiInput = document.getElementById('mobile_jns_transaksi');
+                var resepInput = document.getElementById('mobile_resep');
                 var qtyInput = document.getElementById('mobile_qty_input');
                 var form = document.getElementById('mobile_add_item_form');
                 var submitButton = document.getElementById('mobile_add_item_button');
@@ -534,8 +553,10 @@ if ($showKasir) {
                 function getKodeTransaksiNode() { return document.getElementById('mobile_active_kd'); }
                 function getDraftHintNode() { return document.getElementById('mobile_draft_hint'); }
                 function getDraftSummaryNode() { return document.getElementById('mobile_draft_summary'); }
+                function getPaymentButtons() { return document.querySelectorAll('button[data-mobile-payment-button="1"]'); }
                 var debounceTimer = null;
                 var currentItems = [];
+                var selectedItem = null;
 
                 function formatRupiahMobile(value) {
                     var number = Number(value || 0);
@@ -547,6 +568,33 @@ if ($showKasir) {
                     kodeView.value = '';
                     satuanView.value = '';
                     hargaView.value = '';
+                    selectedItem = null;
+                }
+
+                function getActiveHargaByJenis(item) {
+                    if (!item) {
+                        return 0;
+                    }
+
+                    var jenis = jenisTransaksiInput ? String(jenisTransaksiInput.value || '1') : '1';
+                    if (jenis === '3') {
+                        return Number(item.hrgjual_barang2 || item.hrgjual_barang1 || item.hrgjual_barang || item.hrgsat_barang || 0);
+                    }
+
+                    if (jenis === '2') {
+                        return Number(item.hrgjual_barang1 || item.hrgjual_barang || item.hrgsat_barang || 0);
+                    }
+
+                    return Number(item.hrgjual_barang || item.hrgjual_barang1 || item.hrgjual_barang2 || item.hrgsat_barang || 0);
+                }
+
+                function refreshHargaViewBySelection() {
+                    if (!selectedItem || !barcodeInput.value) {
+                        hargaView.value = '';
+                        return;
+                    }
+
+                    hargaView.value = formatRupiahMobile(getActiveHargaByJenis(selectedItem));
                 }
 
                 function escapeHtml(value) {
@@ -582,6 +630,15 @@ if ($showKasir) {
                     var qtyTampil = item.qty_dtrkasir || item.qty || 0;
                     var hargaTampil = item.hrgjual_dtrkasir || item.harga || 0;
                     var subtotalTampil = item.hrgttl_dtrkasir || item.subtotal || 0;
+                    var tipeValue = Number(item.tipe || item.jns_transaksi || 1);
+                    var tipeLabel = 'Reguler';
+                    if (tipeValue === 2) {
+                        tipeLabel = 'Resep';
+                    } else if (tipeValue === 3) {
+                        tipeLabel = 'Marketplace';
+                    }
+
+                    var resepValue = String(item.resep || 'TIDAK').toUpperCase() === 'YA' ? 'YA' : 'TIDAK';
 
                     return '<li data-row-id="' + String(idRow) + '">' +
                         '<div class="item">' +
@@ -597,6 +654,10 @@ if ($showKasir) {
                         'Qty: ' + formatAngka(qtyTampil) +
                         ' | Harga: ' + formatRupiahMobile(hargaTampil) +
                         ' | Subtotal: ' + formatRupiahMobile(subtotalTampil) +
+                        '</div>' +
+                        '<div class="text-muted" style="font-size:13px;">' +
+                        'Jenis: ' + escapeHtml(tipeLabel) +
+                        ' | Resep: ' + escapeHtml(resepValue) +
                         '</div>' +
                         '</div>' +
                         '</div>' +
@@ -630,6 +691,14 @@ if ($showKasir) {
 
                     if (totalKeranjangNode) {
                         totalKeranjangNode.textContent = 'Total Keranjang Aktif: ' + formatRupiahMobile(data.cart.total_harga || 0);
+                    }
+
+                    var paymentButtons = getPaymentButtons();
+                    var isPayEnabled = Number(data.cart.total_harga || 0) > 0;
+                    if (paymentButtons && paymentButtons.length) {
+                        paymentButtons.forEach(function (btn) {
+                            btn.disabled = !isPayEnabled;
+                        });
                     }
 
                     if (!detailList || !data.cart) {
@@ -667,11 +736,12 @@ if ($showKasir) {
                 }
 
                 function chooseItem(item) {
+                    selectedItem = item;
                     namaInput.value = item.nm_barang;
                     barcodeInput.value = item.kd_barang;
                     kodeView.value = item.kd_barang;
                     satuanView.value = item.sat_barang || '';
-                    hargaView.value = formatRupiahMobile(item.harga_jual || 0);
+                    hargaView.value = formatRupiahMobile(getActiveHargaByJenis(item));
                     qtyInput.value = 1;
                     suggestionBox.style.display = 'none';
                 }
@@ -712,6 +782,12 @@ if ($showKasir) {
                         fetchSuggestions(keyword);
                     }, 250);
                 });
+
+                if (jenisTransaksiInput) {
+                    jenisTransaksiInput.addEventListener('change', function () {
+                        refreshHargaViewBySelection();
+                    });
+                }
 
                 suggestionBox.addEventListener('click', function (event) {
                     var target = event.target;
@@ -785,6 +861,84 @@ if ($showKasir) {
                     return false;
                 });
             })();
+
+            (function() {
+                function renderSalesSummary() {
+                    var container = document.getElementById('mobile_sales_summary_container');
+                    if (!container) return;
+
+                    var formData = new FormData();
+                    formData.append('mobile_action', 'get_sales_summary');
+                    formData.append('tgl_hari', '<?php echo date('Y-m-d'); ?>');
+
+                    var apiPath = '../masuk/mobile/kasir_mobile_action.php';
+                    
+                    fetch(apiPath, {
+                        method: 'POST',
+                        body: formData
+                    }).then(function(response) {
+                        console.log('Response status:', response.status);
+                        return response.json();
+                    }).then(function(json) {
+                        console.log('Response JSON:', json);
+                        
+                        if (!json || json.status !== 'success') {
+                            var errMsg = (json && json.message) ? json.message : 'Gagal memuat data omzet.';
+                            console.error('Error loading sales summary:', errMsg);
+                            container.innerHTML = '<div style="padding:20px; color:#999;">Error: ' + escapeHtml(errMsg) + '</div>';
+                            return;
+                        }
+
+                        var s = json.summary || {};
+                        console.log('Summary data:', s);
+                        
+                        var html = '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
+
+                        // SHIFT PAGI
+                        html += '<tr style="background:#e8f4fd;"><td colspan="2" style="padding:10px 8px; font-weight:700; color:#0a4abf;">SHIFT PAGI</td></tr>';
+                        html += '<tr style="border-bottom:1px solid #eee;"><td style="padding:6px 16px;">Tunai</td><td style="text-align:right; padding:6px 8px;">Rp ' + formatNumber(s.tunai_pagi || 0) + '</td></tr>';
+                        html += '<tr style="border-bottom:1px solid #eee;"><td style="padding:6px 16px;">Transfer</td><td style="text-align:right; padding:6px 8px;">Rp ' + formatNumber(s.transfer_pagi || 0) + '</td></tr>';
+                        html += '<tr style="border-bottom:2px solid #ccc;"><td style="padding:6px 16px;">Tempo</td><td style="text-align:right; padding:6px 8px;">Rp ' + formatNumber(s.tempo_pagi || 0) + '</td></tr>';
+
+                        // SHIFT SORE
+                        html += '<tr style="background:#e8f4fd;"><td colspan="2" style="padding:10px 8px; font-weight:700; color:#0a4abf;">SHIFT SORE</td></tr>';
+                        html += '<tr style="border-bottom:1px solid #eee;"><td style="padding:6px 16px;">Tunai</td><td style="text-align:right; padding:6px 8px;">Rp ' + formatNumber(s.tunai_sore || 0) + '</td></tr>';
+                        html += '<tr style="border-bottom:1px solid #eee;"><td style="padding:6px 16px;">Transfer</td><td style="text-align:right; padding:6px 8px;">Rp ' + formatNumber(s.transfer_sore || 0) + '</td></tr>';
+                        html += '<tr style="border-bottom:2px solid #ccc;"><td style="padding:6px 16px;">Tempo</td><td style="text-align:right; padding:6px 8px;">Rp ' + formatNumber(s.tempo_sore || 0) + '</td></tr>';
+
+                        // TOTAL semua shift
+                        html += '<tr style="background:#f0f7e6;"><td colspan="2" style="padding:10px 8px; font-weight:700; color:#2e7d32;">TOTAL</td></tr>';
+                        html += '<tr style="border-bottom:1px solid #eee;"><td style="padding:6px 16px;">Tunai</td><td style="text-align:right; padding:6px 8px; font-weight:600;">Rp ' + formatNumber(s.total_tunai || 0) + '</td></tr>';
+                        html += '<tr style="border-bottom:1px solid #eee;"><td style="padding:6px 16px;">Transfer</td><td style="text-align:right; padding:6px 8px; font-weight:600;">Rp ' + formatNumber(s.total_transfer || 0) + '</td></tr>';
+                        html += '<tr style="border-bottom:2px solid #aaa;"><td style="padding:6px 16px;">Tempo</td><td style="text-align:right; padding:6px 8px; font-weight:600;">Rp ' + formatNumber(s.total_tempo || 0) + '</td></tr>';
+
+                        // GRAND TOTAL
+                        html += '<tr style="background:#0a4abf;"><td style="padding:12px 8px; font-weight:700; font-size:15px; color:#fff;">GRAND TOTAL</td><td style="text-align:right; padding:12px 8px; font-weight:700; font-size:15px; color:#fff;">Rp ' + formatNumber(s.total_semua || 0) + '</td></tr>';
+                        html += '<tr style="font-size:12px; color:#999;"><td colspan="2" style="padding:6px 8px;">Jumlah transaksi: ' + (s.jumlah_transaksi || 0) + '</td></tr>';
+                        html += '</table>';
+                        
+                        container.innerHTML = html;
+                    }).catch(function(err) {
+                        console.error('Fetch error:', err);
+                        container.innerHTML = '<div style="padding:20px; color:#999;">Error: ' + err.message + '</div>';
+                    });
+                }
+
+                function formatNumber(n) {
+                    return Number(n).toLocaleString('id-ID', {maximumFractionDigits: 0});
+                }
+
+                function escapeHtml(text) {
+                    var map = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
+                    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', renderSalesSummary);
+                } else {
+                    renderSalesSummary();
+                }
+            })();
         </script>
 
         <div class="mobile-section-title">Detail Keranjang Aktif</div>
@@ -808,6 +962,10 @@ if ($showKasir) {
                                             Qty: <?php echo number_format((float)$detail['qty_dtrkasir'], 0, ',', '.'); ?>
                                             | Harga: <?php echo mobileRupiah($detail['hrgjual_dtrkasir']); ?>
                                             | Subtotal: <?php echo mobileRupiah($detail['hrgttl_dtrkasir']); ?>
+                                        </div>
+                                        <div class="text-muted" style="font-size:13px;">
+                                            Jenis: <?php echo ((int)$detail['tipe'] === 2) ? 'Resep' : (((int)$detail['tipe'] === 3) ? 'Marketplace' : 'Reguler'); ?>
+                                            | Resep: <?php echo (isset($detail['resep']) && strtoupper((string)$detail['resep']) === 'YA') ? 'YA' : 'TIDAK'; ?>
                                         </div>
                                     </div>
                                 </div>
@@ -847,11 +1005,22 @@ if ($showKasir) {
                         </select>
                     </div>
 
-                    <button type="submit" class="btn btn-success btn-block mobile-submit-btn" <?php echo $totalKeranjangAktif <= 0 ? 'disabled' : ''; ?>>
+                    <button type="submit" class="btn btn-success btn-block mobile-submit-btn" data-mobile-payment-button="1" <?php echo $totalKeranjangAktif <= 0 ? 'disabled' : ''; ?>>
                         <ion-icon name="cash-outline"></ion-icon>
                         Proses Pembayaran
                     </button>
                 </form>
+            </div>
+        </div>
+
+        <div class="mobile-section-title">Omzet Kasir Harian</div>
+        <div class="card mobile-list-card mb-3">
+            <div class="card-body">
+                <div id="mobile_sales_summary_container" style="font-size:14px;">
+                    <div style="text-align:center; padding:20px; color:#999;">
+                        <p>Memuat data omzet...</p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -973,7 +1142,10 @@ if ($showKeranjang) {
 
             if (!empty($transaksiAktif) && mobileTableExists($db, 'trkasir_detail')) {
                 $stmtDetail = $db->prepare("SELECT d.nmbrg_dtrkasir,
+                                                   d.id_dtrkasir,
                                                    d.kd_barang,
+                                                   d.tipe,
+                                                   COALESCE(d.resep, 'TIDAK') AS resep,
                                                    d.sat_dtrkasir,
                                                    d.qty_dtrkasir,
                                                    d.hrgjual_dtrkasir,
@@ -1037,6 +1209,10 @@ if ($showKeranjang) {
                                             | Harga: <?php echo mobileRupiah($detail['hrgjual_dtrkasir']); ?>
                                             | Subtotal: <?php echo mobileRupiah($detail['hrgttl_dtrkasir']); ?>
                                         </div>
+                                        <div class="text-muted" style="font-size:13px;">
+                                            Jenis: <?php echo ((int)$detail['tipe'] === 2) ? 'Resep' : (((int)$detail['tipe'] === 3) ? 'Marketplace' : 'Reguler'); ?>
+                                            | Resep: <?php echo (isset($detail['resep']) && strtoupper((string)$detail['resep']) === 'YA') ? 'YA' : 'TIDAK'; ?>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1084,7 +1260,7 @@ if ($showKeranjang) {
                         </select>
                     </div>
 
-                    <button type="submit" class="btn btn-success btn-block mobile-submit-btn" <?php echo $totalKeranjangAktif <= 0 ? 'disabled' : ''; ?>>
+                    <button type="submit" class="btn btn-success btn-block mobile-submit-btn" data-mobile-payment-button="1" <?php echo $totalKeranjangAktif <= 0 ? 'disabled' : ''; ?>>
                         <ion-icon name="cash-outline"></ion-icon>
                         Simpan Transaksi
                     </button>

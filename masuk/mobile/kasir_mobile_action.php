@@ -51,6 +51,63 @@ function mobileRedirectKasir($status, $message, $targetModule = 'kasir', $extraP
     exit;
 }
 
+function mobileBatchFifo($db, $qty, $kdBarang)
+{
+    $stmt = $db->prepare("SELECT 
+                          no_batch, 
+                          exp_date, 
+                          MIN(tgl_transaksi) AS tgl_awal, 
+                          SUM(CASE WHEN status = 'masuk' THEN qty ELSE 0 END) AS total_masuk, 
+                          SUM(CASE WHEN status = 'keluar' THEN qty ELSE 0 END) AS total_keluar, 
+                          SUM(CASE WHEN status = 'masuk' THEN qty ELSE 0 END) - SUM(CASE WHEN status = 'keluar' THEN qty ELSE 0 END) AS sisa_qty 
+                        FROM batch 
+                        WHERE kd_barang = ? 
+                        GROUP BY no_batch 
+                        HAVING sisa_qty > 0 
+                        ORDER BY CASE WHEN exp_date = '0000-00-00' THEN '9999-12-31' ELSE exp_date END ASC, exp_date ASC");
+    $stmt->execute(array($kdBarang));
+    
+    $data = array();
+    if ($stmt->rowCount() > 0) {
+        $kebutuhan = $qty;
+        while ($r1 = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            if ($kebutuhan <= 0) {
+                break;
+            }
+
+            if ($r1['sisa_qty'] <= $kebutuhan) {
+                $ambil = $r1['sisa_qty'];
+            } else {
+                $ambil = $kebutuhan;
+            }
+
+            $data[] = array(
+                'no_batch'   => $r1['no_batch'],
+                'exp_date'   => $r1['exp_date'],
+                'qty_ambil'  => $ambil
+            );
+
+            $kebutuhan -= $ambil;
+        }
+
+        if ($kebutuhan > 0) {
+            $data[] = array(
+                'no_batch'   => '',
+                'exp_date'   => '0000-00-00',
+                'qty_ambil'  => $kebutuhan
+            );
+        }
+    } else {
+        $data[] = array(
+            'no_batch'   => '',
+            'exp_date'   => '0000-00-00',
+            'qty_ambil'  => $qty
+        );
+    }
+    
+    return $data;
+}
+
 function mobileHasAccess($sessionKey)
 {
     return isset($_SESSION[$sessionKey]) && $_SESSION[$sessionKey] === 'Y';
@@ -264,6 +321,15 @@ try {
     if ($action === 'add_item') {
         $barcode = trim(isset($_POST['barcode']) ? $_POST['barcode'] : '');
         $qty = (float)(isset($_POST['qty']) ? $_POST['qty'] : 0);
+        $jenisTransaksi = isset($_POST['jns_transaksi']) ? (int)$_POST['jns_transaksi'] : 1;
+        if ($jenisTransaksi < 1 || $jenisTransaksi > 6) {
+            $jenisTransaksi = 1;
+        }
+
+        $resep = isset($_POST['resep']) ? strtoupper(trim((string)$_POST['resep'])) : 'TIDAK';
+        if ($resep !== 'YA' && $resep !== 'TIDAK') {
+            $resep = 'TIDAK';
+        }
 
         if ($barcode === '') {
             throw new Exception('Barcode wajib diisi.');
@@ -305,18 +371,29 @@ try {
             throw new Exception('Stok tidak mencukupi. Stok tersedia: ' . number_format($stokTersedia, 0, ',', '.'));
         }
 
-        $hargaJual = 0;
-        if (isset($barang['hrgjual_barang']) && (float)$barang['hrgjual_barang'] > 0) {
-            $hargaJual = (float)$barang['hrgjual_barang'];
-        } elseif (isset($barang['hrgjual_barang1']) && (float)$barang['hrgjual_barang1'] > 0) {
-            $hargaJual = (float)$barang['hrgjual_barang1'];
-        } elseif (isset($barang['hrgjual_barang2']) && (float)$barang['hrgjual_barang2'] > 0) {
-            $hargaJual = (float)$barang['hrgjual_barang2'];
-        } elseif (isset($barang['hrgsat_barang'])) {
-            $hargaJual = (float)$barang['hrgsat_barang'];
+        $hargaReguler = (isset($barang['hrgjual_barang']) && (float)$barang['hrgjual_barang'] > 0) ? (float)$barang['hrgjual_barang'] : 0;
+        $hargaResep = (isset($barang['hrgjual_barang1']) && (float)$barang['hrgjual_barang1'] > 0) ? (float)$barang['hrgjual_barang1'] : 0;
+        $hargaMarketplace = (isset($barang['hrgjual_barang2']) && (float)$barang['hrgjual_barang2'] > 0) ? (float)$barang['hrgjual_barang2'] : 0;
+        $hargaModal = isset($barang['hrgsat_barang']) ? (float)$barang['hrgsat_barang'] : 0;
+
+        if ($hargaReguler <= 0) {
+            $hargaReguler = $hargaResep > 0 ? $hargaResep : ($hargaMarketplace > 0 ? $hargaMarketplace : $hargaModal);
+        }
+        if ($hargaResep <= 0) {
+            $hargaResep = $hargaReguler > 0 ? $hargaReguler : ($hargaMarketplace > 0 ? $hargaMarketplace : $hargaModal);
+        }
+        if ($hargaMarketplace <= 0) {
+            $hargaMarketplace = $hargaResep > 0 ? $hargaResep : ($hargaReguler > 0 ? $hargaReguler : $hargaModal);
         }
 
-        $modal = isset($barang['hrgsat_barang']) ? (float)$barang['hrgsat_barang'] : 0;
+        $hargaJual = $hargaReguler;
+        if ($jenisTransaksi === 2) {
+            $hargaJual = $hargaResep;
+        } elseif ($jenisTransaksi === 3) {
+            $hargaJual = $hargaMarketplace;
+        }
+
+        $modal = $hargaModal;
 
         $komisi = 0;
         if (mobileHasAccess('komisi') && isset($barang['komisi'])) {
@@ -328,27 +405,66 @@ try {
         $lineQty = (float)$qtyRounded;
         $lineSubtotal = (float)$ttlHarga;
 
-        $stmtInsert = $db->prepare("INSERT INTO trkasir_detail (kd_trkasir, id_barang, kd_barang, nmbrg_dtrkasir, qty_dtrkasir, sat_dtrkasir, hrgjual_dtrkasir, disc, modal, profit, waktu, hrgttl_dtrkasir, tipe, komisi, idadmin) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, 1, ?, ?)");
-        $stmtInsert->execute(array(
-            $kdTrkasir,
-            $idBarang,
-            $kdBarang,
-            $nmBarang,
-            $qtyRounded,
-            $satBarang,
-            $hargaJual,
-            $modal,
-            $profit,
-            date('Y-m-d H:i:s'),
-            $ttlHarga,
-            $komisi,
-            $idAdmin
-        ));
+        $hasResepColumn = mobileColumnExists($db, 'trkasir_detail', 'resep');
+        if ($hasResepColumn) {
+            $stmtInsert = $db->prepare("INSERT INTO trkasir_detail (kd_trkasir, id_barang, kd_barang, nmbrg_dtrkasir, qty_dtrkasir, sat_dtrkasir, hrgjual_dtrkasir, disc, resep, modal, profit, waktu, hrgttl_dtrkasir, tipe, komisi, idadmin) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmtInsert->execute(array(
+                $kdTrkasir,
+                $idBarang,
+                $kdBarang,
+                $nmBarang,
+                $qtyRounded,
+                $satBarang,
+                $hargaJual,
+                $resep,
+                $modal,
+                $profit,
+                date('Y-m-d H:i:s'),
+                $ttlHarga,
+                $jenisTransaksi,
+                $komisi,
+                $idAdmin
+            ));
+        } else {
+            $stmtInsert = $db->prepare("INSERT INTO trkasir_detail (kd_trkasir, id_barang, kd_barang, nmbrg_dtrkasir, qty_dtrkasir, sat_dtrkasir, hrgjual_dtrkasir, disc, modal, profit, waktu, hrgttl_dtrkasir, tipe, komisi, idadmin) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?)");
+            $stmtInsert->execute(array(
+                $kdTrkasir,
+                $idBarang,
+                $kdBarang,
+                $nmBarang,
+                $qtyRounded,
+                $satBarang,
+                $hargaJual,
+                $modal,
+                $profit,
+                date('Y-m-d H:i:s'),
+                $ttlHarga,
+                $jenisTransaksi,
+                $komisi,
+                $idAdmin
+            ));
+        }
 
         $stmtStok = $db->prepare("UPDATE barang SET stok_barang = stok_barang - ? WHERE id_barang = ? AND stok_barang >= ?");
         $stmtStok->execute(array($qtyRounded, $idBarang, $qtyRounded));
         if ($stmtStok->rowCount() <= 0) {
             throw new Exception('Gagal update stok barang. Coba ulangi.');
+        }
+
+        if (mobileTableExists($db, 'batch')) {
+            $batchData = mobileBatchFifo($db, $qtyRounded, $kdBarang);
+            $datetime = date('Y-m-d H:i:s');
+            
+            foreach ($batchData as $batchItem) {
+                $noBatch = (string)$batchItem['no_batch'];
+                $expDate = (string)$batchItem['exp_date'];
+                $qtyAmbil = (float)$batchItem['qty_ambil'];
+                
+                if ($noBatch !== '' && $noBatch !== '0') {
+                    $stmtInsertBatch = $db->prepare("INSERT INTO batch (tgl_transaksi, no_batch, exp_date, qty, satuan, kd_transaksi, kd_barang, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'keluar')");
+                    $stmtInsertBatch->execute(array($datetime, $noBatch, $expDate, $qtyAmbil, $satBarang, $kdTrkasir, $kdBarang));
+                }
+            }
         }
 
         $stmtCartSummary = $db->prepare("SELECT COUNT(*) AS total_baris, COALESCE(SUM(qty_dtrkasir), 0) AS total_qty, COALESCE(SUM(hrgttl_dtrkasir), 0) AS total_harga FROM trkasir_detail WHERE kd_trkasir = ?");
@@ -357,6 +473,8 @@ try {
 
         $stmtCartDetails = $db->prepare("SELECT d.id_dtrkasir,
                                                 d.kd_barang,
+                                                d.tipe,
+                                                COALESCE(d.resep, 'TIDAK') AS resep,
                                                 d.sat_dtrkasir,
                                                 d.qty_dtrkasir,
                                                 d.hrgjual_dtrkasir,
@@ -374,6 +492,8 @@ try {
             $cartDetails[] = array(
                 'id_dtrkasir' => isset($row['id_dtrkasir']) ? (int)$row['id_dtrkasir'] : 0,
                 'kd_barang' => isset($row['kd_barang']) ? (string)$row['kd_barang'] : '',
+                'tipe' => isset($row['tipe']) ? (int)$row['tipe'] : 1,
+                'resep' => isset($row['resep']) ? (string)$row['resep'] : 'TIDAK',
                 'nm_barang_tampil' => isset($row['nm_barang_tampil']) ? (string)$row['nm_barang_tampil'] : '',
                 'sat_dtrkasir' => isset($row['sat_dtrkasir']) ? (string)$row['sat_dtrkasir'] : '',
                 'qty_dtrkasir' => isset($row['qty_dtrkasir']) ? (float)$row['qty_dtrkasir'] : 0,
@@ -397,6 +517,8 @@ try {
                 'qty' => $lineQty,
                 'harga' => (float)$hargaJual,
                 'subtotal' => $lineSubtotal,
+                'tipe' => (int)$jenisTransaksi,
+                'resep' => $resep,
             ),
         );
 
@@ -487,6 +609,60 @@ try {
                 'paid' => '1',
             )
         );
+    }
+
+    if ($action === 'get_sales_summary') {
+        $idAdmin = (int)$_SESSION['idadmin'];
+        $tglHari = isset($_POST['tgl_hari']) ? (string)$_POST['tgl_hari'] : date('Y-m-d');
+        
+        header('Content-Type: application/json; charset=utf-8');
+        
+        try {
+            $stmtSummary = $db->prepare("SELECT 
+                COALESCE(SUM(ttl_trkasir), 0) AS total_semua,
+                COALESCE(SUM(CASE WHEN id_carabayar = 1 THEN ttl_trkasir ELSE 0 END), 0) AS total_tunai,
+                COALESCE(SUM(CASE WHEN id_carabayar = 1 AND shift = 1 THEN ttl_trkasir ELSE 0 END), 0) AS tunai_pagi,
+                COALESCE(SUM(CASE WHEN id_carabayar = 1 AND shift = 2 THEN ttl_trkasir ELSE 0 END), 0) AS tunai_sore,
+                COALESCE(SUM(CASE WHEN id_carabayar = 2 THEN ttl_trkasir ELSE 0 END), 0) AS total_transfer,
+                COALESCE(SUM(CASE WHEN id_carabayar = 2 AND shift = 1 THEN ttl_trkasir ELSE 0 END), 0) AS transfer_pagi,
+                COALESCE(SUM(CASE WHEN id_carabayar = 2 AND shift = 2 THEN ttl_trkasir ELSE 0 END), 0) AS transfer_sore,
+                COALESCE(SUM(CASE WHEN id_carabayar = 3 THEN ttl_trkasir ELSE 0 END), 0) AS total_tempo,
+                COALESCE(SUM(CASE WHEN id_carabayar = 3 AND shift = 1 THEN ttl_trkasir ELSE 0 END), 0) AS tempo_pagi,
+                COALESCE(SUM(CASE WHEN id_carabayar = 3 AND shift = 2 THEN ttl_trkasir ELSE 0 END), 0) AS tempo_sore,
+                COUNT(*) AS jumlah_transaksi
+            FROM trkasir 
+            WHERE DATE(tgl_trkasir) = ? AND id_user = ?");
+            
+            $stmtSummary->execute(array($tglHari, $idAdmin));
+            $summary = $stmtSummary->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$summary) {
+                $summary = array(
+                    'total_semua' => 0,
+                    'total_tunai' => 0,
+                    'tunai_pagi' => 0,
+                    'tunai_sore' => 0,
+                    'total_transfer' => 0,
+                    'transfer_pagi' => 0,
+                    'transfer_sore' => 0,
+                    'total_tempo' => 0,
+                    'tempo_pagi' => 0,
+                    'tempo_sore' => 0,
+                    'jumlah_transaksi' => 0,
+                );
+            }
+
+            echo json_encode(array(
+                'status' => 'success',
+                'summary' => $summary
+            ));
+        } catch (Exception $e) {
+            echo json_encode(array(
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ));
+        }
+        exit;
     }
 
     throw new Exception('Aksi kasir tidak dikenali.');

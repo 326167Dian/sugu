@@ -52,6 +52,10 @@ try {
             'nm_barang' => (string)$row['nm_barang'],
             'sat_barang' => isset($row['sat_barang']) ? (string)$row['sat_barang'] : '',
             'stok_barang' => isset($row['stok_barang']) ? (float)$row['stok_barang'] : 0,
+            'hrgjual_barang' => isset($row['hrgjual_barang']) ? (float)$row['hrgjual_barang'] : 0,
+            'hrgjual_barang1' => isset($row['hrgjual_barang1']) ? (float)$row['hrgjual_barang1'] : 0,
+            'hrgjual_barang2' => isset($row['hrgjual_barang2']) ? (float)$row['hrgjual_barang2'] : 0,
+            'hrgsat_barang' => isset($row['hrgsat_barang']) ? (float)$row['hrgsat_barang'] : 0,
             'harga_jual' => $harga,
         );
     }
