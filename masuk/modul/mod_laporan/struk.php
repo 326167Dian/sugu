@@ -7,6 +7,16 @@ include "../../../configurasi/fungsi_rupiah.php";
 
 $kd_trkasir = isset($_GET['kd_trkasir']) ? $_GET['kd_trkasir'] : '';
 
+function wrapReceiptText($text, $maxChars = 30)
+{
+    $clean = trim((string)$text);
+    if ($clean === '') {
+        return '-';
+    }
+
+    return wordwrap($clean, $maxChars, "\n", true);
+}
+
 //ambil header
 $ah = $db->prepare("SELECT * FROM setheader");
 $ah->execute();
@@ -49,16 +59,25 @@ if (!$r1) {
     ];
 }
 
-$jumlah = $db->prepare("SELECT * FROM trkasir_detail WHERE kd_trkasir=?");
-$jumlah->execute([$kd_trkasir]);
-$jumlahdetail = $jumlah->rowCount();
+$detailQueryForPaper = $db->prepare("SELECT nmbrg_dtrkasir, resep FROM trkasir_detail WHERE kd_trkasir=? ORDER BY id_dtrkasir ASC");
+$detailQueryForPaper->execute([$kd_trkasir]);
+$detailRowsForPaper = $detailQueryForPaper->fetchAll(PDO::FETCH_ASSOC);
 
 $ukuran1 = 20.7; //setingan kertas
-$ukuran2 = 5.6; //garis akhir tabel
+$tambahukuran = 0;
+foreach ($detailRowsForPaper as $rowPaper) {
+    $isResepLine = isset($rowPaper['resep']) && strtoupper((string)$rowPaper['resep']) === 'YA';
+    if ($isResepLine) {
+        $tambahukuran += 0.6;
+        continue;
+    }
 
-$tambahukuran = $jumlahdetail * 0.4;
+    $wrappedName = wrapReceiptText(isset($rowPaper['nmbrg_dtrkasir']) ? $rowPaper['nmbrg_dtrkasir'] : '', 35);
+    $lineCount = max(1, substr_count($wrappedName, "\n") + 1);
+    // Tinggi nama + detail qty/harga + jarak antar item.
+    $tambahukuran += ($lineCount * 0.24) + 0.52;
+}
 $tinggikertas = $ukuran1 + $tambahukuran;
-$posisigaris = $ukuran2 + $tambahukuran;
 
 
 //$pdf = new FPDF("P","cm","A4");
@@ -152,7 +171,6 @@ $st = [];
 $totalresep = 0;
 $adaResep = false;
 
-$currentX = 5.7;
 while ($r2 = $query->fetch(PDO::FETCH_ASSOC)) {
     $st[] = $r2['hrgttl_dtrkasir'];
 
@@ -164,15 +182,19 @@ while ($r2 = $query->fetch(PDO::FETCH_ASSOC)) {
 
     $pdf->SetX(0.2);
 
-    // $pdf->Cell(5.7, 0.4, $r2['nmbrg_dtrkasir'], 0, 1, 'L');
-    $pdf->MultiCell(4, 0.2, $r2['nmbrg_dtrkasir']); // width 50, height per line 10
-    $pdf->Cell(1.2, 0.4, $r2['qty_dtrkasir'], 0, 0, 'R');
-    $pdf->Cell(0.7, 0.4, $r2['sat_dtrkasir'], 0, 0, 'C');
-    $pdf->Cell(1.3, 0.4, format_rupiah($r2['hrgjual_dtrkasir']), 0, 0, 'R');
-    $pdf->Cell(1.5, 0.4, format_rupiah($r2['hrgttl_dtrkasir']), 0, 1, 'R');
+    $namaBarangWrapped = wrapReceiptText($r2['nmbrg_dtrkasir'], 32);
+    $pdf->SetFont('Arial', 'B', 8);
+    $pdf->MultiCell(4.6, 0.24, $namaBarangWrapped, 0, 'L');
+
+    $pdf->SetX(0.2);
+    $pdf->SetFont('Arial', 'B', 8);
+    $pdf->Cell(1.2, 0.34, $r2['qty_dtrkasir'], 0, 0, 'R');
+    $pdf->Cell(0.7, 0.34, $r2['sat_dtrkasir'], 0, 0, 'C');
+    $pdf->Cell(1.3, 0.34, format_rupiah($r2['hrgjual_dtrkasir']), 0, 0, 'R');
+    $pdf->Cell(1.4, 0.34, format_rupiah($r2['hrgttl_dtrkasir']), 0, 1, 'R');
+    $pdf->Ln(0.12);
 
     $no++;
-    $currentX += 0.4;
 }
 
 if ($adaResep) {
@@ -183,7 +205,7 @@ if ($adaResep) {
     $pdf->Cell(1, 0.4, format_rupiah($totalresep), 0, 0, 'R');
     $pdf->Cell(1.5, 0.4, format_rupiah($totalresep), 0, 1, 'R');
     
-    $currentX += 0.6;
+    $pdf->Ln(0.1);
 }
 
 $gt = array_sum($st);
@@ -192,12 +214,13 @@ $disc_tampil = number_format($disc, 2, ',', '.') . '%';
 $tagihan = format_rupiah($r1['ttl_trkasir']);
 $subtotal = format_rupiah($gt);
 
-$currentX = $currentX + 0.2;
-$pdf->Line(0.2, $currentX, 4.8, $currentX);
+$lineAfterItemsY = $pdf->GetY() + 0.06;
+$pdf->Line(0.2, $lineAfterItemsY, 4.8, $lineAfterItemsY);
+$pdf->SetY($lineAfterItemsY);
 // $pdf->SetFont('Arial','U');
 // $pdf->Cell(4.8, 0.3,'______________________________________', 0, 0, 'L');
 
-$pdf->ln(0.4);
+$pdf->ln(0.25);
 $pdf->SetFont('Arial', 'B', 8);
 $pdf->SetX(0.2);
 $pdf->SetFont('Arial', 'B', 8);
@@ -225,8 +248,9 @@ $pdf->SetX(0.2);
 $pdf->Cell(3.5, 0.4, 'Kembalian : ', 0, 0, 'R');
 $pdf->Cell(1.2, 0.4, format_rupiah($r1['sisa_bayar']), 0, 1, 'R');
 
-$nowX = $currentX + 2.4;
-$pdf->Line(0.2, $nowX, 4.8, $nowX); 
+$lineAfterTotalY = $pdf->GetY() + 0.08;
+$pdf->Line(0.2, $lineAfterTotalY, 4.8, $lineAfterTotalY);
+$pdf->SetY($lineAfterTotalY);
 
 $stmt_pelanggan = $db->prepare("SELECT * FROM pelanggan WHERE id_pelanggan = :id_pelanggan");
 $stmt_pelanggan->execute([

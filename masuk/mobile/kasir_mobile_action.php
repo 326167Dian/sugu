@@ -391,6 +391,126 @@ try {
         $shiftAktif = isset($shiftRow['shift']) ? $shiftRow['shift'] : '0';
     }
 
+    if ($action === 'delete_cart_item') {
+        $idDetail = isset($_POST['id_dtrkasir']) ? (int)$_POST['id_dtrkasir'] : 0;
+        if ($idDetail <= 0) {
+            throw new Exception('ID detail item tidak valid.');
+        }
+
+        $stmtDetail = $db->prepare("SELECT id_dtrkasir, id_barang, kd_barang, qty_dtrkasir, kd_trkasir, idadmin FROM trkasir_detail WHERE id_dtrkasir = ? LIMIT 1");
+        $stmtDetail->execute(array($idDetail));
+        $detailRow = $stmtDetail->fetch(PDO::FETCH_ASSOC);
+        if (!$detailRow) {
+            throw new Exception('Item keranjang tidak ditemukan atau sudah terhapus.');
+        }
+
+        $idAdminBaris = isset($detailRow['idadmin']) ? (int)$detailRow['idadmin'] : 0;
+        if ($idAdminBaris > 0 && $idAdminBaris !== $idAdmin) {
+            throw new Exception('Item keranjang bukan milik user login saat ini.');
+        }
+
+        $idBarang = isset($detailRow['id_barang']) ? (int)$detailRow['id_barang'] : 0;
+        $kdBarang = isset($detailRow['kd_barang']) ? (string)$detailRow['kd_barang'] : '';
+        $qtyDetail = isset($detailRow['qty_dtrkasir']) ? (float)$detailRow['qty_dtrkasir'] : 0;
+        $kdTrkasir = isset($detailRow['kd_trkasir']) ? (string)$detailRow['kd_trkasir'] : '';
+        if ($kdTrkasir === '') {
+            throw new Exception('Kode transaksi item tidak valid.');
+        }
+
+        if ($idBarang > 0 && $qtyDetail > 0) {
+            $stmtRestoreStok = $db->prepare("UPDATE barang SET stok_barang = stok_barang + ? WHERE id_barang = ?");
+            $stmtRestoreStok->execute(array($qtyDetail, $idBarang));
+        }
+
+        if (mobileTableExists($db, 'komisi_pegawai')) {
+            $stmtDelKomisi = $db->prepare("DELETE FROM komisi_pegawai WHERE id_dtrkasir = ?");
+            $stmtDelKomisi->execute(array($idDetail));
+        }
+
+        if (mobileTableExists($db, 'batch') && $kdBarang !== '' && $qtyDetail > 0) {
+            try {
+                $qtySisaRollback = (float)$qtyDetail;
+                $stmtBatchKeluar = $db->prepare("SELECT id_batch, qty FROM batch WHERE kd_transaksi = ? AND kd_barang = ? AND status = 'keluar' ORDER BY id_batch DESC");
+                $stmtBatchKeluar->execute(array($kdTrkasir, $kdBarang));
+
+                while (($rowBatch = $stmtBatchKeluar->fetch(PDO::FETCH_ASSOC)) && $qtySisaRollback > 0) {
+                    $idBatch = isset($rowBatch['id_batch']) ? (int)$rowBatch['id_batch'] : 0;
+                    $qtyBatch = isset($rowBatch['qty']) ? (float)$rowBatch['qty'] : 0;
+                    if ($idBatch <= 0 || $qtyBatch <= 0) {
+                        continue;
+                    }
+
+                    if ($qtyBatch <= $qtySisaRollback + 0.00001) {
+                        $stmtDelBatchRow = $db->prepare("DELETE FROM batch WHERE id_batch = ?");
+                        $stmtDelBatchRow->execute(array($idBatch));
+                        $qtySisaRollback -= $qtyBatch;
+                    } else {
+                        $qtyBaru = $qtyBatch - $qtySisaRollback;
+                        $stmtUpdBatchRow = $db->prepare("UPDATE batch SET qty = ? WHERE id_batch = ?");
+                        $stmtUpdBatchRow->execute(array($qtyBaru, $idBatch));
+                        $qtySisaRollback = 0;
+                    }
+                }
+            } catch (Exception $e) {
+                // Abaikan kegagalan rollback batch agar hapus item keranjang tetap berjalan.
+            }
+        }
+
+        $stmtDeleteDetail = $db->prepare("DELETE FROM trkasir_detail WHERE id_dtrkasir = ? AND kd_trkasir = ?");
+        $stmtDeleteDetail->execute(array($idDetail, $kdTrkasir));
+        if ($stmtDeleteDetail->rowCount() <= 0) {
+            throw new Exception('Gagal menghapus item keranjang.');
+        }
+
+        $stmtCartSummary = $db->prepare("SELECT COUNT(*) AS total_baris, COALESCE(SUM(qty_dtrkasir), 0) AS total_qty, COALESCE(SUM(hrgttl_dtrkasir), 0) AS total_harga FROM trkasir_detail WHERE kd_trkasir = ?");
+        $stmtCartSummary->execute(array($kdTrkasir));
+        $cartSummary = $stmtCartSummary->fetch(PDO::FETCH_ASSOC);
+
+        $stmtCartDetails = $db->prepare("SELECT d.id_dtrkasir,
+                                                d.kd_barang,
+                                                d.tipe,
+                                                COALESCE(d.resep, 'TIDAK') AS resep,
+                                                d.sat_dtrkasir,
+                                                d.qty_dtrkasir,
+                                                d.hrgjual_dtrkasir,
+                                                d.hrgttl_dtrkasir,
+                                                COALESCE(b.nm_barang, d.nmbrg_dtrkasir) AS nm_barang_tampil
+                                         FROM trkasir_detail d
+                                         LEFT JOIN barang b ON b.id_barang = d.id_barang
+                                         WHERE d.kd_trkasir = ?
+                                         ORDER BY d.id_dtrkasir DESC
+                                         LIMIT 500");
+        $stmtCartDetails->execute(array($kdTrkasir));
+        $cartDetailsRows = $stmtCartDetails->fetchAll(PDO::FETCH_ASSOC);
+        $cartDetails = array();
+        foreach ($cartDetailsRows as $row) {
+            $cartDetails[] = array(
+                'id_dtrkasir' => isset($row['id_dtrkasir']) ? (int)$row['id_dtrkasir'] : 0,
+                'kd_barang' => isset($row['kd_barang']) ? (string)$row['kd_barang'] : '',
+                'tipe' => isset($row['tipe']) ? (int)$row['tipe'] : 1,
+                'resep' => isset($row['resep']) ? (string)$row['resep'] : 'TIDAK',
+                'nm_barang_tampil' => isset($row['nm_barang_tampil']) ? (string)$row['nm_barang_tampil'] : '',
+                'sat_dtrkasir' => isset($row['sat_dtrkasir']) ? (string)$row['sat_dtrkasir'] : '',
+                'qty_dtrkasir' => isset($row['qty_dtrkasir']) ? (float)$row['qty_dtrkasir'] : 0,
+                'hrgjual_dtrkasir' => isset($row['hrgjual_dtrkasir']) ? (float)$row['hrgjual_dtrkasir'] : 0,
+                'hrgttl_dtrkasir' => isset($row['hrgttl_dtrkasir']) ? (float)$row['hrgttl_dtrkasir'] : 0,
+            );
+        }
+
+        $extraAjaxData = array(
+            'cart' => array(
+                'kd_trkasir' => $kdTrkasir,
+                'total_baris' => isset($cartSummary['total_baris']) ? (int)$cartSummary['total_baris'] : 0,
+                'total_qty' => isset($cartSummary['total_qty']) ? (float)$cartSummary['total_qty'] : 0,
+                'total_harga' => isset($cartSummary['total_harga']) ? (float)$cartSummary['total_harga'] : 0,
+                'details' => $cartDetails,
+            ),
+        );
+
+        $db->commit();
+        mobileRedirectKasir('success', 'Item berhasil dihapus dari keranjang.', $returnModule, $extraAjaxData);
+    }
+
     $kdTrkasir = mobileEnsureActiveKasirCode($db, $idAdmin);
 
     if ($action === 'add_item') {
@@ -629,7 +749,39 @@ try {
     if ($action === 'process_payment') {
         $jumlahBayar = mobileSanitizeNumber(isset($_POST['jumlah_bayar']) ? $_POST['jumlah_bayar'] : 0);
         $idCarabayar = isset($_POST['id_carabayar']) ? (int)$_POST['id_carabayar'] : 0;
-        $idPelanggan = mobileResolveDefaultPelangganId($db);
+        $idPelangganInput = isset($_POST['id_pelanggan']) ? (int)$_POST['id_pelanggan'] : 0;
+        $idPelanggan = $idPelangganInput > 0 ? $idPelangganInput : mobileResolveDefaultPelangganId($db);
+        $nmPelanggan = 'UMUM';
+        $tlpPelanggan = '';
+        $alamatPelanggan = '';
+
+        if ($idPelanggan > 0 && mobileTableExists($db, 'pelanggan')) {
+            $stmtPelanggan = $db->prepare("SELECT id_pelanggan, nm_pelanggan, tlp_pelanggan, alamat_pelanggan FROM pelanggan WHERE id_pelanggan = ? LIMIT 1");
+            $stmtPelanggan->execute(array($idPelanggan));
+            $rowPelanggan = $stmtPelanggan->fetch(PDO::FETCH_ASSOC);
+
+            if ($rowPelanggan) {
+                $nmPelanggan = isset($rowPelanggan['nm_pelanggan']) ? trim((string)$rowPelanggan['nm_pelanggan']) : 'UMUM';
+                $tlpPelanggan = isset($rowPelanggan['tlp_pelanggan']) ? (string)$rowPelanggan['tlp_pelanggan'] : '';
+                $alamatPelanggan = isset($rowPelanggan['alamat_pelanggan']) ? (string)$rowPelanggan['alamat_pelanggan'] : '';
+            } else {
+                $idPelanggan = mobileResolveDefaultPelangganId($db);
+                if ($idPelanggan > 0) {
+                    $stmtPelangganFallback = $db->prepare("SELECT id_pelanggan, nm_pelanggan, tlp_pelanggan, alamat_pelanggan FROM pelanggan WHERE id_pelanggan = ? LIMIT 1");
+                    $stmtPelangganFallback->execute(array($idPelanggan));
+                    $rowPelangganFallback = $stmtPelangganFallback->fetch(PDO::FETCH_ASSOC);
+                    if ($rowPelangganFallback) {
+                        $nmPelanggan = isset($rowPelangganFallback['nm_pelanggan']) ? trim((string)$rowPelangganFallback['nm_pelanggan']) : 'UMUM';
+                        $tlpPelanggan = isset($rowPelangganFallback['tlp_pelanggan']) ? (string)$rowPelangganFallback['tlp_pelanggan'] : '';
+                        $alamatPelanggan = isset($rowPelangganFallback['alamat_pelanggan']) ? (string)$rowPelangganFallback['alamat_pelanggan'] : '';
+                    }
+                }
+            }
+        }
+
+        if ($nmPelanggan === '') {
+            $nmPelanggan = 'UMUM';
+        }
 
         $stmtTotal = $db->prepare("SELECT COALESCE(SUM(hrgttl_dtrkasir), 0) AS total_belanja FROM trkasir_detail WHERE kd_trkasir = ?");
         $stmtTotal->execute(array($kdTrkasir));
@@ -665,11 +817,15 @@ try {
             $uangKembalian = 0;
         }
 
-        $sisaBayar = $totalBelanja - $jumlahBayar;
-        if ($sisaBayar < 0) {
-            $sisaBayar = 0;
+        $kurangBayar = $totalBelanja - $jumlahBayar;
+        if ($kurangBayar < 0) {
+            $kurangBayar = 0;
         }
-        $ketTrx = $sisaBayar > 0 ? 'BELUM LUNAS' : 'LUNAS';
+        $sisaBayar = $uangKembalian;
+        $ketTrx = 'LUNAS';
+        if ($kurangBayar > 0) {
+            $ketTrx = 'BELUM LUNAS | KURANG: Rp ' . number_format((float)$kurangBayar, 0, ',', '.');
+        }
 
         $jenisTx = 1;
         $stmtJenisTx = $db->prepare("SELECT tipe FROM trkasir_detail WHERE kd_trkasir = ? ORDER BY id_dtrkasir DESC LIMIT 1");
@@ -679,7 +835,7 @@ try {
             $jenisTx = (int)$jenisTxRow['tipe'];
         }
 
-        $insertTrkasir = $db->prepare("INSERT INTO trkasir (kd_trkasir, id_user, petugas, shift, tgl_trkasir, id_pelanggan, nm_pelanggan, tlp_pelanggan, alamat_pelanggan, kodetx, ttl_trkasir, diskon1, diskon2, dp_bayar, sisa_bayar, ket_trkasir, id_carabayar, jenistx, waktu_trx, poin_awal, tambahan_poin, redeem_poin) VALUES (?, ?, ?, ?, ?, ?, 'UMUM', '', '', '', ?, 0, 0, ?, ?, ?, ?, ?, ?, 0, 0, 0)");
+        $insertTrkasir = $db->prepare("INSERT INTO trkasir (kd_trkasir, id_user, petugas, shift, tgl_trkasir, id_pelanggan, nm_pelanggan, tlp_pelanggan, alamat_pelanggan, kodetx, ttl_trkasir, diskon1, diskon2, dp_bayar, sisa_bayar, ket_trkasir, id_carabayar, jenistx, waktu_trx, poin_awal, tambahan_poin, redeem_poin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, '', ?, 0, 0, ?, ?, ?, ?, ?, ?, 0, 0, 0)");
         $insertTrkasir->execute(array(
             $kdTrkasir,
             $idAdmin,
@@ -687,6 +843,9 @@ try {
             $shiftAktif,
             date('Y-m-d'),
             $idPelanggan,
+            $nmPelanggan,
+            $tlpPelanggan,
+            $alamatPelanggan,
             $totalBelanja,
             $jumlahBayar,
             $sisaBayar,

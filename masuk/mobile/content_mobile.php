@@ -276,6 +276,7 @@ if ($showKasir) {
         $detailAktif = array();
         $riwayatKasir = array();
         $metodeBayar = array();
+        $pelangganList = array();
         $totalKeranjangAktif = 0;
         $totalBarisKeranjang = 0;
         $totalQtyKeranjang = 0;
@@ -386,10 +387,16 @@ if ($showKasir) {
                 $stmtCarabayar = $db->query("SELECT id_carabayar, nm_carabayar FROM carabayar ORDER BY id_carabayar ASC");
                 $metodeBayar = $stmtCarabayar->fetchAll(PDO::FETCH_ASSOC);
             }
+
+            if (mobileTableExists($db, 'pelanggan')) {
+                $stmtPelanggan = $db->query("SELECT id_pelanggan, nm_pelanggan FROM pelanggan ORDER BY CASE WHEN UPPER(nm_pelanggan) = 'UMUM' THEN 0 ELSE 1 END, nm_pelanggan ASC LIMIT 500");
+                $pelangganList = $stmtPelanggan->fetchAll(PDO::FETCH_ASSOC);
+            }
         } catch (Exception $e) {
             $riwayatKasir = array();
             $detailAktif = array();
             $metodeBayar = array();
+            $pelangganList = array();
         }
         ?>
         <div class="mobile-section-title">Kasir Mobile</div>
@@ -681,6 +688,11 @@ if ($showKasir) {
                         'Jenis: ' + escapeHtml(tipeLabel) +
                         ' | Resep: ' + escapeHtml(resepValue) +
                         '</div>' +
+                        '<div style="margin-top:8px;">' +
+                        '<button type="button" class="btn btn-sm btn-outline-danger mobile-delete-cart-item" data-row-id="' + String(idRow) + '" title="Hapus item" style="padding:4px 8px;">' +
+                        '<ion-icon name="trash-outline" style="font-size:16px;"></ion-icon> Hapus' +
+                        '</button>' +
+                        '</div>' +
                         '</div>' +
                         '</div>' +
                         '</div>' +
@@ -688,7 +700,7 @@ if ($showKasir) {
                 }
 
                 function refreshCartUiFromAjax(data) {
-                    if (!data || !data.cart || !data.item) {
+                    if (!data || !data.cart) {
                         return;
                     }
 
@@ -737,6 +749,93 @@ if ($showKasir) {
                     } else {
                         detailList.innerHTML = '<li data-empty="1"><div class="item"><div class="in">Belum ada item pada transaksi aktif.</div></div></li>';
                     }
+
+                    bindDeleteCartHandler();
+
+                    var bayarNode = document.getElementById('mobile_bayar_input');
+                    if (bayarNode) {
+                        bayarNode.dispatchEvent(new Event('input'));
+                    }
+                }
+
+                function deleteCartItemAjax(idRow, triggerButton) {
+                    if (!idRow || Number(idRow) <= 0) {
+                        alert('ID item tidak valid.');
+                        return;
+                    }
+
+                    if (!window.confirm('Hapus item ini dari keranjang aktif?')) {
+                        return;
+                    }
+
+                    if (triggerButton) {
+                        triggerButton.disabled = true;
+                    }
+
+                    var formData = new FormData();
+                    formData.append('mobile_action', 'delete_cart_item');
+                    formData.append('return_module', 'kasir');
+                    formData.append('id_dtrkasir', String(idRow));
+                    formData.append('ajax', '1');
+
+                    fetch(form.getAttribute('action'), {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: formData
+                    }).then(function (response) {
+                        if (!response.ok) {
+                            throw new Error('HTTP ' + String(response.status));
+                        }
+                        return response.json();
+                    }).then(function (json) {
+                        if (!json || json.status !== 'success') {
+                            showFeedback((json && json.message) ? json.message : 'Gagal menghapus item keranjang.', false);
+                            return;
+                        }
+
+                        showFeedback(json.message || 'Item berhasil dihapus dari keranjang.', true);
+                        refreshCartUiFromAjax(json);
+                    }).catch(function (error) {
+                        var msg = (error && error.message) ? error.message : 'Terjadi kendala jaringan. Coba lagi.';
+                        showFeedback('Gagal hapus item: ' + msg, false);
+                    }).finally(function () {
+                        if (triggerButton) {
+                            triggerButton.disabled = false;
+                        }
+                    });
+                }
+
+                function bindDeleteCartHandler() {
+                    var detailListNode = getDetailList();
+                    if (!detailListNode) {
+                        return;
+                    }
+                    if (detailListNode.getAttribute('data-delete-bound') === '1') {
+                        return;
+                    }
+
+                    detailListNode.setAttribute('data-delete-bound', '1');
+                    detailListNode.addEventListener('click', function (event) {
+                        var target = event.target;
+                        while (target && !target.classList.contains('mobile-delete-cart-item')) {
+                            target = target.parentElement;
+                        }
+
+                        if (!target) {
+                            return;
+                        }
+
+                        var idRow = Number(target.getAttribute('data-row-id'));
+                        if (Number.isNaN(idRow) || idRow <= 0) {
+                            return;
+                        }
+
+                        event.preventDefault();
+                        deleteCartItemAjax(idRow, target);
+                    });
                 }
 
                 function renderSuggestions(items) {
@@ -834,6 +933,12 @@ if ($showKasir) {
                         suggestionBox.style.display = 'none';
                     }
                 });
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', bindDeleteCartHandler);
+                } else {
+                    bindDeleteCartHandler();
+                }
 
                 form.addEventListener('submit', function (event) {
                     if (!barcodeInput.value) {
@@ -989,6 +1094,11 @@ if ($showKasir) {
                                             Jenis: <?php echo ((int)$detail['tipe'] === 2) ? 'Resep' : (((int)$detail['tipe'] === 3) ? 'Marketplace' : 'Reguler'); ?>
                                             | Resep: <?php echo (isset($detail['resep']) && strtoupper((string)$detail['resep']) === 'YA') ? 'YA' : 'TIDAK'; ?>
                                         </div>
+                                        <div style="margin-top:8px;">
+                                            <button type="button" class="btn btn-sm btn-outline-danger mobile-delete-cart-item" data-row-id="<?php echo (int)$detail['id_dtrkasir']; ?>" title="Hapus item" style="padding:4px 8px;">
+                                                <ion-icon name="trash-outline" style="font-size:16px;"></ion-icon> Hapus
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1011,6 +1121,33 @@ if ($showKasir) {
                 <form method="post" action="mobile/kasir_mobile_action.php">
                     <input type="hidden" name="mobile_action" value="process_payment">
                     <input type="hidden" name="return_module" value="kasir">
+
+                    <?php
+                    $selectedPelangganMobile = 0;
+                    foreach ($pelangganList as $pRow) {
+                        if (isset($pRow['nm_pelanggan']) && strtoupper(trim((string)$pRow['nm_pelanggan'])) === 'UMUM') {
+                            $selectedPelangganMobile = (int)$pRow['id_pelanggan'];
+                            break;
+                        }
+                    }
+                    if ($selectedPelangganMobile <= 0 && count($pelangganList) > 0) {
+                        $selectedPelangganMobile = (int)$pelangganList[0]['id_pelanggan'];
+                    }
+                    ?>
+
+                    <div class="form-group mb-2">
+                        <label for="mobile_id_pelanggan" class="mobile-form-label">Pelanggan</label>
+                        <select id="mobile_id_pelanggan" name="id_pelanggan" class="form-control mobile-form-input">
+                            <?php if (count($pelangganList) > 0) { ?>
+                                <?php foreach ($pelangganList as $plg) { ?>
+                                    <?php $idPlg = (int)$plg['id_pelanggan']; ?>
+                                    <option value="<?php echo $idPlg; ?>" <?php echo ($idPlg === $selectedPelangganMobile) ? 'selected' : ''; ?>><?php echo htmlspecialchars((string)$plg['nm_pelanggan']); ?></option>
+                                <?php } ?>
+                            <?php } else { ?>
+                                <option value="0" selected>UMUM</option>
+                            <?php } ?>
+                        </select>
+                    </div>
 
                     <div class="form-group mb-2">
                         <label for="mobile_bayar_input" class="mobile-form-label">Jumlah Bayar</label>
