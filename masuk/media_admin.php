@@ -131,6 +131,39 @@ if ($_SESSION['login'] == 0) {
                   0%   { transform: translateX(0); }
                   100% { transform: translateX(-100%); }
                 }
+
+				.navbar-mobile-mode-wrap {
+					position: absolute;
+					left: 50%;
+					top: 50%;
+					transform: translate(-50%, -50%);
+					z-index: 5;
+				}
+
+				.navbar-mobile-mode-btn {
+					display: inline-block;
+					background: #08a14a;
+					color: #fff;
+					font-weight: 700;
+					font-size: 18px;
+					line-height: 1;
+					padding: 6px 14px;
+					border-radius: 2px;
+					text-decoration: none;
+				}
+
+				.navbar-mobile-mode-btn:hover,
+				.navbar-mobile-mode-btn:focus {
+					color: #fff;
+					background: #0a8f43;
+					text-decoration: none;
+				}
+
+				@media (max-width: 991px) {
+					.navbar-mobile-mode-wrap {
+						display: none;
+					}
+				}
 			</style>
 
 			<script src="vendors/modernizr-2.6.2-respond-1.1.0.min.js"></script>
@@ -189,6 +222,10 @@ if ($_SESSION['login'] == 0) {
 						<a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
 							<span class="sr-only">Toggle navigation</span>
 						</a>
+
+						<div class="navbar-mobile-mode-wrap">
+							<a class="navbar-mobile-mode-btn" href="media_mobile.php?module=kasir&amp;force_mobile=1">MODE KASIR MOBILE</a>
+						</div>
 
 						<div class="navbar-custom-menu">
 							<ul class="nav navbar-nav">

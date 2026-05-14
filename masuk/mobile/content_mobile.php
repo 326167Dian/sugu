@@ -70,6 +70,7 @@ function mobileRupiah($angka)
 $todayDate = date('Y-m-d');
 
 $showHome = ($module === 'home');
+$showBarangMobile = ($module === 'barangmobile');
 $showKasir = ($module === 'kasir');
 $showKeranjang = ($module === 'keranjang');
 $showTransaksi = ($module === 'transaksi');
@@ -258,6 +259,54 @@ if ($showHome) {
         })();
     </script>
 
+<?php }
+
+if ($showBarangMobile) {
+    if (!mobileHasAccess('mbarang')) {
+        ?>
+        <div class="mobile-section-title">Item Obat</div>
+        <div class="card mobile-list-card mb-3">
+            <div class="card-body" style="padding:14px;">
+                <div class="text-danger">Anda tidak memiliki hak akses ke modul Barang.</div>
+            </div>
+        </div>
+        <?php
+        return;
+    }
+    ?>
+    <div class="mobile-section-title">Item Obat (CRUD)</div>
+
+    <div class="card mobile-list-card mb-3">
+        <div class="card-body" style="padding:14px;">
+            <div class="text-muted" style="margin-bottom:8px;">Mode ini meneruskan ke modul desktop Barang agar fitur CRUD lengkap tetap tersedia di mobile.</div>
+            <div class="mobile-menu-actions">
+                <a href="media_admin.php?module=barang" class="btn btn-primary">
+                    <ion-icon name="list-outline"></ion-icon>&nbsp; Daftar Barang
+                </a>
+                <a href="media_admin.php?module=barang&amp;act=tambah" class="btn btn-success">
+                    <ion-icon name="add-circle-outline"></ion-icon>&nbsp; Tambah Barang
+                </a>
+                <a href="media_admin.php?module=jenisobat" class="btn btn-warning">
+                    <ion-icon name="albums-outline"></ion-icon>&nbsp; Master Jenis Obat
+                </a>
+                <a href="media_admin.php?module=zataktif" class="btn btn-secondary">
+                    <ion-icon name="flask-outline"></ion-icon>&nbsp; Zat Aktif / Merk
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mobile-list-card mb-3">
+        <div class="card-body" style="padding:0; overflow:hidden;">
+            <iframe
+                title="Modul Barang Desktop"
+                src="media_admin.php?module=barang"
+                style="width:100%; min-height:75vh; border:0; background:#fff;"
+                loading="lazy"
+                referrerpolicy="same-origin"
+            ></iframe>
+        </div>
+    </div>
 <?php }
 
 if ($showKasir) {

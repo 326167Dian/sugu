@@ -32,6 +32,8 @@ if (!$isMobileClient && !$forceMobileView) {
     $desktopModule = 'home';
     if ($requestedModule === 'kasir' || $requestedModule === 'keranjang') {
         $desktopModule = 'trkasir';
+    } elseif ($requestedModule === 'barangmobile') {
+        $desktopModule = 'barang';
     } elseif ($requestedModule === 'stok') {
         $desktopModule = 'lapstok';
     } elseif ($requestedModule === 'profil') {
@@ -53,6 +55,10 @@ function mobileCanAccessModule($targetModule)
         return true;
     }
 
+    if ($targetModule === 'barang' || $targetModule === 'barangmobile') {
+        return mobileHasAccess('mbarang');
+    }
+
     if ($targetModule === 'kasir') {
         return mobileHasAccess('tpk');
     }
@@ -72,7 +78,7 @@ function mobileCanAccessModule($targetModule)
     return false;
 }
 
-$allowedModules = array('home', 'kasir', 'keranjang', 'transaksi', 'stok', 'profil');
+$allowedModules = array('home', 'barangmobile', 'kasir', 'keranjang', 'transaksi', 'stok', 'profil');
 $defaultModule = mobileCanAccessModule('kasir') ? 'kasir' : 'home';
 $module = isset($_GET['module']) ? $_GET['module'] : $defaultModule;
 if (!in_array($module, $allowedModules, true) || !mobileCanAccessModule($module)) {
@@ -108,6 +114,7 @@ $bottomMenus = array(
 
 $sidebarMenus = array(
     array('module' => 'home', 'label' => 'Dashboard Mobile', 'icon' => 'home-outline', 'color' => 'bg-primary', 'enabled' => mobileCanAccessModule('home')),
+    array('module' => 'barangmobile', 'label' => 'Item Obat', 'icon' => 'bandage-outline', 'color' => 'bg-success', 'enabled' => mobileCanAccessModule('barangmobile')),
     array('module' => 'kasir', 'label' => 'Kasir Mobile', 'icon' => 'cart-outline', 'color' => 'bg-success', 'enabled' => mobileCanAccessModule('kasir')),
     array('module' => 'keranjang', 'label' => 'Keranjang Aktif', 'icon' => 'basket-outline', 'color' => 'bg-info', 'enabled' => mobileCanAccessModule('keranjang')),
     array('module' => 'transaksi', 'label' => 'Transaksi', 'icon' => 'repeat-outline', 'color' => 'bg-secondary', 'enabled' => mobileCanAccessModule('transaksi')),
