@@ -138,6 +138,7 @@ if ($_SESSION['login'] == 0) {
 					top: 50%;
 					transform: translate(-50%, -50%);
 					z-index: 5;
+					max-width: calc(100% - 150px);
 				}
 
 				.navbar-mobile-mode-btn {
@@ -150,6 +151,7 @@ if ($_SESSION['login'] == 0) {
 					padding: 6px 14px;
 					border-radius: 2px;
 					text-decoration: none;
+					white-space: nowrap;
 				}
 
 				.navbar-mobile-mode-btn:hover,
@@ -161,7 +163,23 @@ if ($_SESSION['login'] == 0) {
 
 				@media (max-width: 991px) {
 					.navbar-mobile-mode-wrap {
-						display: none;
+						max-width: calc(100% - 120px);
+					}
+
+					.navbar-mobile-mode-btn {
+						font-size: 13px;
+						padding: 5px 8px;
+					}
+				}
+
+				@media (max-width: 480px) {
+					.navbar-mobile-mode-wrap {
+						max-width: calc(100% - 105px);
+					}
+
+					.navbar-mobile-mode-btn {
+						font-size: 11px;
+						padding: 4px 6px;
 					}
 				}
 			</style>
