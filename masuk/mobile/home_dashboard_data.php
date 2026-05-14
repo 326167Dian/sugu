@@ -88,6 +88,7 @@ $totalPelanggan = mobileApproxCount($db, 'pelanggan', "SELECT COUNT(*) FROM pela
 
 $totalTransaksiHariIni = 0;
 $totalOmzetHariIni = 0;
+$referensiTanggalTransaksi = date('Y-m-d');
 $totalBarangMacet = 0;
 $topProduk = array();
 
@@ -112,28 +113,45 @@ if (mobileTableExistsAjax($db, 'riwayat_pelanggan')) {
 
 if (mobileTableExistsAjax($db, 'trkasir')) {
     try {
-        $stmt = $db->prepare("SELECT COUNT(*) FROM trkasir WHERE tgl_trkasir >= CURDATE() AND tgl_trkasir < (CURDATE() + INTERVAL 1 DAY)");
-        $stmt->execute();
-        $totalTransaksiHariIni = (int)$stmt->fetchColumn();
+        $todayDate = date('Y-m-d');
+        $hasTanggalTrkasir = mobileColumnExistsAjax($db, 'trkasir', 'tgl_trkasir');
+        $hasWaktuTrx = mobileColumnExistsAjax($db, 'trkasir', 'waktu_trx');
+
+        $dateExpression = null;
+        if ($hasTanggalTrkasir && $hasWaktuTrx) {
+            $dateExpression = "COALESCE(NULLIF(DATE(tgl_trkasir), '0000-00-00'), NULLIF(DATE(waktu_trx), '0000-00-00'))";
+        } elseif ($hasTanggalTrkasir) {
+            $dateExpression = "NULLIF(DATE(tgl_trkasir), '0000-00-00')";
+        } elseif ($hasWaktuTrx) {
+            $dateExpression = "NULLIF(DATE(waktu_trx), '0000-00-00')";
+        }
+
+        if ($dateExpression !== null) {
+            $fieldOmzet = null;
+            if (mobileColumnExistsAjax($db, 'trkasir', 'ttl_trkasir')) {
+                $fieldOmzet = 'ttl_trkasir';
+            } elseif (mobileColumnExistsAjax($db, 'trkasir', 'total')) {
+                $fieldOmzet = 'total';
+            }
+
+            $sumExpression = $fieldOmzet !== null ? "COALESCE(SUM(" . $fieldOmzet . "), 0)" : "0";
+
+            $sqlAgg = "SELECT COUNT(*) AS total_transaksi, " . $sumExpression . " AS total_omzet
+                       FROM trkasir
+                       WHERE " . $dateExpression . " = ?";
+            $stmtAgg = $db->prepare($sqlAgg);
+            $stmtAgg->execute(array($todayDate));
+            $rowAgg = $stmtAgg->fetch(PDO::FETCH_ASSOC);
+
+            if ($rowAgg) {
+                $totalTransaksiHariIni = (int)$rowAgg['total_transaksi'];
+                $totalOmzetHariIni = (float)round((float)$rowAgg['total_omzet']);
+            }
+        }
     } catch (Exception $e) {
         $totalTransaksiHariIni = 0;
-    }
-
-    try {
-        $fieldOmzet = null;
-        if (mobileColumnExistsAjax($db, 'trkasir', 'ttl_trkasir')) {
-            $fieldOmzet = 'ttl_trkasir';
-        } elseif (mobileColumnExistsAjax($db, 'trkasir', 'total')) {
-            $fieldOmzet = 'total';
-        }
-
-        if ($fieldOmzet !== null) {
-            $stmt = $db->prepare("SELECT COALESCE(SUM(" . $fieldOmzet . "), 0) FROM trkasir WHERE tgl_trkasir >= CURDATE() AND tgl_trkasir < (CURDATE() + INTERVAL 1 DAY)");
-            $stmt->execute();
-            $totalOmzetHariIni = (float)$stmt->fetchColumn();
-        }
-    } catch (Exception $e) {
         $totalOmzetHariIni = 0;
+        $referensiTanggalTransaksi = date('Y-m-d');
     }
 }
 
@@ -183,6 +201,7 @@ echo json_encode(array(
         'total_pelanggan' => $totalPelanggan,
         'total_transaksi_hari_ini' => $totalTransaksiHariIni,
         'total_omzet_hari_ini' => $totalOmzetHariIni,
+        'referensi_tanggal_transaksi' => $referensiTanggalTransaksi,
         'total_barang_macet' => $totalBarangMacet,
         'top_produk' => $topProduk,
     )

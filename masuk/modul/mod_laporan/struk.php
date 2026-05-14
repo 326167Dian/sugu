@@ -94,7 +94,7 @@ $pdf->Line(0.2, 2.9, 4.8, 2.9); //horisontal bawah
 $pdf->Line(0.2, 4.9, 4.8, 4.9); //judul tabel atas
 // $pdf->Line(0.2, 5.5, 4.8, 5.5); //judul tabel atas
 
-$text = substr($rh['satu'], 7,);
+$text = substr($rh['satu'], 7);
 
 
 $pdf->ln(1.3);
