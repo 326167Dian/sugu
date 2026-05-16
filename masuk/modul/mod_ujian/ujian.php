@@ -11,6 +11,18 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
     } else {
         include "../../../configurasi/koneksi.php";
 
+        function render_pertanyaan_html($html)
+        {
+            $clean = strip_tags((string) $html, '<p><br><strong><b><em><i><u><ol><ul><li><sub><sup><span><div>');
+
+            // Jika input berupa teks biasa, pertahankan baris baru agar tampil per baris.
+            if (strpos($clean, '<') === false) {
+                return nl2br(htmlspecialchars($clean), false);
+            }
+
+            return $clean;
+        }
+
         $isPemilik = (isset($_SESSION['level']) && $_SESSION['level'] === 'pemilik');
         $act = isset($_GET['act']) ? $_GET['act'] : '';
         $aksi = "modul/mod_ujian/aksi_ujian.php";
@@ -18,7 +30,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         $prefill_ujian_id = isset($_GET['ujian_id']) ? (int) $_GET['ujian_id'] : 0;
         $edit_header_id = isset($_GET['edit_header_id']) ? (int) $_GET['edit_header_id'] : 0;
 
-        if (in_array($act, array('kelola', 'tambahsoal', 'editsoal'), true) && !$isPemilik) {
+        if (in_array($act, array('kelola', 'tambahsoal', 'editsoal', 'hasilujian'), true) && !$isPemilik) {
             echo "<link href=../css/style.css rel=stylesheet type=text/css>";
             echo "<div class='error msg'>Fitur CRUD soal hanya untuk status pemilik.</div>";
             return;
@@ -29,6 +41,8 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         $ujian_aktif = null;
         $header_edit = null;
         $error_load_soal = "";
+        $error_load_hasil = "";
+        $daftar_hasil = array();
 
         try {
             $stmtUjian = $db->query("SELECT id_soal, nm_ujian, durasi FROM soal_header ORDER BY id_soal DESC");
@@ -65,6 +79,19 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             if ($act === 'kelola') {
                 $stmt = $db->query("SELECT s.id, s.id_soal, h.nm_ujian, h.durasi, s.pertanyaan, s.opsi_a, s.opsi_b, s.opsi_c, s.jawaban_benar FROM soal s LEFT JOIN soal_header h ON h.id_soal = s.id_soal ORDER BY h.nm_ujian ASC, s.id ASC");
                 $daftar_soal = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } elseif ($act === 'hasilujian') {
+                try {
+                    if ($selected_ujian_id > 0) {
+                        $stmtHasil = $db->prepare("SELECT nama_lengkap, nama_ujian, total_soal, jawaban_benar, jawaban_salah, tidak_dijawab, nilai_akhir FROM hasil_ujian WHERE ujian_id = ? ORDER BY id_hasil DESC LIMIT 500");
+                        $stmtHasil->execute(array($selected_ujian_id));
+                        $daftar_hasil = $stmtHasil->fetchAll(PDO::FETCH_ASSOC);
+                    } else {
+                        $stmtHasil = $db->query("SELECT nama_lengkap, nama_ujian, total_soal, jawaban_benar, jawaban_salah, tidak_dijawab, nilai_akhir FROM hasil_ujian ORDER BY id_hasil DESC LIMIT 500");
+                        $daftar_hasil = $stmtHasil->fetchAll(PDO::FETCH_ASSOC);
+                    }
+                } catch (Exception $e) {
+                    $error_load_hasil = "Tabel hasil ujian belum siap. Jalankan migrasi hasil ujian terlebih dahulu.";
+                }
             } elseif ($selected_ujian_id > 0) {
                 $stmt = $db->prepare("SELECT id, id_soal, pertanyaan, opsi_a, opsi_b, opsi_c, jawaban_benar FROM soal WHERE id_soal = ? ORDER BY id ASC");
                 $stmt->execute(array($selected_ujian_id));
@@ -81,6 +108,28 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 ?>
 
 <div class="box box-primary box-solid table-responsive">
+    <style>
+        #example1 th,
+        #example1 td {
+            padding: 6px 8px;
+            vertical-align: top;
+        }
+
+        .pertanyaan-html {
+            white-space: pre-line;
+            line-height: 9pt;
+            letter-spacing: normal;
+        }
+
+        .pertanyaan-html p {
+            margin: 0 0 4px;
+        }
+
+        .pertanyaan-html p:last-child {
+            margin-bottom: 0;
+        }
+    </style>
+
     <div class="box-header with-border">
         <h3 class="box-title">Kelola Soal Ujian</h3>
         <div class="box-tools pull-right">
@@ -164,15 +213,11 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             <table id="example1" class="table table-bordered table-striped ">
                 <thead>
                     <tr>
-                        <th width="60">No</th>
+                        <th width="45">No</th>
                         <th>Nama Ujian</th>
-                        <th width="120">Durasi</th>
-                        <th>Pertanyaan</th>
-                        <th>Opsi A</th>
-                        <th>Opsi B</th>
-                        <th>Opsi C</th>
-                        <th width="110">Kunci</th>
-                        <th width="140">Aksi</th>
+                        <th width="85">Durasi</th>
+                        <th>Soal</th>
+                        <th width="110">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -181,11 +226,15 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                             <td><?php echo $i + 1; ?></td>
                             <td><?php echo htmlspecialchars((string) $soal['nm_ujian']); ?></td>
                             <td><?php echo (int) $soal['durasi']; ?> menit</td>
-                            <td><?php echo htmlspecialchars($soal['pertanyaan']); ?></td>
-                            <td><?php echo htmlspecialchars($soal['opsi_a']); ?></td>
-                            <td><?php echo htmlspecialchars($soal['opsi_b']); ?></td>
-                            <td><?php echo htmlspecialchars($soal['opsi_c']); ?></td>
-                            <td style="text-transform:uppercase;"><?php echo htmlspecialchars($soal['jawaban_benar']); ?></td>
+                            <td>
+                                <div class="pertanyaan-html"><?php echo render_pertanyaan_html($soal['pertanyaan']); ?></div>
+                                <div class="pertanyaan-html" style="margin-top:8px;">
+                                    A. <?php echo htmlspecialchars((string) $soal['opsi_a']); ?><br>
+                                    B. <?php echo htmlspecialchars((string) $soal['opsi_b']); ?><br>
+                                    C. <?php echo htmlspecialchars((string) $soal['opsi_c']); ?><br>
+                                    <strong>Jawaban : <?php echo strtoupper(htmlspecialchars((string) $soal['jawaban_benar'])); ?></strong>
+                                </div>
+                            </td>
                             <td>
                                 <a href="?module=ujian&act=editsoal&id=<?php echo (int) $soal['id']; ?>&ujian_id=<?php echo (int) $soal['id_soal']; ?>" class="btn btn-warning btn-xs">Edit</a>
                                 <a href="<?php echo $aksi; ?>?module=ujian&act=hapussoal&id=<?php echo (int) $soal['id']; ?>&ujian_id=<?php echo (int) $soal['id_soal']; ?>" class="btn btn-danger btn-xs" onclick="return confirm('Hapus soal ini?');">Hapus</a>
@@ -194,6 +243,72 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                     <?php } ?>
                 </tbody>
             </table>
+        <?php } ?>
+
+    </div>
+</div>
+
+<?php
+        } elseif ($act === 'hasilujian') {
+?>
+
+<div class="box box-primary box-solid">
+    <div class="box-header with-border">
+        <h3 class="box-title">Hasil Akhir Ujian</h3>
+        <div class="box-tools pull-right">
+            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+    </div>
+    <div class="box-body">
+        <form method="GET" class="form-inline" style="margin-bottom:15px;">
+            <input type="hidden" name="module" value="ujian">
+            <input type="hidden" name="act" value="hasilujian">
+            <div class="form-group" style="margin-right:10px;">
+                <label for="ujian_id_hasil" style="margin-right:8px;">Nama Ujian</label>
+                <select name="ujian_id" id="ujian_id_hasil" class="form-control">
+                    <option value="">Semua Ujian</option>
+                    <?php foreach ($daftar_ujian as $u) { ?>
+                        <option value="<?php echo (int) $u['id_soal']; ?>" <?php if ($selected_ujian_id === (int) $u['id_soal']) { echo 'selected'; } ?>><?php echo htmlspecialchars($u['nm_ujian']); ?></option>
+                    <?php } ?>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a href="?module=ujian" class="btn btn-default">Kembali</a>
+        </form>
+
+        <?php if (!empty($error_load_hasil)) { ?>
+            <div class="alert alert-warning"><?php echo $error_load_hasil; ?></div>
+        <?php } elseif (empty($daftar_hasil)) { ?>
+            <div class="alert alert-info">Belum ada hasil ujian.</div>
+        <?php } else { ?>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="example1">
+                    <thead>
+                        <tr>
+                            <th>Nama Lengkap</th>
+                            <th>Nama Ujian</th>
+                            <th>Total Soal</th>
+                            <th>Jawaban Benar</th>
+                            <th>Jawaban Salah</th>
+                            <th>Tidak dijawab</th>
+                            <th>Nilai akhir</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($daftar_hasil as $h) { ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars((string) $h['nama_lengkap']); ?></td>
+                                <td><?php echo htmlspecialchars((string) $h['nama_ujian']); ?></td>
+                                <td><?php echo (int) $h['total_soal']; ?></td>
+                                <td><?php echo (int) $h['jawaban_benar']; ?></td>
+                                <td><?php echo (int) $h['jawaban_salah']; ?></td>
+                                <td><?php echo (int) $h['tidak_dijawab']; ?></td>
+                                <td><?php echo (float) $h['nilai_akhir']; ?></td>
+                            </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </div>
         <?php } ?>
     </div>
 </div>
@@ -232,7 +347,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             <?php if ($prefill_ujian) { ?>
                 <input type="hidden" name="id_soal" value="<?php echo (int) $prefill_ujian['id_soal']; ?>">
                 <div class="form-group">
-                    <label class="col-sm-2 control-label">Nama Ujian (nm_ujian) =</label>
+                    <label class="col-sm-2 control-label">Nama Ujian  =</label>
                     <div class="col-sm-5">
                         <input type="text" class="form-control" value="<?php echo htmlspecialchars($prefill_ujian['nm_ujian']); ?>" readonly>
                     </div>
@@ -249,7 +364,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             <div class="form-group">
                 <label class="col-sm-2 control-label">Pertanyaan</label>
                 <div class="col-sm-8">
-                    <textarea name="pertanyaan" class="form-control" rows="3" required></textarea>
+                    <textarea name="pertanyaan" id="pertanyaan_tambah" class="form-control" rows="6" required></textarea>
                 </div>
             </div>
             <div class="form-group">
@@ -288,6 +403,17 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 </div>
             </div>
         </form>
+
+        <script>
+            if (typeof CKEDITOR !== 'undefined') {
+                if (CKEDITOR.instances.pertanyaan_tambah) {
+                    CKEDITOR.instances.pertanyaan_tambah.destroy(true);
+                }
+                CKEDITOR.replace('pertanyaan_tambah', {
+                    height: 180
+                });
+            }
+        </script>
     </div>
 </div>
 
@@ -333,7 +459,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             <div class="form-group">
                 <label class="col-sm-2 control-label">Pertanyaan</label>
                 <div class="col-sm-8">
-                    <textarea name="pertanyaan" class="form-control" rows="3" required><?php echo htmlspecialchars($soalEdit['pertanyaan']); ?></textarea>
+                    <textarea name="pertanyaan" id="pertanyaan_edit" class="form-control" rows="6" required><?php echo htmlspecialchars($soalEdit['pertanyaan']); ?></textarea>
                 </div>
             </div>
             <div class="form-group">
@@ -374,6 +500,15 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         </form>
 
         <script>
+            if (typeof CKEDITOR !== 'undefined') {
+                if (CKEDITOR.instances.pertanyaan_edit) {
+                    CKEDITOR.instances.pertanyaan_edit.destroy(true);
+                }
+                CKEDITOR.replace('pertanyaan_edit', {
+                    height: 180
+                });
+            }
+
             (function () {
                 var selectEl = document.getElementById('id_soal_edit');
                 var durasiEl = document.getElementById('durasi_edit');
@@ -428,6 +563,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 </div>
                 <div class="col-sm-2">
                     <button type="submit" class="btn btn-primary">Tampilkan Soal</button>
+                    <button type="submit" name="act" value="hasilujian" class="btn btn-success">Hasil Ujian</button>
                 </div>
             </div>
             <div class="form-group">
@@ -485,7 +621,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 <?php foreach ($soal_ujian as $index => $soal) { ?>
                     <div class="panel panel-default">
                         <div class="panel-body">
-                            <p><strong><?php echo ($index + 1) . ". " . htmlspecialchars($soal['pertanyaan']); ?></strong></p>
+                            <div class="pertanyaan-html"><strong><?php echo ($index + 1) . ". "; ?></strong><?php echo render_pertanyaan_html($soal['pertanyaan']); ?></div>
 
                             <div class="radio">
                                 <label>

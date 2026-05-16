@@ -27,6 +27,20 @@ $ids = array();
 $exam_started_at = isset($_POST['exam_started_at']) ? (int) $_POST['exam_started_at'] : 0;
 $exam_duration_seconds = isset($_POST['exam_duration_seconds']) ? (int) $_POST['exam_duration_seconds'] : 0;
 $ujian_id = isset($_POST['ujian_id']) ? (int) $_POST['ujian_id'] : 0;
+$nama_ujian = '';
+
+if ($ujian_id > 0) {
+    try {
+        $stmtNamaUjian = $db->prepare("SELECT nm_ujian FROM soal_header WHERE id_soal = ? LIMIT 1");
+        $stmtNamaUjian->execute(array($ujian_id));
+        $rowUjian = $stmtNamaUjian->fetch(PDO::FETCH_ASSOC);
+        if ($rowUjian) {
+            $nama_ujian = (string) $rowUjian['nm_ujian'];
+        }
+    } catch (Exception $e) {
+        $nama_ujian = '';
+    }
+}
 
 foreach ($jawaban_user as $soal_id => $nilai_user) {
     $id = (int) $soal_id;
@@ -78,7 +92,26 @@ foreach ($ids as $id) {
 }
 
 $total_dinilai = $benar + $salah;
-$nilai_akhir = $total_dinilai > 0 ? round(($benar / $total_dinilai) * 100, 2) : 0;
+$total_soal = $total_dinilai;
+
+if ($ujian_id > 0) {
+    try {
+        $stmtTotal = $db->prepare("SELECT COUNT(*) FROM soal WHERE id_soal = ?");
+        $stmtTotal->execute(array($ujian_id));
+        $total_soal = (int) $stmtTotal->fetchColumn();
+    } catch (Exception $e) {
+        $total_soal = $total_dinilai;
+    }
+} else {
+    $total_soal = count($kunci_jawaban);
+}
+
+if ($total_soal <= 0) {
+    $total_soal = $total_dinilai;
+}
+
+$tidak_dijawab = max(0, $total_soal - $total_dinilai);
+$nilai_akhir = $total_soal > 0 ? round(($benar / $total_soal) * 100, 2) : 0;
 
 $waktu_selesai_ts = time();
 $waktu_mulai_ts = $exam_started_at > 0 ? $exam_started_at : $waktu_selesai_ts;
@@ -97,9 +130,12 @@ try {
         id_admin,
         username,
         nama_lengkap,
+        ujian_id,
+        nama_ujian,
         total_soal,
         jawaban_benar,
         jawaban_salah,
+        tidak_dijawab,
         soal_tidak_valid,
         nilai_akhir,
         waktu_mulai,
@@ -108,15 +144,18 @@ try {
         durasi_batas_detik,
         status_waktu,
         jawaban_json
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
     $stmtSimpanHasil->execute(array(
         isset($_SESSION['idadmin']) ? (int) $_SESSION['idadmin'] : null,
         isset($_SESSION['username']) ? $_SESSION['username'] : null,
         isset($_SESSION['namalengkap']) ? $_SESSION['namalengkap'] : null,
-        $total_dinilai,
+        $ujian_id > 0 ? $ujian_id : null,
+        $nama_ujian !== '' ? $nama_ujian : null,
+        $total_soal,
         $benar,
         $salah,
+        $tidak_dijawab,
         $tidak_valid,
         $nilai_akhir,
         $waktu_mulai_sql,
@@ -142,9 +181,13 @@ try {
         <div class="panel panel-primary">
             <div class="panel-heading"><strong>Hasil Ujian</strong></div>
             <div class="panel-body">
-                <p>Total Soal Dinilai: <strong><?php echo $total_dinilai; ?></strong></p>
+                <?php if ($nama_ujian !== '') { ?>
+                    <p>Nama Ujian: <strong><?php echo htmlspecialchars($nama_ujian); ?></strong></p>
+                <?php } ?>
+                <p>Total Soal: <strong><?php echo $total_soal; ?></strong></p>
                 <p>Jawaban Benar: <strong><?php echo $benar; ?></strong></p>
                 <p>Jawaban Salah: <strong><?php echo $salah; ?></strong></p>
+                <p>Tidak dijawab: <strong><?php echo $tidak_dijawab; ?></strong></p>
                 <?php if ($tidak_valid > 0) { ?>
                     <p>Soal Tidak Valid: <strong><?php echo $tidak_valid; ?></strong></p>
                 <?php } ?>

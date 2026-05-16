@@ -14,6 +14,7 @@ Jalankan file sesuai urutan nama (timestamp di awal nama file):
 6. `20260516_create_table_soal_ujian.sql`
 7. `20260516_create_table_hasil_ujian.sql`
 8. `20260516_add_fk_soal_to_soal_header.sql`
+9. `20260516_add_columns_hasil_ujian_for_report.sql`
 
 ## Cara menjalankan
 
@@ -71,6 +72,10 @@ mysql -u USERNAME -p NAMA_DATABASE < database/migrations/20260223_add_indexes_si
 - kolom `id_soal` pada tabel `soal`
 - index `idx_soal_id_soal` pada `soal(id_soal)`
 - foreign key `fk_soal_soal_header` dari `soal.id_soal` ke `soal_header.id_soal`
+
+`20260516_add_columns_hasil_ujian_for_report.sql` menambahkan kolom laporan hasil akhir ujian:
+
+- `ujian_id`, `nama_ujian`, `tidak_dijawab` pada tabel `hasil_ujian`
 
 Migrasi bersifat **idempotent** (aman dijalankan ulang). Jika index sudah ada, script akan skip.
 
