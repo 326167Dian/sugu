@@ -198,6 +198,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 										<input type=checkbox name='mjenisobat[]' value='Y' checked> Jenis Obat </br>
 										<input type=checkbox name='mbarang[]' value='Y' checked> Item Barang </br>
 										<input type=checkbox name='komisi[]' value='Y' checked> Komisi Pegawai </br>
+										<input type=checkbox name='ujian[]' value='Y' checked> Ujian </br>
 									 </div>
 							  </div>
 							  
@@ -338,6 +339,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 										<input type=checkbox name='msatuan[]' value='Y' "; if ($r['msatuan'] == "Y") { echo "checked"; } echo "> Satuan </br>
 										<input type=checkbox name='mbarang[]' value='Y' "; if ($r['mbarang'] == "Y") { echo "checked"; } echo "> Item Barang </br>
 			                            <input type=checkbox name='komisi[]' value='Y' "; if ($r['komisi'] == "Y") { echo "checked"; }  echo "> Komisi Pegawai </br>
+						                            <input type=checkbox name='ujian[]' value='Y' "; if (isset($r['ujian']) && $r['ujian'] == "Y") { echo "checked"; }  echo "> Ujian </br>
 									 </div>
 							  </div>
 							  <div class='form-group'>

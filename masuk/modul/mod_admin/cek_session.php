@@ -54,5 +54,6 @@ if ($ketemu > 0) {
     $_SESSION['catatan'] = $r['catatan'];
     $_SESSION['cekdarah'] = $r['cekdarah'];
     $_SESSION['jurnalkas'] = $r['jurnalkas'];
+    $_SESSION['ujian'] = isset($r['ujian']) ? $r['ujian'] : 'N';
 }
 ?>

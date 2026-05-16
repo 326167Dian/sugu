@@ -10,6 +10,10 @@ Jalankan file sesuai urutan nama (timestamp di awal nama file):
 2. `20260225_add_indexes_laporan_laba_penjualan.sql`
 3. `20260225_add_indexes_byrkredit_serverside.sql`
 4. `20260225_add_indexes_stok_kritis_analisa.sql`
+5. `20260516_add_column_admin_ujian.sql`
+6. `20260516_create_table_soal_ujian.sql`
+7. `20260516_create_table_hasil_ujian.sql`
+8. `20260516_add_fk_soal_to_soal_header.sql`
 
 ## Cara menjalankan
 
@@ -49,6 +53,24 @@ mysql -u USERNAME -p NAMA_DATABASE < database/migrations/20260223_add_indexes_si
 
 - `idx_trkasir_tgl_kd` pada tabel `trkasir(tgl_trkasir, kd_trkasir)`
 - `idx_trkasir_detail_kdtrkasir_kdbarang` pada tabel `trkasir_detail(kd_trkasir, kd_barang)`
+
+`20260516_add_column_admin_ujian.sql` menambahkan kolom hak akses modul ujian:
+
+- `ujian` pada tabel `admin` dengan default `N`
+
+`20260516_create_table_soal_ujian.sql` menambahkan tabel bank soal untuk modul ujian:
+
+- tabel `soal` dengan kolom pertanyaan, opsi jawaban (`opsi_a`, `opsi_b`, `opsi_c`), dan `jawaban_benar`
+
+`20260516_create_table_hasil_ujian.sql` menambahkan tabel hasil pengerjaan ujian:
+
+- tabel `hasil_ujian` berisi peserta, waktu mulai/selesai, skor, status waktu, dan jawaban dalam format JSON
+
+`20260516_add_fk_soal_to_soal_header.sql` menambahkan relasi soal ke master ujian:
+
+- kolom `id_soal` pada tabel `soal`
+- index `idx_soal_id_soal` pada `soal(id_soal)`
+- foreign key `fk_soal_soal_header` dari `soal.id_soal` ke `soal_header.id_soal`
 
 Migrasi bersifat **idempotent** (aman dijalankan ulang). Jika index sudah ada, script akan skip.
 

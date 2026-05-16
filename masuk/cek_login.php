@@ -155,6 +155,7 @@ $username = $_POST['username'];
                     $_SESSION['catatan'] = $row['catatan'];
                     $_SESSION['cekdarah'] = $row['cekdarah'];
                     $_SESSION['jurnalkas'] = $row['jurnalkas'];
+                    $_SESSION['ujian'] = isset($row['ujian']) ? $row['ujian'] : 'N';
                 
                     // session timeout
                     $_SESSION['login'] = 1;

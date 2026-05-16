@@ -551,6 +551,10 @@ elseif ($_GET['module'] == 'evaluasi') {
 elseif ($_GET['module'] == 'bundle') {
     include "modul/mod_bundle/bundle.php";
 }
+// Bagian Ujian
+elseif ($_GET['module'] == 'ujian') {
+    include "modul/mod_ujian/ujian.php";
+}
 // Laporan Batch
 elseif ($_GET['module'] == 'lapbatch') {
     include "modul/mod_batch/laporan_batch.php";

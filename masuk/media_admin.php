@@ -15,6 +15,15 @@ if ($_SESSION['login'] == 1) {
 if ($_SESSION['login'] == 0) {
 	header('location:logout.php');
 } else {
+	if (!isset($_SESSION['ujian'])) {
+		$getUjianAkses = $db->prepare("SELECT ujian FROM admin WHERE id_admin = ? LIMIT 1");
+		$getUjianAkses->execute([$_SESSION['idadmin']]);
+		$aksesUjian = $getUjianAkses->fetch(PDO::FETCH_ASSOC);
+		$_SESSION['ujian'] = isset($aksesUjian['ujian']) ? $aksesUjian['ujian'] : 'N';
+	}
+
+	$canAccessUjian = (isset($_SESSION['ujian']) && strtoupper(trim((string) $_SESSION['ujian'])) === 'Y');
+
 	if (empty($_SESSION['username']) and empty($_SESSION['passuser']) and $_SESSION['login'] == 0) {
 		echo "<link href=css/style.css rel=stylesheet type=text/css>";
 		echo "<div class='error msg'>Untuk mengakses Modul anda harus login.</div>";
@@ -335,6 +344,7 @@ if ($_SESSION['login'] == 0) {
 									<?php if ($_SESSION['mjenisobat'] == "Y") { ?><li><a href="?module=jenisobat"><i class="glyphicon glyphicon-tags"></i> Jenis Obat & Rak Obat</a></li><?php } ?>
 									<?php if ($_SESSION['mbarang'] == "Y") { ?><li><a href="?module=barang"><i class="glyphicon glyphicon-book"></i> Item Barang</a></li><?php } ?>
 									<?php if ($_SESSION['komisi'] == "Y") { ?><li><a href="?module=komisi"><i class="glyphicon glyphicon-usd"></i> Komisi Pegawai</a></li><?php } ?>
+									<?php if ($canAccessUjian) { ?><li><a href="?module=ujian"><i class="glyphicon glyphicon-usd"></i> Ujian</a></li><?php } ?>
 								</ul>
 							</li>
 							<li class="treeview">
