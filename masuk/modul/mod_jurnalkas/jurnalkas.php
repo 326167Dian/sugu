@@ -89,25 +89,30 @@ default:
                 echo "</tbody>
                         <tfoot>
                             ";
-                $kaki = $db->prepare("select sum(debit) as debt,sum(kredit) as kre from jurnal where tanggal ='$tgl'")->execute();
+                $kaki = $db->prepare("select sum(debit) as debt,sum(kredit) as kre from jurnal where tanggal ='$tgl'");
+                $kaki->execute();
                 $kk = $kaki->fetch(PDO::FETCH_ASSOC);
                 $akhir = format_rupiah($kk['debt']);
                 $akhir2 = format_rupiah($kk['kre']);
                 $akhir3 = format_rupiah($kk['kre'] - $kk['debt']);
 
-                $kanan = $db->prepare("select sum(debit) as kn from jurnal where tanggal='$tgl' and carabayar = 'TUNAI'")->execute();
+                $kanan = $db->prepare("select sum(debit) as kn from jurnal where tanggal='$tgl' and carabayar = 'TUNAI'");
+                $kanan->execute();
                 $kanan2 = $kanan->fetch(PDO::FETCH_ASSOC);
                 $kanan3 = format_rupiah($kanan2['kn']);
 
-                $kiri = $db->prepare("select sum(debit) as kk from jurnal where tanggal='$tgl' and carabayar = 'TRANSFER'")->execute();
+                $kiri = $db->prepare("select sum(debit) as kk from jurnal where tanggal='$tgl' and carabayar = 'TRANSFER'");
+                $kiri->execute();
                 $kiri2 = $kiri->fetch(PDO::FETCH_ASSOC);
                 $kiri3 = format_rupiah($kiri2['kk']);
 
-                $atas = $db->prepare("select sum(kredit) as kn from jurnal where tanggal='$tgl' and carabayar = 'TUNAI'")->execute();
+                $atas = $db->prepare("select sum(kredit) as kn from jurnal where tanggal='$tgl' and carabayar = 'TUNAI'");
+                $atas->execute();
                 $atas2 = $atas->fetch(PDO::FETCH_ASSOC);
                 $atas3 = format_rupiah($atas2['kn']);
 
-                $bawah = $db->prepare("select sum(kredit) as kn from jurnal where tanggal='$tgl' and carabayar = 'TRANSFER'")->execute();
+                $bawah = $db->prepare("select sum(kredit) as kn from jurnal where tanggal='$tgl' and carabayar = 'TRANSFER'");
+                $bawah->execute();
                 $bawah2 = $bawah->fetch(PDO::FETCH_ASSOC);
                 $bawah3 = format_rupiah($bawah2['kn']);
 
@@ -131,7 +136,8 @@ default:
         <div style="text-align: center">
            <?php
             $owner = $_SESSION['level'];
-            $kasutama = $db->prepare("SELECT * FROM kas")->execute();
+            $kasutama = $db->prepare("SELECT * FROM kas");
+            $kasutama->execute();
             $kas1 = $kasutama->fetch(PDO::FETCH_ASSOC);
             $kas = format_rupiah($kas1['saldo']);
             if($owner=='pemilik')
@@ -784,25 +790,25 @@ $tampiljurnal->execute([$tgl_akhir, $tgl_kemarin]);
                         <tfoot>
                             ";
                         $kaki = $db->query("select sum(debit) as debt,sum(kredit) as kre from jurnal where tanggal between '$tgl_awal' and '$tgl_akhir' ");
-                        $kk = $kaki->fetch_array();
+                        $kk = $kaki->fetch(PDO::FETCH_ASSOC);
                         $akhir = format_rupiah($kk['debt']);
                         $akhir2 = format_rupiah($kk['kre']);
                         $akhir3 = format_rupiah($kk['kre'] - $kk['debt']);
 
                         $kanan = $db->query("select sum(debit) as kn from jurnal where tanggal between '$tgl_awal' and '$tgl_akhir' and carabayar = 'TUNAI'");
-                        $kanan2 = $kanan->fetch_array();
+                        $kanan2 = $kanan->fetch(PDO::FETCH_ASSOC);
                         $kanan3 = format_rupiah($kanan2['kn']);
 
                         $kiri = $db->query("select sum(debit) as kk from jurnal where tanggal between '$tgl_awal' and '$tgl_akhir' and carabayar = 'TRANSFER'");
-                        $kiri2 = $kiri->fetch_array();
+                        $kiri2 = $kiri->fetch(PDO::FETCH_ASSOC);
                         $kiri3 = format_rupiah($kiri2['kk']);
 
                         $atas = $db->query("select sum(kredit) as kn from jurnal where tanggal between '$tgl_awal' and '$tgl_akhir' and carabayar = 'TUNAI'");
-                        $atas2 = $atas->fetch_array();
+                        $atas2 = $atas->fetch(PDO::FETCH_ASSOC);
                         $atas3 = format_rupiah($atas2['kn']);
 
                         $bawah = $db->query("select sum(kredit) as kn from jurnal where tanggal between '$tgl_awal' and '$tgl_akhir' and carabayar = 'TRANSFER'");
-                        $bawah2 = $bawah->fetch_array();
+                        $bawah2 = $bawah->fetch(PDO::FETCH_ASSOC);
                         $bawah3 = format_rupiah($bawah2['kn']);
 
                         $saldotunai = format_rupiah($atas2['kn'] - $kanan2['kn']);
@@ -908,10 +914,10 @@ $tampiljurnal->execute([$tgl_akhir, $tgl_kemarin]);
                                 <tbody>
                                 <?php
                                 $w=1;
-                                while ($q3 = $tampiljurnal3->fetch_array())
+                                while ($q3 = $tampiljurnal3->fetch(PDO::FETCH_ASSOC))
                                 { $r1 = $db->query("select sum(debit) as debt, sum(kredit) as kred from jurnal 
                                     where idjenis ='$q3[idjenis]' and tanggal between '$tgl_awal' and '$tgl_akhir'  ");
-                                    $r2=$r1->fetch_array();
+                                    $r2=$r1->fetch(PDO::FETCH_ASSOC);
                                     $debit= format_rupiah($r2['debt']);
                                     $kredit= format_rupiah($r2['kred']);
                                     $de[]=$r2['debt'];
@@ -974,7 +980,7 @@ $tampiljurnal->execute([$tgl_akhir, $tgl_kemarin]);
                                 <tbody>
                                 <?php
                                 $w=1;
-                                while ($q4 = $tampiljurnal4->fetch_array())
+                                while ($q4 = $tampiljurnal4->fetch(PDO::FETCH_ASSOC))
                                 {
                                     $qiu1=format_rupiah($q4['debit']);
                                     $qiu2 =format_rupiah($q4['kredit']);
