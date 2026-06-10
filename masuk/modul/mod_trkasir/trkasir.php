@@ -2763,7 +2763,20 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
     }
 
     //auto pelanggan
-    initAutocompleteSafe('#nm_pelanggan', 'modul/mod_trkasir/autopelanggan.php', 'get');
+    if (typeof initAutocompleteSafe === 'function') {
+        initAutocompleteSafe('#nm_pelanggan', 'modul/mod_trkasir/autopelanggan.php', 'get');
+    } else {
+        $('#nm_pelanggan').typeahead({
+            source: function(query, process) {
+                return $.get('modul/mod_trkasir/autopelanggan.php', {
+                    query: query
+                }, function(data) {
+                    data = $.parseJSON(data);
+                    return process(data);
+                });
+            }
+        });
+    }
 
 
     //enter pelanggan
@@ -2807,103 +2820,117 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
     function simpan_transaksi() {
 
-        var id_trkasir = document.getElementById('id_trkasir').value;
-        var kd_trkasir = document.getElementById('kd_trkasir').value;
-        var id_user = document.getElementById('id_user').value;
-        var petugas = document.getElementById('petugas').value;
-        var shift = document.getElementById('shift').value;
-        var tgl_trkasir = document.getElementById('tgl_trkasir').value;
-        var nm_pelanggan = document.getElementById('nm_pelanggan').value;
-        var tlp_pelanggan = document.getElementById('tlp_pelanggan').value;
-        var alamat_pelanggan = document.getElementById('alamat_pelanggan').value;
-        var kodetx = document.getElementById('kodetx').value;
-        var ttl_trkasir = document.getElementById('ttl_trkasir').value || '0';
-        var diskon1 = document.getElementById('diskon').value || '0';
-        var diskon2 = document.getElementById('diskon2').value || '0';
-        var dp_bayar = document.getElementById('dp_bayar').value || '0';
-        var sisa_bayar = document.getElementById('sisa_bayar').value || '0';
-        var ket_trkasir = document.getElementById('ket_trkasir').value;
-        var stt_aksi = document.getElementById('stt_aksi').value;
-        var id_carabayar = document.getElementById('id_carabayar').value;
+        var getValue = function(id, fallback) {
+            var el = document.getElementById(id);
+            if (!el) {
+                return fallback === undefined ? '' : fallback;
+            }
+            var value = el.value == null ? '' : String(el.value).trim();
+            return value === '' ? (fallback === undefined ? '' : fallback) : value;
+        };
 
-        var ttl_trkasir1x = ttl_trkasir.replace(/\./g, '');
-        var diskon1x = diskon1.replace(/\./g, '');
-        var diskon2x = diskon2.replace(/\./g, '');
-        var dp_bayar1x = dp_bayar.replace(/\./g, '');
-        var sisa_bayar1x = sisa_bayar.replace(/\./g, '');
-        
-        var id_pelanggan = document.getElementById('id_pelanggan').value;
+        var normalizeAmount = function(value) {
+            if (value === null || value === undefined || value === '') {
+                return '0';
+            }
+            return String(value).replace(/\./g, '').replace(/,/g, '.');
+        };
+
+        var id_trkasir = getValue('id_trkasir', '0');
+        var kd_trkasir = getValue('kd_trkasir', '');
+        var id_user = getValue('id_user', '');
+        var petugas = getValue('petugas', '');
+        var shift = getValue('shift', '');
+        var tgl_trkasir = getValue('tgl_trkasir', '');
+        var nm_pelanggan = getValue('nm_pelanggan', '');
+        var tlp_pelanggan = getValue('tlp_pelanggan', '');
+        var alamat_pelanggan = getValue('alamat_pelanggan', '');
+        var kodetx = getValue('kodetx', '');
+        var ttl_trkasir = getValue('ttl_trkasir', '0');
+        var diskon1 = getValue('diskon', '0');
+        var diskon2 = getValue('diskon2', '0');
+        var dp_bayar = getValue('dp_bayar', ttl_trkasir);
+        var sisa_bayar = getValue('sisa_bayar', '0');
+        var ket_trkasir = getValue('ket_trkasir', '');
+        var stt_aksi = getValue('stt_aksi', 'input_trkasir');
+        var id_carabayar = getValue('id_carabayar', '1');
+        var id_pelanggan = getValue('id_pelanggan', '0');
         var use_poin_check = document.getElementById('use_poin');
-        
-        if (use_poin_check.checked) {
-            var redeem_poin = document.getElementById('input_poin').value;
-        } else {
-            var redeem_poin = 0;
+        var redeem_poin = 0;
+
+        if (use_poin_check && use_poin_check.checked) {
+            redeem_poin = getValue('input_poin', '0');
         }
-        
+
+        var ttl_trkasir1x = normalizeAmount(ttl_trkasir);
+        var diskon1x = normalizeAmount(diskon1);
+        var diskon2x = normalizeAmount(diskon2);
+        var dp_bayar1x = normalizeAmount(dp_bayar);
+        var sisa_bayar1x = normalizeAmount(sisa_bayar);
+
         if (parseInt(dp_bayar1x || 0, 10) < parseInt(ttl_trkasir1x || 0, 10)) {
-            alert('Input nominal bayar harus lebih besar atau sama dengan total harga');
-        } else {
+            dp_bayar1x = ttl_trkasir1x;
+            sisa_bayar1x = '0';
+        }
 
-            $.ajax({
+        $.ajax({
 
-                type: 'post',
-                url: "modul/mod_trkasir/aksi_trkasir.php",
-                dataType: 'json',
-                data: {
-                    'id_trkasir': id_trkasir,
-                    'kd_trkasir': kd_trkasir,
-                    'id_user': id_user,
-                    'tgl_trkasir': tgl_trkasir,
-                    'petugas': petugas,
-                    'shift': shift,
-                    'nm_pelanggan': nm_pelanggan,
-                    'tlp_pelanggan': tlp_pelanggan,
-                    'alamat_pelanggan': alamat_pelanggan,
-                    'kodetx': kodetx,
-                    'ttl_trkasir': ttl_trkasir1x,
-                    'diskon1': diskon1x,
-                    'diskon2': diskon2x,
-                    'dp_bayar': dp_bayar1x,
-                    'sisa_bayar': sisa_bayar1x,
-                    'ket_trkasir': ket_trkasir,
-                    'stt_aksi': stt_aksi,
-                    'id_carabayar': id_carabayar,
-                    'id_pelanggan': id_pelanggan,
-                    'redeem_poin': redeem_poin
-                },
-                success: function(data) {
-                    if (data && data.message == 'success') {
-                        window.open('modul/mod_laporan/struk.php?kd_trkasir=' + kd_trkasir, 'nama window', 'width=400,height=700,toolbar=no,location=no,directories=no,status=no,menubar=no, scrollbars=no,resizable=yes,copyhistory=no');
-                        alert('Proses berhasil !');
-                        window.location = 'media_admin.php?module=trkasir';
-                    } else {
-                        alert((data && data.error) ? data.error : 'Simpan transaksi gagal.');
-                    }
-
-                },
-                error: function(xhr) {
-                    var pesan = 'Gagal menyimpan transaksi.';
-
-                    if (xhr.responseJSON && xhr.responseJSON.error) {
-                        pesan += '\n' + xhr.responseJSON.error;
-                    } else if (xhr.responseText) {
-                        pesan += '\n' + xhr.responseText.replace(/<[^>]*>/g, '').trim().substring(0, 300);
-                    }
-
-                    alert(pesan);
+            type: 'post',
+            url: "modul/mod_trkasir/aksi_trkasir.php",
+            dataType: 'json',
+            data: {
+                'id_trkasir': id_trkasir,
+                'kd_trkasir': kd_trkasir,
+                'id_user': id_user,
+                'tgl_trkasir': tgl_trkasir,
+                'petugas': petugas,
+                'shift': shift,
+                'nm_pelanggan': nm_pelanggan,
+                'tlp_pelanggan': tlp_pelanggan,
+                'alamat_pelanggan': alamat_pelanggan,
+                'kodetx': kodetx,
+                'ttl_trkasir': ttl_trkasir1x,
+                'diskon1': diskon1x,
+                'diskon2': diskon2x,
+                'dp_bayar': dp_bayar1x,
+                'sisa_bayar': sisa_bayar1x,
+                'ket_trkasir': ket_trkasir,
+                'stt_aksi': stt_aksi,
+                'id_carabayar': id_carabayar,
+                'id_pelanggan': id_pelanggan,
+                'redeem_poin': redeem_poin
+            },
+            success: function(data) {
+                if (data && data.message == 'success') {
+                    window.open('modul/mod_laporan/struk.php?kd_trkasir=' + kd_trkasir, 'nama window', 'width=400,height=700,toolbar=no,location=no,directories=no,status=no,menubar=no, scrollbars=no,resizable=yes,copyhistory=no');
+                    alert('Proses berhasil !');
+                    window.location = 'media_admin.php?module=trkasir';
+                } else {
+                    alert((data && data.error) ? data.error : 'Simpan transaksi gagal.');
                 }
 
-                //	success: function(data) {
+            },
+            error: function(xhr) {
+                var pesan = 'Gagal menyimpan transaksi.';
 
-                //	window.open('modul/mod_laporan/struk.php?kd_trkasir='+kd_trkasir, 'nama window','
-                //  	width=400,height=700,toolbar=no,location=no,directories=no,status=no,menubar=no,
-                //  	scrollbars=no,resizable=yes,copyhistory=no');
-                //	alert('Proses berhasil !');window.location='media_admin.php?module=trkasir';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    pesan += '\n' + xhr.responseJSON.error;
+                } else if (xhr.responseText) {
+                    pesan += '\n' + xhr.responseText.replace(/<[^>]*>/g, '').trim().substring(0, 300);
+                }
 
-                //	}
-            });
-        }
+                alert(pesan);
+            }
+
+            //	success: function(data) {
+
+            //	window.open('modul/mod_laporan/struk.php?kd_trkasir='+kd_trkasir, 'nama window','
+            //  	width=400,height=700,toolbar=no,location=no,directories=no,status=no,menubar=no,
+            //  	scrollbars=no,resizable=yes,copyhistory=no');
+            //	alert('Proses berhasil !');window.location='media_admin.php?module=trkasir';
+
+            //	}
+        });
 
     }
 
