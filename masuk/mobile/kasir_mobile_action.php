@@ -666,9 +666,9 @@ try {
             throw new Exception('Gagal update stok barang. Coba ulangi.');
         }
 
-        if ($hargaJualManual > 0 && mobileColumnExists($db, 'barang', 'hrgsat_barang')) {
-            $stmtUpdateHargaBarang = $db->prepare("UPDATE barang SET hrgsat_barang = ? WHERE id_barang = ?");
-            $stmtUpdateHargaBarang->execute(array((float)round($hargaJualManual, 0), $idBarang));
+        if ($hargaJual > 0 && mobileColumnExists($db, 'barang', 'hrgjual_barang')) {
+            $stmtUpdateHargaBarang = $db->prepare("UPDATE barang SET hrgjual_barang = ? WHERE id_barang = ?");
+            $stmtUpdateHargaBarang->execute(array($hargaJual, $idBarang));
         }
 
         if (mobileTableExists($db, 'batch')) {
