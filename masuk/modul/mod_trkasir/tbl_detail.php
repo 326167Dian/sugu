@@ -126,18 +126,16 @@ color: white;
 											<div class='buttons'>
 												<button type='button' class='btn btn-primary right-block' onclick='simpan_transaksi();'>[F3] SIMPAN TRANSAKSI</button>
 												&nbsp
-												<input class='btn btn-danger' type='button' value=BATAL onclick=self.history.back()>
+												<input class='btn btn-danger' type='button' value=BATAL onclick=\"window.location='media_admin.php?module=trkasir'\">
 											</div>
 											";
                                             
-											if($stt_aksi == "input_trkasir"){
-											}else{
+											if($stt_aksi != "input_trkasir"){
 											echo"
 											<p>
 											<div class='buttons'>
-												<button type='button' class='btn btn-success right-block' onclick='cetakstruk();'>CETAK STRUK</button>
-												<button type='button' class='btn btn-success right-block' onclick='cetakstrukresep();'>CETAK STRUK RESEP</button>
-												<a href=javascript:confirmdelete('$aksi?module=trkasir&act=hapus&id=$rf[id_trkasir]') title='HAPUS' class='btn btn-danger right-block'>HAPUS</a> 
+												<button type='button' class='btn btn-success right-block' onclick='cetakstruk();'>CETAK STRUK</button>												
+												
 											</div>
 											";
 											}

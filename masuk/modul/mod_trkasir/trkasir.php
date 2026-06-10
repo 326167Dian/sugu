@@ -34,7 +34,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 </div>
                 <div class="box-body table-responsive">
                     <a class='btn  btn-success btn-flat' href='?module=trkasir&act=tambah'>(F4)TAMBAH</a>
-                    <td><a class='btn btn-danger btn-flat' href='modul/mod_trkasir/barangmacet.php' target='_blank'>DOWNLOAD STOK MACET</a></td>
+                    <a class='btn btn-danger btn-flat' href='modul/mod_trkasir/barangmacet.php' target='_blank'>DOWNLOAD STOK MACET</a>
                     <?php
                     $lupa = $_SESSION['level'];
                     if ($_SESSION['username'] == 'ernawati') {
@@ -299,13 +299,21 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 <?php
             
                 if ($_SESSION['komisi']=='Y' && $_SESSION['level']=='petugas'){
-                echo"
-                <marquee><h3 style='font-weight: bold;'>Total Komisi per Produk <?php echo $petugas; ?> Rp. <?php echo $pk; ?></h3></marquee>
-                "; }
+                    echo "<marquee><h3 style='font-weight: bold;'>Total Komisi per Produk $petugas Rp. $pk</h3></marquee>";
+                }
                 ?>
             </div>
 
             <script>
+                // Definisikan formatRupiah secara global di modul ini agar tidak error saat DataTables render
+                function formatRupiah(angka) {
+                    if (!angka) return "0";
+                    var reverse = angka.toString().split('').reverse().join(''),
+                        ribuan = reverse.match(/\d{1,3}/g);
+                    ribuan = ribuan.join('.').split('').reverse().join('');
+                    return ribuan;
+                }
+
                 $(document).ready(function() {
                     $("#rekap").DataTable({
                         processing: true,
