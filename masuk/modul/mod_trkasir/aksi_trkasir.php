@@ -44,30 +44,38 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 ]);
                 $tk = $stmt_trkasir->fetch(PDO::FETCH_ASSOC);
                                                 
-                $stmt_poin = $db->prepare("SELECT * FROM poin_pelanggan");
+                $stmt_poin = $db->prepare("SELECT * FROM poin_pelanggan LIMIT 1");
                 $stmt_poin->execute();
                 $poin = $stmt_poin->fetch(PDO::FETCH_ASSOC);
-                        
-                $stmt_pelanggan = $db->prepare("SELECT * FROM pelanggan WHERE id_pelanggan = :id_pelanggan");
-                $stmt_pelanggan->execute([
-                    ':id_pelanggan' => $_POST['id_pelanggan']
-                ]);
-                
+
+                $id_pelanggan = isset($_POST['id_pelanggan']) && $_POST['id_pelanggan'] !== '' ? (int) $_POST['id_pelanggan'] : 0;
+                $redeem_poin = isset($_POST['redeem_poin']) && is_numeric($_POST['redeem_poin']) ? (int) $_POST['redeem_poin'] : 0;
                 $total_poin = 0;
                 $poin_awal = 0;
-                if($stmt_pelanggan->rowCount() > 0){
-                    $pelanggan = $stmt_pelanggan->fetch(PDO::FETCH_ASSOC);
-                    $poin_awal = $pelanggan['total_poin'];
-                    $total_poin = floor($tk['total_harga'] / $poin['min_penjualan']) * $poin['poin_pelanggan'];
-                            
-                    $stmt_update_pelanggan = $db->prepare("UPDATE pelanggan SET total_poin = (total_poin + :total_poin) - :redeem_poin
-                                                            WHERE id_pelanggan = :id_pelanggan");
-                    $stmt_update_pelanggan->execute([
-                        ':total_poin'   => $total_poin,
-                        ':redeem_poin'    => $_POST['redeem_poin'],
-                        ':id_pelanggan' => $_POST['id_pelanggan']
-                    ]);
-                    
+
+                if($id_pelanggan > 0){
+                    $stmt_pelanggan = $db->prepare("SELECT * FROM pelanggan WHERE id_pelanggan = ?");
+                    $stmt_pelanggan->execute([$id_pelanggan]);
+
+                    if($stmt_pelanggan->rowCount() > 0){
+                        $pelanggan = $stmt_pelanggan->fetch(PDO::FETCH_ASSOC);
+                        $poin_awal = isset($pelanggan['total_poin']) && is_numeric($pelanggan['total_poin']) ? (int) $pelanggan['total_poin'] : 0;
+
+                        $min_penjualan = isset($poin['min_penjualan']) && is_numeric($poin['min_penjualan']) ? (int) $poin['min_penjualan'] : 0;
+                        $poin_per_transaksi = isset($poin['poin_pelanggan']) && is_numeric($poin['poin_pelanggan']) ? (int) $poin['poin_pelanggan'] : 0;
+
+                        if($min_penjualan > 0 && $poin_per_transaksi > 0){
+                            $total_poin = floor($tk['total_harga'] / $min_penjualan) * $poin_per_transaksi;
+                        }
+
+                        $stmt_update_pelanggan = $db->prepare("UPDATE pelanggan SET total_poin = (total_poin + :total_poin) - :redeem_poin
+                                                                WHERE id_pelanggan = :id_pelanggan");
+                        $stmt_update_pelanggan->execute([
+                            ':total_poin'   => $total_poin,
+                            ':redeem_poin'  => $redeem_poin,
+                            ':id_pelanggan' => $id_pelanggan
+                        ]);
+                    }
                 }
                 
     		    $inserttrkasir = $db->prepare("INSERT INTO trkasir(
@@ -95,42 +103,50 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 											redeem_poin
     										)
     									 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    		        $insert = $inserttrkasir->execute([$_POST['kd_trkasir'], $_POST['id_user'], $_POST['petugas'], $_POST['shift'], $_POST['tgl_trkasir'], $_POST['id_pelanggan'], $_POST['nm_pelanggan'], $_POST['tlp_pelanggan'], $_POST['alamat_pelanggan'], $_POST['kodetx'], $_POST['ttl_trkasir'], $_POST['diskon1'], $_POST['diskon2'], $_POST['dp_bayar'], $_POST['sisa_bayar'], $_POST['ket_trkasir'], $_POST['id_carabayar'], $jnstx['tipe'], $datetime, $poin_awal, $total_poin, $_POST['redeem_poin']]);
+			        $insert = $inserttrkasir->execute([
+                        $_POST['kd_trkasir'],
+                        $_POST['id_user'],
+                        $_POST['petugas'],
+                        $_POST['shift'],
+                        $_POST['tgl_trkasir'],
+                        $id_pelanggan,
+                        $_POST['nm_pelanggan'],
+                        $_POST['tlp_pelanggan'],
+                        $_POST['alamat_pelanggan'],
+                        $_POST['kodetx'],
+                        $_POST['ttl_trkasir'],
+                        $_POST['diskon1'],
+                        $_POST['diskon2'],
+                        $_POST['dp_bayar'],
+                        $_POST['sisa_bayar'],
+                        $_POST['ket_trkasir'],
+                        $_POST['id_carabayar'],
+                        $jnstx['tipe'],
+                        $datetime,
+                        $poin_awal,
+                        $total_poin,
+                        $redeem_poin
+                    ]);
 
                 $db->prepare("update trkasir_detail set idadmin = ? where kd_trkasir = ?")->execute([$_POST['id_user'], $_POST['kd_trkasir']]);
-    
-            $tgl_sekarang = date('Y-m-d H:i:s', time());
-            $db->prepare("INSERT INTO kartu_stok(kode_transaksi, tgl_sekarang) VALUES(?,?)")->execute([$_POST['kd_trkasir'], $tgl_sekarang]);
-            
-                
-    		if ($insert) {
-    			# code...
-    			$db->prepare("UPDATE kdtk SET stt_kdtk = 'OFF' WHERE id_admin = ? AND kd_trkasir = ?")->execute([$_SESSION['idadmin'], $_POST['kd_trkasir']]);
-    
-    //             $ambildatainduk = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM trkasir WHERE id_trkasir='$_GET[id]'");
-                $ambildatainduk = $db->prepare("SELECT * FROM trkasir WHERE kd_trkasir=?");
-                $ambildatainduk->execute([$_POST['kd_trkasir']]);
-    			$r1 = $ambildatainduk->fetch(PDO::FETCH_ASSOC);
-    			$kd_trkasir = $r1['kd_trkasir'];
-    			
-    			//loop data detail
-    // 			$ambildatadetail = $db->prepare("SELECT * FROM trkasir_detail WHERE kd_trkasir=?");
-    //             $ambildatadetail->execute([$kd_trkasir]);
-    // 			while ($r = $ambildatadetail->fetch(PDO::FETCH_ASSOC)) {
-    //                 $db->prepare("INSERT INTO trkasir_restore(
-    // 						kd_trkasir, petugas, shift, tgl_trkasir, nm_pelanggan, tlp_pelanggan, alamat_pelanggan,
-    // 						ttl_trkasir, dp_bayar, diskon1, diskon2, sisa_bayar, ket_trkasir, id_carabayar, id_barang,
-    // 						kd_barang, nmbrg_dtrkasir, qty_dtrkasir, sat_dtrkasir, hrgjual_dtrkasir, hrgttl_dtrkasir)
-    // 					VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")->execute([$r1['kd_trkasir'], $r1['petugas'], $r1['shift'], $r1['tgl_trkasir'], $r1['nm_pelanggan'], $r1['tlp_pelanggan'], $r1['alamat_pelanggan'], $r1['ttl_trkasir'], $r1['dp_bayar'], $r1['diskon1'], $r1['diskon2'], $r1['sisa_bayar'], $r1['ket_trkasir'], $r1['id_carabayar'], $r['id_barang'], $r['kd_barang'], $r['nmbrg_dtrkasir'], $r['qty_dtrkasir'], $r['sat_dtrkasir'], $r['hrgjual_dtrkasir'], $r['hrgttl_dtrkasir']]);
-    
-    //             }
-                
-    			$data['message'] = 'success';
-    			echo json_encode($data);
-    		} else {
-    			$data['message'] = 'failed';
-    			echo json_encode($data);
-    		}
+
+                $tgl_sekarang = date('Y-m-d H:i:s', time());
+                $db->prepare("INSERT INTO kartu_stok(kode_transaksi, tgl_sekarang) VALUES(?,?)")->execute([$_POST['kd_trkasir'], $tgl_sekarang]);
+
+                if ($insert) {
+                    $db->prepare("UPDATE kdtk SET stt_kdtk = 'OFF' WHERE id_admin = ? AND kd_trkasir = ?")->execute([$_SESSION['idadmin'], $_POST['kd_trkasir']]);
+
+                    $ambildatainduk = $db->prepare("SELECT * FROM trkasir WHERE kd_trkasir=?");
+                    $ambildatainduk->execute([$_POST['kd_trkasir']]);
+                    $r1 = $ambildatainduk->fetch(PDO::FETCH_ASSOC);
+                    $kd_trkasir = $r1['kd_trkasir'];
+
+                    $data['message'] = 'success';
+                    echo json_encode($data);
+                } else {
+                    $data['message'] = 'failed';
+                    echo json_encode($data);
+                }
 
             }
         } catch (Throwable $e) {
