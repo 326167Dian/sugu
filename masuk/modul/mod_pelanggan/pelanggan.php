@@ -659,12 +659,14 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 	$is_outlet      = ($rp)? (($rp['is_outlet']=='ya')?'checked':''):'';
                 	$is_kelipatan   = ($rp)? (($rp['is_kelipatan']=='ya')?'checked':''):'';
                 	$min_penjualan  = ($rp)? $rp['min_penjualan']:'';
-                	$poin_pelanggan  = ($rp)? $rp['poin_pelanggan']:'';
+                	$poin_pelanggan = ($rp)? $rp['poin_pelanggan']:'';
+                	$id_poin        = ($rp)? $rp['id_poin']:'';
                 ?>
                 <form method="POST" action="<?=$aksi?>?module=pelanggan&act=input_poin">
                     <div class="form-group">
                         <label for="nm_outlet">Nama Outlet</label>
                         <input type="text" class="form-control" name="nm_outlet" id="nm_outlet" placeholder="Nama Outlet" value="<?=$nm_outlet?>">
+                        <input type="hidden" name="id_poin" id="id_poin" value="<?=$id_poin?>">
                      </div>
   
                     <div class="checkbox">
@@ -713,6 +715,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 <!-- end modal poin -->
 
 <script>
+    
     /* =========================
        Modal Item Pop Up
     ========================= */

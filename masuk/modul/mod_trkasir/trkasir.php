@@ -2293,14 +2293,15 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
                 data = $.parseJSON(data);
                 return process(data);
-
+                
             });
         },
         updater: function(item) {
             let jns_transaksi = $('select[name="jns_transaksi"]').val();
             // strip suffix " ( X satuan )" yang ditambahkan untuk tampilan dropdown
-            let nm_barang_clean = item.replace(/\s*\(\s*\d+\s+\S+\s*\)\s*$/, '').trim();
-
+            // let nm_barang_clean = item.replace(/\s*\(\s*\d+\s+\S+\s*\)\s*$/, '').trim();
+            const nm_barang_clean = item.replace(/\s*\([^)]*\)/g, "");
+            
             $.ajax({
                 url: 'modul/mod_trkasir/autonamabarang_enter.php',
                 type: 'post',
@@ -2909,6 +2910,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 'redeem_poin': redeem_poin
             },
             success: function(data) {
+                console.log(data);
                 if (data && data.message == 'success') {
                     window.open('modul/mod_laporan/struk.php?kd_trkasir=' + kd_trkasir, 'nama window', 'width=400,height=700,toolbar=no,location=no,directories=no,status=no,menubar=no, scrollbars=no,resizable=yes,copyhistory=no');
                     alert('Proses berhasil !');
@@ -2916,7 +2918,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 } else {
                     alert((data && data.error) ? data.error : 'Simpan transaksi gagal.');
                 }
-
+                
             },
             error: function(xhr) {
                 var pesan = 'Gagal menyimpan transaksi.';

@@ -331,15 +331,40 @@ elseif ($module=='pelanggan' AND $act=='hapus_riwayat'){
 }
 // Input Poin
 elseif ($module=='pelanggan' AND $act=='input_poin'){
+    $idpoin         = $_POST['id_poin'];
     $nm_outlet      = $_POST['nm_outlet'];
     $is_outlet      = isset($_POST['is_outlet']) ? 'ya' : 'no';
     $min_penjualan  = str_replace('.','',$_POST['min_penjualan']);
     $is_kelipatan   = isset($_POST['is_kelipatan']) ? 'ya' : 'no';
     $poin_member    = str_replace('.','',$_POST['poin_member']);
     
-    $insert_poin = $db->prepare("INSERT INTO poin_pelanggan(nm_outlet, is_outlet, min_penjualan, is_kelipatan, poin_pelanggan)
-                    VALUES(?,?,?,?,?)");
-    $insert_poin->execute([$nm_outlet, $is_outlet, $min_penjualan, $is_kelipatan, $poin_member]);
+    $stmt_poin  = $db->prepare("SELECT * FROM poin_pelanggan WHERE id_poin = :id_poin");
+    $stmt_poin->execute([
+            ':id_poin'  => $idpoin
+        ]);
+        
+    if ($stmt_poin->rowCount() > 0) {
+        $update_poin = $db->prepare("UPDATE poin_pelanggan SET
+                                        nm_outlet       = :nm_outlet,
+                                        is_outlet       = :is_outlet,
+                                        min_penjualan   = :min_penjualan,
+                                        is_kelipatan    = :is_kelipatan,
+                                        poin_pelanggan  = :poin_pelanggan
+                                    WHERE id_poin = :id_poin");
+        $update_poin->execute([
+            ':nm_outlet'        => $nm_outlet,
+            ':is_outlet'        => $is_outlet,
+            ':min_penjualan'    => $min_penjualan,
+            ':is_kelipatan'     => $is_kelipatan,
+            ':poin_pelanggan'   => $poin_member,
+            ':id_poin'          => $idpoin
+        ]);
+    } else {
+        $insert_poin = $db->prepare("INSERT INTO poin_pelanggan(nm_outlet, is_outlet, min_penjualan, is_kelipatan, poin_pelanggan)
+                        VALUES(?,?,?,?,?)");
+        $insert_poin->execute([$nm_outlet, $is_outlet, $min_penjualan, $is_kelipatan, $poin_member]);
+        
+    }
     header('location:../../media_admin.php?module='.$module);
 }
 }

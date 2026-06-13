@@ -115,7 +115,7 @@ if ($_GET['action'] == 'table_data') {
                                             <i class="fa fa-caret-down"></i>
                                           </button>
                                           <div class="dropdown-menu">
-                                            <a class="btn btn-primary btn-xs" onclick="window.open(\'modul/mod_laporan/member_card.php?kd_trkasir=' . $value['kd_trkasir'] . '\',\'nama window\',\'width=500,height=600,toolbar=no,location=no,directories=no,status=no,menubar=no, scrollbars=no,resizable=yes,copyhistory=no\')" style="width:50%; margin:0 5 5 5">TES</a>
+                                            
                                             <a href="?module=trkasir&act=ubah&id=' . $value['id_trkasir'] . '" title="EDIT" class="btn btn-info btn-xs" style="width:50%; margin:0 5 5 5">EDIT</a>
                                             <a href=javascript:confirmdelete("' . $aksi . '?module=trkasir&act=hapus&id=' . $value['id_trkasir'] . '") title="HAPUS" class="btn btn-danger btn-xs" style="width:50%; margin:0 3 3 3">HAPUS</a>
                                             <a class="btn btn-primary btn-xs" onclick="window.open(\'modul/mod_laporan/struk.php?kd_trkasir=' . $value['kd_trkasir'] . '\',\'nama window\',\'width=500,height=600,toolbar=no,location=no,directories=no,status=no,menubar=no, scrollbars=no,resizable=yes,copyhistory=no\')" style="width:50%; margin:0 5 5 5">PRINT</a>
