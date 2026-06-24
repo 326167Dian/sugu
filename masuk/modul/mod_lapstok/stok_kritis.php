@@ -60,11 +60,6 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 						$tgl_akhir = date('Y-m-d', strtotime('-30 days', strtotime($tgl_awal)));
 
 						$updateAnalisa = $db->prepare("UPDATE barang b
-							JOIN (
-								SELECT DISTINCT kd_barang
-								FROM trbmasuk_detail
-								WHERE kd_trbmasuk IS NOT NULL
-							) bm ON bm.kd_barang = b.kd_barang
 							LEFT JOIN (
 								SELECT td.kd_barang,
 									   COUNT(*) AS t30,

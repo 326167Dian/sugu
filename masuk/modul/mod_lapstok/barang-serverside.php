@@ -39,23 +39,23 @@ if ($_GET['action'] == "table_data") {
                 SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
                 JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                 WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                AND trkasir_detail.id_barang = a.id_barang
+                AND trkasir_detail.kd_barang = a.kd_barang
             ) AS t30,
             (
                 (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
                 JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                 WHERE trkasir.tgl_trkasir BETWEEN '$tgl60' AND '$_GET[finish]'
-                AND trkasir_detail.id_barang = a.id_barang) -
+                AND trkasir_detail.kd_barang = a.kd_barang) -
                 (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
                 JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                 WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                AND trkasir_detail.id_barang = a.id_barang)
+                AND trkasir_detail.kd_barang = a.kd_barang)
             ) AS t60,
             (
                 SELECT SUM(trkasir_detail.qty_dtrkasir) FROM trkasir_detail
                 JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                 WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                AND trkasir_detail.id_barang = a.id_barang
+                AND trkasir_detail.kd_barang = a.kd_barang
             ) AS q30,
             (
                 ROUND((
@@ -63,16 +63,16 @@ if ($_GET['action'] == "table_data") {
                         (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
                         JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                         WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                        AND trkasir_detail.id_barang = a.id_barang)/
+                        AND trkasir_detail.kd_barang = a.kd_barang)/
                         (
                             (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
                             JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                             WHERE trkasir.tgl_trkasir BETWEEN '$tgl60' AND '$_GET[finish]'
-                            AND trkasir_detail.id_barang = a.id_barang) -
+                            AND trkasir_detail.kd_barang = a.kd_barang) -
                             (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
                             JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                             WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                            AND trkasir_detail.id_barang = a.id_barang)
+                            AND trkasir_detail.kd_barang = a.kd_barang)
                         )
                     )*100
                 )-100)
@@ -100,23 +100,23 @@ if ($_GET['action'] == "table_data") {
                     SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
                     JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                     WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                    AND trkasir_detail.id_barang = a.id_barang
+                    AND trkasir_detail.kd_barang = a.kd_barang
                 ) AS t30,
                 (
                     (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
                     JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                     WHERE trkasir.tgl_trkasir BETWEEN '$tgl60' AND '$_GET[finish]'
-                    AND trkasir_detail.id_barang = a.id_barang) -
+                    AND trkasir_detail.kd_barang = a.kd_barang) -
                     (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
                     JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                     WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                    AND trkasir_detail.id_barang = a.id_barang)
+                    AND trkasir_detail.kd_barang = a.kd_barang)
                 ) AS t60,
                 (
                     SELECT SUM(trkasir_detail.qty_dtrkasir) FROM trkasir_detail
                     JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                     WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                    AND trkasir_detail.id_barang = a.id_barang
+                    AND trkasir_detail.kd_barang = a.kd_barang
                 ) AS q30,
                 (
                     ROUND((
@@ -124,16 +124,16 @@ if ($_GET['action'] == "table_data") {
                             (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
                             JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                             WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                            AND trkasir_detail.id_barang = a.id_barang)/
+                            AND trkasir_detail.kd_barang = a.kd_barang)/
                             (
                                 (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
                                 JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                                 WHERE trkasir.tgl_trkasir BETWEEN '$tgl60' AND '$_GET[finish]'
-                                AND trkasir_detail.id_barang = a.id_barang) -
+                                AND trkasir_detail.kd_barang = a.kd_barang) -
                                 (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
                                 JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                                 WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                                AND trkasir_detail.id_barang = a.id_barang)
+                                AND trkasir_detail.kd_barang = a.kd_barang)
                             )
                         )*100
                     )-100)
@@ -181,23 +181,23 @@ if ($_GET['action'] == "table_data") {
                     SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
                     JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                     WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                    AND trkasir_detail.id_barang = a.id_barang
+                    AND trkasir_detail.kd_barang = a.kd_barang
                 ) AS t30,
                 (
                     (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
                     JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                     WHERE trkasir.tgl_trkasir BETWEEN '$tgl60' AND '$_GET[finish]'
-                    AND trkasir_detail.id_barang = a.id_barang) -
+                    AND trkasir_detail.kd_barang = a.kd_barang) -
                     (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
                     JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                     WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                    AND trkasir_detail.id_barang = a.id_barang)
+                    AND trkasir_detail.kd_barang = a.kd_barang)
                 ) AS t60,
                 (
                     SELECT SUM(trkasir_detail.qty_dtrkasir) FROM trkasir_detail
                     JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                     WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                    AND trkasir_detail.id_barang = a.id_barang
+                    AND trkasir_detail.kd_barang = a.kd_barang
                 ) AS q30,
                 (
                     ROUND((
@@ -205,16 +205,16 @@ if ($_GET['action'] == "table_data") {
                             (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
                             JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                             WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                            AND trkasir_detail.id_barang = a.id_barang)/
+                            AND trkasir_detail.kd_barang = a.kd_barang)/
                             (
                                 (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
                                 JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                                 WHERE trkasir.tgl_trkasir BETWEEN '$tgl60' AND '$_GET[finish]'
-                                AND trkasir_detail.id_barang = a.id_barang) -
+                                AND trkasir_detail.kd_barang = a.kd_barang) -
                                 (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
                                 JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
                                 WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                                AND trkasir_detail.id_barang = a.id_barang)
+                                AND trkasir_detail.kd_barang = a.kd_barang)
                             )
                         )*100
                     )-100)

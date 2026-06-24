@@ -24,7 +24,7 @@ if ($_GET['action'] == "table_data") {
                 WHERE NOT EXISTS (
                     SELECT trkasir_detail.kd_barang FROM trkasir_detail
                     JOIN trkasir ON trkasir_detail.kd_trkasir = trkasir.kd_trkasir
-                    WHERE trkasir_detail.id_barang = barang.id_barang
+                    WHERE trkasir_detail.kd_barang = barang.kd_barang
                     AND trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
                 )");
 
@@ -53,7 +53,7 @@ if ($_GET['action'] == "table_data") {
             WHERE NOT EXISTS (
                 SELECT trkasir_detail.kd_barang FROM trkasir_detail
                 JOIN trkasir ON trkasir_detail.kd_trkasir = trkasir.kd_trkasir
-                WHERE trkasir_detail.id_barang = barang.id_barang
+                WHERE trkasir_detail.kd_barang = barang.kd_barang
                 AND trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
             )
             ORDER BY $order $dir LIMIT $limit OFFSET $start");
@@ -71,7 +71,7 @@ if ($_GET['action'] == "table_data") {
                 WHERE NOT EXISTS (
                     SELECT trkasir_detail.kd_barang FROM trkasir_detail
                     JOIN trkasir ON trkasir_detail.kd_trkasir = trkasir.kd_trkasir
-                    WHERE trkasir_detail.id_barang = barang.id_barang
+                    WHERE trkasir_detail.kd_barang = barang.kd_barang
                     AND trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
                 )
                     AND kd_barang LIKE '%$search%' 
@@ -84,7 +84,7 @@ if ($_GET['action'] == "table_data") {
                         WHERE NOT EXISTS (
                             SELECT trkasir_detail.kd_barang FROM trkasir_detail
                             JOIN trkasir ON trkasir_detail.kd_trkasir = trkasir.kd_trkasir
-                            WHERE trkasir_detail.id_barang = barang.id_barang
+                            WHERE trkasir_detail.kd_barang = barang.kd_barang
                             AND trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
                         ) 
                         AND kd_barang LIKE '%$search%' 
@@ -106,7 +106,7 @@ if ($_GET['action'] == "table_data") {
                     SUM(trkasir_detail.qty_dtrkasir) as pw
                 FROM trkasir_detail JOIN trkasir
                 ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir 
-                WHERE trkasir_detail.id_barang = '$value[id_barang]'
+                WHERE trkasir_detail.kd_barang = '$value[kd_barang]'
                 AND trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'");
             $pass->execute();
             $pass1 = $pass->fetch(PDO::FETCH_ASSOC);

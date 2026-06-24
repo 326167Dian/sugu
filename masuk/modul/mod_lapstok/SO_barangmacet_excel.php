@@ -66,7 +66,7 @@
             WHERE NOT EXISTS (
                 SELECT trkasir_detail.kd_barang FROM trkasir_detail
                 JOIN trkasir ON trkasir_detail.kd_trkasir = trkasir.kd_trkasir
-                WHERE trkasir_detail.id_barang = barang.id_barang
+                WHERE trkasir_detail.kd_barang = barang.kd_barang
                 AND trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
             )
             ORDER BY barang.stok_barang DESC");

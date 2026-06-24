@@ -77,7 +77,7 @@ if ($_GET['action'] == "table_data") {
                     SUM(trkasir_detail.qty_dtrkasir) as pw
                 FROM trkasir_detail JOIN trkasir
                 ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir 
-                WHERE trkasir_detail.id_barang = '$value[id_barang]'
+                WHERE trkasir_detail.kd_barang = '$value[kd_barang]'
                 AND trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'");
             $pass->execute();
             $pass1 = $pass->fetch(PDO::FETCH_ASSOC);
