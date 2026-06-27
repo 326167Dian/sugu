@@ -20,6 +20,14 @@ include "../../../configurasi/koneksi.php";
 
 $act = isset($_GET['act']) ? $_GET['act'] : '';
 
+function setUjianFlash($type, $message)
+{
+    $_SESSION['ujian_flash'] = array(
+        'type' => $type,
+        'message' => $message
+    );
+}
+
 function validJawaban($value)
 {
     $v = strtolower(trim((string) $value));
@@ -31,7 +39,8 @@ if ($act === 'simpanheader') {
     $durasi = isset($_POST['durasi']) ? (int) $_POST['durasi'] : 0;
 
     if ($nm_ujian === '' || $durasi <= 0) {
-        echo "<script>alert('Nama ujian dan durasi wajib diisi.');window.location='../../media_admin.php?module=ujian&act=kelola';</script>";
+        setUjianFlash('danger', 'Nama ujian dan durasi wajib diisi.');
+        header("Location: ../../media_admin.php?module=ujian&act=input_nama_ujian");
         exit;
     }
 
@@ -43,7 +52,8 @@ if ($act === 'simpanheader') {
         $_SESSION['ujian_aktif_id'] = $id_soal_aktif;
     }
 
-    header("Location: ../../media_admin.php?module=ujian&act=tambahsoal&ujian_id=" . $id_soal_aktif);
+    setUjianFlash('success', 'Nama ujian berhasil disimpan.');
+    header("Location: ../../media_admin.php?module=ujian&act=input_nama_ujian");
     exit;
 }
 
@@ -53,7 +63,8 @@ if ($act === 'updateheader') {
     $durasi = isset($_POST['durasi']) ? (int) $_POST['durasi'] : 0;
 
     if ($id_soal <= 0 || $nm_ujian === '' || $durasi <= 0) {
-        echo "<script>alert('Data update ujian tidak valid.');window.location='../../media_admin.php?module=ujian&act=kelola';</script>";
+        setUjianFlash('danger', 'Data update ujian tidak valid.');
+        header("Location: ../../media_admin.php?module=ujian&act=input_nama_ujian");
         exit;
     }
 
@@ -62,7 +73,39 @@ if ($act === 'updateheader') {
 
     $_SESSION['ujian_aktif_id'] = $id_soal;
 
-    header("Location: ../../media_admin.php?module=ujian&act=kelola&ujian_id=" . $id_soal);
+    setUjianFlash('success', 'Nama ujian berhasil diupdate.');
+    header("Location: ../../media_admin.php?module=ujian&act=input_nama_ujian");
+    exit;
+}
+
+if ($act === 'hapusheader') {
+    $id_soal = isset($_GET['id_soal']) ? (int) $_GET['id_soal'] : 0;
+
+    if ($id_soal <= 0) {
+        setUjianFlash('danger', 'Data ujian tidak valid.');
+        header("Location: ../../media_admin.php?module=ujian&act=input_nama_ujian");
+        exit;
+    }
+
+    $stmtCekSoal = $db->prepare("SELECT COUNT(*) FROM soal WHERE id_soal = ?");
+    $stmtCekSoal->execute(array($id_soal));
+    $jumlahSoal = (int) $stmtCekSoal->fetchColumn();
+
+    if ($jumlahSoal > 0) {
+        setUjianFlash('warning', 'Nama ujian tidak dapat dihapus karena masih memiliki soal.');
+        header("Location: ../../media_admin.php?module=ujian&act=input_nama_ujian");
+        exit;
+    }
+
+    $stmt = $db->prepare("DELETE FROM soal_header WHERE id_soal = ?");
+    $stmt->execute(array($id_soal));
+
+    if (isset($_SESSION['ujian_aktif_id']) && (int) $_SESSION['ujian_aktif_id'] === $id_soal) {
+        unset($_SESSION['ujian_aktif_id']);
+    }
+
+    setUjianFlash('success', 'Nama ujian berhasil dihapus.');
+    header("Location: ../../media_admin.php?module=ujian&act=input_nama_ujian");
     exit;
 }
 

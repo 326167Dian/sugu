@@ -29,8 +29,12 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         $selected_ujian_id = isset($_GET['ujian_id']) ? (int) $_GET['ujian_id'] : 0;
         $prefill_ujian_id = isset($_GET['ujian_id']) ? (int) $_GET['ujian_id'] : 0;
         $edit_header_id = isset($_GET['edit_header_id']) ? (int) $_GET['edit_header_id'] : 0;
+        $ujian_flash = isset($_SESSION['ujian_flash']) && is_array($_SESSION['ujian_flash']) ? $_SESSION['ujian_flash'] : null;
+        if ($ujian_flash) {
+            unset($_SESSION['ujian_flash']);
+        }
 
-        if (in_array($act, array('kelola', 'tambahsoal', 'editsoal', 'hasilujian'), true) && !$isPemilik) {
+        if (in_array($act, array('kelola', 'input_nama_ujian', 'tambahsoal', 'editsoal', 'hasilujian'), true) && !$isPemilik) {
             echo "<link href=../css/style.css rel=stylesheet type=text/css>";
             echo "<div class='error msg'>Fitur CRUD soal hanya untuk status pemilik.</div>";
             return;
@@ -104,7 +108,81 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         $durasi_ujian_menit = ($ujian_aktif && (int) $ujian_aktif['durasi'] > 0) ? (int) $ujian_aktif['durasi'] : 15;
         $durasi_ujian_detik = $durasi_ujian_menit * 60;
 
-        if ($act === 'kelola') {
+        if ($act === 'input_nama_ujian') {
+?>
+
+<div class="box box-primary box-solid table-responsive">
+    <div class="box-header with-border">
+        <h3 class="box-title">Input Nama Ujian</h3>
+        <div class="box-tools pull-right">
+            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+    </div>
+    <div class="box-body">
+        <?php if ($ujian_flash && !empty($ujian_flash['message'])) { ?>
+            <div class="alert alert-<?php echo htmlspecialchars((string) (isset($ujian_flash['type']) ? $ujian_flash['type'] : 'info')); ?>"><?php echo htmlspecialchars((string) $ujian_flash['message']); ?></div>
+        <?php } ?>
+
+        <div class="row">
+            <div class="col-md-8">
+                <form method="POST" action="<?php echo $aksi; ?>?module=ujian&act=simpanheader" class="form-inline" style="margin-bottom:15px;">
+                    <?php if ($header_edit) { ?>
+                        <input type="hidden" name="id_soal" value="<?php echo (int) $header_edit['id_soal']; ?>">
+                    <?php } ?>
+                    <div class="form-group" style="margin-right:10px;">
+                        <label for="nm_ujian" style="margin-right:8px;">Nama Ujian (nm_ujian) =</label>
+                        <input type="text" name="nm_ujian" id="nm_ujian" class="form-control" value="<?php echo $header_edit ? htmlspecialchars($header_edit['nm_ujian']) : ''; ?>" required>
+                    </div>
+                    <div class="form-group" style="margin-right:10px;">
+                        <label for="durasi" style="margin-right:8px;">Durasi (menit) menunjukkan lama ujian =</label>
+                        <input type="number" name="durasi" id="durasi" class="form-control" min="1" value="<?php echo $header_edit ? (int) $header_edit['durasi'] : ''; ?>" required>
+                    </div>
+                    <?php if ($header_edit) { ?>
+                        <button type="submit" formaction="<?php echo $aksi; ?>?module=ujian&act=updateheader" class="btn btn-warning">Update Ujian</button>
+                        <a href="?module=ujian&act=input_nama_ujian" class="btn btn-default">Batal</a>
+                    <?php } else { ?>
+                        <button type="submit" class="btn btn-primary">Simpan Ujian</button>
+                    <?php } ?>
+                </form>
+            </div>
+        </div>
+
+        <?php if (!empty($daftar_ujian)) { ?>
+            <div class="table-responsive" style="margin-bottom:15px;">
+                <table class="table table-bordered table-condensed">
+                    <thead>
+                        <tr>
+                            <th width="60">ID</th>
+                            <th>Nama Ujian</th>
+                            <th width="120">Durasi (menit)</th>
+                            <th width="170">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($daftar_ujian as $u) { ?>
+                            <tr>
+                                <td><?php echo (int) $u['id_soal']; ?></td>
+                                <td><?php echo htmlspecialchars($u['nm_ujian']); ?></td>
+                                <td><?php echo (int) $u['durasi']; ?></td>
+                                <td>
+                                    <a href="?module=ujian&act=input_nama_ujian&edit_header_id=<?php echo (int) $u['id_soal']; ?>" class="btn btn-warning btn-xs">Edit</a>
+                                    <a href="<?php echo $aksi; ?>?module=ujian&act=hapusheader&id_soal=<?php echo (int) $u['id_soal']; ?>" class="btn btn-danger btn-xs" onclick="return confirm('Hapus nama ujian ini?');">Hapus</a>
+                                </td>
+                            </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php } else { ?>
+            <div class="alert alert-info">Belum ada data nama ujian.</div>
+        <?php } ?>
+
+        <a href="?module=ujian&act=kelola" class="btn btn-default btn-flat">Kembali ke Kelola Soal</a>
+    </div>
+</div>
+
+<?php
+        } elseif ($act === 'kelola') {
 ?>
 
 <div class="box box-primary box-solid table-responsive">
@@ -137,55 +215,8 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         </div>
     </div>
     <div class="box-body">
-        <div class="row">
-            <div class="col-md-8">
-                <form method="POST" action="<?php echo $aksi; ?>?module=ujian&act=simpanheader" class="form-inline" style="margin-bottom:15px;">
-                    <?php if ($header_edit) { ?>
-                        <input type="hidden" name="id_soal" value="<?php echo (int) $header_edit['id_soal']; ?>">
-                    <?php } ?>
-                    <div class="form-group" style="margin-right:10px;">
-                        <label for="nm_ujian" style="margin-right:8px;">Nama Ujian (nm_ujian) =</label>
-                        <input type="text" name="nm_ujian" id="nm_ujian" class="form-control" value="<?php echo $header_edit ? htmlspecialchars($header_edit['nm_ujian']) : ''; ?>" required>
-                    </div>
-                    <div class="form-group" style="margin-right:10px;">
-                        <label for="durasi" style="margin-right:8px;">Durasi (menit) menunjukkan lama ujian =</label>
-                        <input type="number" name="durasi" id="durasi" class="form-control" min="1" value="<?php echo $header_edit ? (int) $header_edit['durasi'] : ''; ?>" required>
-                    </div>
-                    <?php if ($header_edit) { ?>
-                        <button type="submit" formaction="<?php echo $aksi; ?>?module=ujian&act=updateheader" class="btn btn-warning">Update Ujian</button>
-                        <a href="?module=ujian&act=kelola" class="btn btn-default">Batal</a>
-                    <?php } else { ?>
-                        <button type="submit" class="btn btn-primary">Simpan Ujian</button>
-                    <?php } ?>
-                </form>
-            </div>
-        </div>
-
-        <?php if (!empty($daftar_ujian)) { ?>
-            <div class="table-responsive" style="margin-bottom:15px;">
-                <table class="table table-bordered table-condensed">
-                    <thead>
-                        <tr>
-                            <th width="60">ID</th>
-                            <th>Nama Ujian</th>
-                            <th width="120">Durasi (menit)</th>
-                            <th width="120">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($daftar_ujian as $u) { ?>
-                            <tr>
-                                <td><?php echo (int) $u['id_soal']; ?></td>
-                                <td><?php echo htmlspecialchars($u['nm_ujian']); ?></td>
-                                <td><?php echo (int) $u['durasi']; ?></td>
-                                <td>
-                                    <a href="?module=ujian&act=kelola&edit_header_id=<?php echo (int) $u['id_soal']; ?>" class="btn btn-warning btn-xs">Edit</a>
-                                </td>
-                            </tr>
-                        <?php } ?>
-                    </tbody>
-                </table>
-            </div>
+        <?php if ($ujian_flash && !empty($ujian_flash['message'])) { ?>
+            <div class="alert alert-<?php echo htmlspecialchars((string) (isset($ujian_flash['type']) ? $ujian_flash['type'] : 'info')); ?>"><?php echo htmlspecialchars((string) $ujian_flash['message']); ?></div>
         <?php } ?>
 
         <?php
@@ -201,6 +232,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             }
         ?>
 
+        <a href="?module=ujian&act=input_nama_ujian" class="btn btn-primary btn-flat">INPUT NAMA UJIAN</a>
         <a href="<?php echo $tambah_soal_link; ?>" class="btn btn-success btn-flat">Tambah Soal</a>
         <a href="?module=ujian" class="btn btn-default btn-flat">Kembali ke Ujian</a>
         <br><br>
