@@ -1,4 +1,5 @@
 <?php
+session_start();
 // Fungsi pembantu untuk menghitung jumlah baris MultiCell
 function NbLines($w, $txt, $pdf) {
     $cw = &$pdf->CurrentFont['cw'];
@@ -36,7 +37,7 @@ if ($id_pelanggan == 0) {
 }
 
 // Ambil data header apotek
-$ah = $db->query("SELECT * FROM setheader");
+$ah = $db->query("SELECT * FROM setheader WHERE unit = '".$_SESSION['unit']."' LIMIT 1");
 $rh = $ah->fetch(PDO::FETCH_ASSOC);
 
 // Ambil data pelanggan
@@ -66,18 +67,20 @@ $pdf->AliasNbPages();
 $pdf->AddPage();
 
 // Logo di kiri atas
-$myImage = "../../images/".$rh['logo'];
-if (file_exists($myImage)) {
-    $pdf->Image($myImage, 1.5, 1, 2, 2);
+if ($rh && !empty($rh['logo'])) {
+    $myImage = "../../images/".$rh['logo'];
+    if (file_exists($myImage) && is_file($myImage)) {
+        $pdf->Image($myImage, 1.5, 1, 2, 2);
+    }
 }
 
 // HEADER - Info Apotek
 $pdf->SetFont('Arial', 'B', 14);
-$pdf->Cell(18, 0.7, $rh['satu'], 0, 1, 'C');
+$pdf->Cell(18, 0.7, isset($rh['satu']) ? $rh['satu'] : '', 0, 1, 'C');
 $pdf->SetFont('Arial', '', 10);
-$pdf->Cell(18, 0.5, $rh['dua'], 0, 1, 'C');
-$pdf->Cell(18, 0.5, $rh['tiga'], 0, 1, 'C');
-$pdf->Cell(18, 0.5, $rh['empat'], 0, 1, 'C');
+$pdf->Cell(18, 0.5, isset($rh['dua']) ? $rh['dua'] : '', 0, 1, 'C');
+$pdf->Cell(18, 0.5, isset($rh['tiga']) ? $rh['tiga'] : '', 0, 1, 'C');
+$pdf->Cell(18, 0.5, isset($rh['empat']) ? $rh['empat'] : '', 0, 1, 'C');
 
 
 // Line separator

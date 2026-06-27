@@ -30,6 +30,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 					</div><!-- /.box-tools -->
 				</div>
 				<div class="box-body table-responsive">
+					<a class='btn btn-success btn-flat' href='?module=swamedikasi&act=petugas_swamedikasi'>Rekap Petugas Swamedikasi </a>
 					<!--<a class='btn  btn-success btn-flat' href='?module=pelanggan&act=tambah'>TAMBAH</a>-->
 					<!--<a class='btn btn-primary btn-flat' href='?module=konseling'>KONSELING</a>-->
 					<!--<a class='btn btn-warning btn-flat' href='?module=meso'>MESO</a>-->
@@ -45,12 +46,10 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 							<tr>
         						<th>No</th>
         						<th>Pelanggan</th>
-        						<th>Tanggal</th>
-        						<th>Diagnosa</th>
+							<th>Diagnosa</th>
         						<th>Tindakan</th>
         						<th>Saran Konsultasi</th>
-        						<th>Tgl Follow Up</th>
-        						<th>Follow Up oleh</th>
+							<th>Tgl Follow Up</th>
         						<th>Created</th>
         						<th>Aksi</th>
         					</tr>
@@ -68,9 +67,10 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             			}
             			$token = $_SESSION['csrf_pelanggan'];
 			
-						$stmt = $db->prepare("SELECT rp.*, p.nm_pelanggan
+						$stmt = $db->prepare("SELECT rp.*, p.nm_pelanggan, a.nama_lengkap AS nama_petugas
 							FROM riwayat_pelanggan rp
 							LEFT JOIN pelanggan p ON p.id_pelanggan = rp.id_pelanggan
+							LEFT JOIN admin a ON a.id_admin = rp.id_admin
 							ORDER BY rp.tgl DESC");
             			$stmt->execute();
             			$riwayat = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -94,20 +94,45 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             			$no = 1;
             			foreach($riwayat as $rw){
 					$nama_pelanggan = isset($rw['nm_pelanggan']) && $rw['nm_pelanggan'] !== '' ? htmlspecialchars($rw['nm_pelanggan']) : '-';
+					$nama_petugas = '-';
+					if (!empty($rw['nama_petugas'])) {
+						$nama_petugas = htmlspecialchars($rw['nama_petugas']);
+					} elseif (isset($rw['id_admin']) && $rw['id_admin'] !== '' && $rw['id_admin'] !== null) {
+						$nama_petugas = 'ID: ' . (int)$rw['id_admin'];
+					}
+					$pelanggan_petugas = $nama_pelanggan . "<br><small>(" . $nama_petugas . ")</small>";
+					$diagnosa_text = isset($rw['diagnosa']) ? htmlspecialchars($rw['diagnosa']) : '-';
+					$tgl_display = '-';
+					if (!empty($rw['tgl']) && $rw['tgl'] !== '0000-00-00') {
+						$ts_tgl = strtotime($rw['tgl']);
+						if ($ts_tgl !== false) {
+							$tgl_display = date('d-m-Y', $ts_tgl);
+						} else {
+							$tgl_display = htmlspecialchars($rw['tgl']);
+						}
+					}
+					$diagnosa_with_tgl = $diagnosa_text . "<br><small>(" . $tgl_display . ")</small>";
+
+					if (!empty($rw['tgl_followup']) && $rw['tgl_followup'] !== '0000-00-00 00:00:00') {
+						$followup_name = isset($rw['followup_by']) && trim($rw['followup_by']) !== '' ? htmlspecialchars($rw['followup_by']) : '-';
+						$tgl_followup = htmlspecialchars($rw['tgl_followup']) . "<br><small>(" . $followup_name . ")</small>";
+						if (!empty($rw['foto2'])) {
+							$foto2_nama = htmlspecialchars($rw['foto2']);
+							$tgl_followup .= "<br><a href='#' onclick=\"showImgModal('images/".$foto2_nama."')\" style='cursor:zoom-in;'><img src='images/".$foto2_nama."' alt='Foto Follow Up' style='max-width:90px; max-height:90px; border:1px solid #ddd; margin-top:4px;'></a>";
+						}
+					} else {
+						$tgl_followup = '<button type="button" data-id="'.$rw['id'].'" class="tgl_followup btn btn-danger">Klik untuk followup</button>';
+					}
             				$edit_link = "?module=swamedikasi&act=edit_riwayat&idr=".$rw['id'];
             				$delete_link = $aksi."?module=swamedikasi&act=hapus_riwayat&id=".$rw['id']."&token=".$token;
             				$obat_tindakan = isset($obat_map[$rw['id']]) ? implode("<br>", $obat_map[$rw['id']]) : htmlspecialchars($rw['tindakan']);
-            				$tgl_followup = (isset($rw['tgl_followup']))? $rw['tgl_followup']:'<button type="button" data-id="'.$rw['id'].'" class="tgl_followup btn btn-danger">Klik untuk followup</button>';
-            				
             				echo "<tr>
             					<td>$no</td>
-					<td>$nama_pelanggan</td>
-            					<td>$rw[tgl]</td>
-            					<td>$rw[diagnosa]</td>
+					<td>$pelanggan_petugas</td>
+					<td>$diagnosa_with_tgl</td>
             					<td>$obat_tindakan</td>
             					<td>$rw[followup]</td>
             					<td>$tgl_followup</td>
-            					<td>$rw[followup_by]</td>
             					<td>$rw[created_at]</td>
             					<td>
             						<a href='".$edit_link."' title='EDIT' class='btn btn-warning btn-xs'>EDIT</a>
@@ -124,9 +149,106 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 				</div>
 			</div>
 
+			<div class="modal fade" id="modalFollowupFoto" tabindex="-1" role="dialog" aria-labelledby="modalFollowupFotoLabel">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title" id="modalFollowupFotoLabel">Follow Up Pelanggan</h4>
+						</div>
+						<div class="modal-body">
+							<input type="hidden" id="followup_riwayat_id" value="">
+							<div class="form-group">
+								<label for="followup_foto">Foto Follow Up (opsional)</label>
+								<input type="file" id="followup_foto" class="form-control" accept="image/*">
+								<small class="text-muted">Maksimal ukuran file 1MB.</small>
+							</div>
+							<div id="followup_upload_error" class="alert alert-danger" style="display:none;"></div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+							<button type="button" id="btnSimpanFollowup" class="btn btn-primary">Simpan Follow Up</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
 
 <?php
 
+			break;
+
+		case "petugas_swamedikasi":
+			$has_pelanggan_id_admin = ($db->query("SHOW COLUMNS FROM pelanggan LIKE 'id_admin'")->rowCount() > 0);
+			$has_riwayat_id_admin = ($db->query("SHOW COLUMNS FROM riwayat_pelanggan LIKE 'id_admin'")->rowCount() > 0);
+			$has_cekdarah_id_admin = ($db->query("SHOW COLUMNS FROM cekdarah LIKE 'id_admin'")->rowCount() > 0);
+
+			$swamedikasi_subquery = "SELECT NULL AS id_admin, 0 AS total_swamedikasi WHERE 1=0";
+			if ($has_pelanggan_id_admin) {
+				$swamedikasi_subquery = "SELECT id_admin, COUNT(*) AS total_swamedikasi FROM pelanggan GROUP BY id_admin";
+			} elseif ($has_riwayat_id_admin) {
+				$swamedikasi_subquery = "SELECT id_admin, COUNT(*) AS total_swamedikasi FROM riwayat_pelanggan GROUP BY id_admin";
+			}
+
+			$cekdarah_subquery = "SELECT NULL AS id_admin, 0 AS total_cekdarah WHERE 1=0";
+			if ($has_cekdarah_id_admin) {
+				$cekdarah_subquery = "SELECT id_admin, COUNT(*) AS total_cekdarah FROM cekdarah GROUP BY id_admin";
+			}
+
+			$sql_rekap = "SELECT a.id_admin, a.nama_lengkap,
+				COALESCE(sw.total_swamedikasi, 0) AS total_swamedikasi,
+				COALESCE(cd.total_cekdarah, 0) AS total_cekdarah
+				FROM admin a
+				LEFT JOIN (".$swamedikasi_subquery.") sw ON sw.id_admin = a.id_admin
+				LEFT JOIN (".$cekdarah_subquery.") cd ON cd.id_admin = a.id_admin
+				ORDER BY a.nama_lengkap ASC";
+
+			$rekap_stmt = $db->prepare($sql_rekap);
+			$rekap_stmt->execute();
+			$rekap_rows = $rekap_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+			echo "
+			<div class='box box-primary box-solid'>
+				<div class='box-header with-border'>
+					<h3 class='box-title'>REKAP PETUGAS SWAMEDIKASI</h3>
+					<div class='box-tools pull-right'>
+						<button class='btn btn-box-tool' data-widget='collapse'><i class='fa fa-minus'></i></button>
+					</div>
+				</div>
+				<div class='box-body table-responsive'>
+					<a class='btn btn-default btn-flat' href='?module=swamedikasi'>KEMBALI</a>
+					<br><br>
+					<table class='table table-bordered table-striped'>
+						<thead>
+							<tr>
+								<th>No</th>
+								<th>Nama Petugas</th>
+								<th>Swamedikasi</th>
+								<th>Cek Darah</th>
+							</tr>
+						</thead>
+						<tbody>";
+
+			$no = 1;
+			foreach ($rekap_rows as $row) {
+				$nama_petugas = htmlspecialchars($row['nama_lengkap']);
+				$total_swamedikasi = (int) $row['total_swamedikasi'];
+				$total_cekdarah = (int) $row['total_cekdarah'];
+
+				echo "<tr>
+					<td>".$no."</td>
+					<td>".$nama_petugas."</td>
+					<td>".$total_swamedikasi."</td>
+					<td>".$total_cekdarah."</td>
+				</tr>";
+				$no++;
+			}
+
+			echo "
+						</tbody>
+					</table>
+				</div>
+			</div>";
 			break;
 
 		case "tambah":
@@ -240,6 +362,12 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 			<form method=POST action='$aksi?module=pelanggan&act=input_riwayat' enctype='multipart/form-data' class='form-horizontal'>
 				<input type=hidden name='id_pelanggan' value='$_GET[id]'>
 				<input type=hidden name='token' value='$token'>
+				<div class='form-group'>
+					<label class='col-sm-2 control-label'>Nama Pelanggan</label>
+					<div class='col-sm-4'>
+						<input type='text' class='form-control' value='".htmlspecialchars($p['nm_pelanggan'], ENT_QUOTES, 'UTF-8')."' readonly>
+					</div>
+				</div>
 				<div class='form-group'>
 					<label class='col-sm-2 control-label'>Tanggal</label>
 					<div class='col-sm-4'>
@@ -455,6 +583,8 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 				<input type=hidden name='id_pelanggan' value='".$id_pelanggan."'>
 				<input type=hidden name='id_riwayat' value='".$rw['id']."'>
 				<input type=hidden name='token' value='".$token."'>
+				<input type=hidden name='foto_lama' value='".htmlspecialchars(isset($rw['foto']) ? $rw['foto'] : '', ENT_QUOTES)."'>
+				<input type=hidden name='foto2_lama' value='".htmlspecialchars(isset($rw['foto2']) ? $rw['foto2'] : '', ENT_QUOTES)."'>
 				<div class='form-group'>
 					<label class='col-sm-2 control-label'>Tanggal</label>
 					<div class='col-sm-4'>
@@ -529,6 +659,22 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 					<label class='col-sm-2 control-label'>Saran Konsultasi</label>
 					<div class='col-sm-4'>
 						<textarea name='followup' class='form-control' rows='3'>".htmlspecialchars($rw['followup'])."</textarea>
+					</div>
+				</div>
+				<div class='form-group'>
+					<label class='col-sm-2 control-label'>Foto Riwayat</label>
+					<div class='col-sm-4'>
+						".((!empty($rw['foto'])) ? "<div style='margin-bottom:6px;'><a href='#' onclick=\"showImgModal('images/".htmlspecialchars($rw['foto'], ENT_QUOTES)."')\" style='cursor:zoom-in;'><img src='images/".htmlspecialchars($rw['foto'], ENT_QUOTES)."' style='max-width:120px;max-height:120px;border:1px solid #ddd;'></a><br><label style='font-weight:normal;'><input type='checkbox' name='hapus_foto' value='1'> Hapus foto ini</label></div>" : "<small class='text-muted'>Belum ada foto.</small><br>")."
+						<input type='file' name='foto' class='form-control' accept='image/*'>
+						<small class='text-muted'>Kosongkan jika tidak ingin mengganti. Maks 2MB.</small>
+					</div>
+				</div>
+				<div class='form-group'>
+					<label class='col-sm-2 control-label'>Foto Follow Up</label>
+					<div class='col-sm-4'>
+						".((!empty($rw['foto2'])) ? "<div style='margin-bottom:6px;'><a href='#' onclick=\"showImgModal('images/".htmlspecialchars($rw['foto2'], ENT_QUOTES)."')\" style='cursor:zoom-in;'><img src='images/".htmlspecialchars($rw['foto2'], ENT_QUOTES)."' style='max-width:120px;max-height:120px;border:1px solid #ddd;'></a><br><label style='font-weight:normal;'><input type='checkbox' name='hapus_foto2' value='1'> Hapus foto ini</label></div>" : "<small class='text-muted'>Belum ada foto follow up.</small><br>")."
+						<input type='file' name='foto2' class='form-control' accept='image/*'>
+						<small class='text-muted'>Kosongkan jika tidak ingin mengganti. Maks 1MB.</small>
 					</div>
 				</div>
 				<div class='form-group'>
@@ -1342,27 +1488,112 @@ $(document).ready(function() {
 
 // 	bindObatAutocomplete('body');
 
-    $(document).on('click', '.tgl_followup', function() {
+	function submitFollowup(id, file) {
+		if (!id) {
+			$('#followup_upload_error').text('ID riwayat tidak valid.').show();
+			return;
+		}
 
-        var id = $(this).data('id');
-        $.ajax({
-            url: "modul/mod_pelanggan/updateFollowUp.php",
-            type: "POST",
-            dataType: "json",
-            data:{
-                id: id
-            },
-            success:function(data){
-                if(data.status === 'success'){
-                    window.location.reload();
-                }
-            }
-        });
-    });
+		if (file && file.size > 1024 * 1024) {
+			$('#followup_upload_error').text('Ukuran foto maksimal 1MB.').show();
+			return;
+		}
+
+		var formData = new FormData();
+		formData.append('id', id);
+		if (file) {
+			formData.append('foto_followup', file);
+		}
+
+		$('#followup_upload_error').hide().text('');
+		$.ajax({
+			url: "modul/mod_pelanggan/updateFollowUp.php",
+			type: "POST",
+			dataType: "json",
+			data: formData,
+			processData: false,
+			contentType: false,
+			success:function(data){
+				if(data.status === 'success'){
+					window.location.reload();
+				} else {
+					alert(data.message ? data.message : 'Gagal menyimpan follow up.');
+					$('#followup_upload_error').text(data.message ? data.message : 'Gagal menyimpan follow up.').show();
+				}
+			},
+			error:function(){
+				alert('Terjadi kesalahan saat menyimpan follow up.');
+				$('#followup_upload_error').text('Terjadi kesalahan saat menyimpan follow up.').show();
+			}
+		});
+	}
+
+	$(document).on('click', '.tgl_followup', function() {
+		var id = $(this).data('id');
+		$('#followup_riwayat_id').val(id);
+		$('#followup_foto').val('');
+		$('#followup_upload_error').hide().text('');
+
+		if ($.fn && typeof $.fn.modal === 'function') {
+			$('#modalFollowupFoto').modal('show');
+			return;
+		}
+
+		var lanjutTanpaModal = confirm('Upload foto follow up bersifat opsional. Klik OK untuk pilih foto, atau Cancel untuk simpan tanpa foto.');
+		if (lanjutTanpaModal) {
+			$('#followup_foto').trigger('click');
+		} else {
+			submitFollowup(id, null);
+		}
+	});
+
+	$(document).on('change', '#followup_foto', function() {
+		var id = $('#followup_riwayat_id').val();
+		var fileInput = $('#followup_foto')[0];
+		var file = fileInput && fileInput.files && fileInput.files.length > 0 ? fileInput.files[0] : null;
+		if (file) {
+			submitFollowup(id, file);
+		}
+	});
+
+	$(document).on('click', '#btnSimpanFollowup', function() {
+		var id = $('#followup_riwayat_id').val();
+		var fileInput = $('#followup_foto')[0];
+		var file = fileInput && fileInput.files && fileInput.files.length > 0 ? fileInput.files[0] : null;
+
+		submitFollowup(id, file);
+	});
     
     
 });
+
+function showImgModal(src) {
+    document.getElementById('imgModalSrc').src = src;
+    if ($.fn && typeof $.fn.modal === 'function') {
+        $('#imgViewerModal').modal('show');
+    } else {
+        window.open(src, '_blank');
+    }
+}
 </script>
+
+<div class="modal fade" id="imgViewerModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document" style="max-width:90vw;">
+    <div class="modal-content">
+      <div class="modal-header" style="padding:10px 15px;">
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        <h4 class="modal-title">Lihat Foto</h4>
+      </div>
+      <div class="modal-body" style="text-align:center;padding:10px;">
+        <img id="imgModalSrc" src="" alt="Foto" style="max-width:100%;max-height:80vh;border-radius:4px;">
+      </div>
+      <div class="modal-footer" style="padding:10px 15px;">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Kembali</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <style>
 .typeahead.dropdown-menu > li.active > a,
 ul.typeahead.dropdown-menu > li.active > a,
