@@ -26,6 +26,7 @@ color: white;
 								<th style="vertical-align: middle; background-color: #008000; text-align: center; ">Jenis</th>
 								<th style="vertical-align: middle; background-color: #008000; text-align: center; ">Resep</th>
 								<th style="vertical-align: middle; background-color: #008000; text-align: left; ">Kode Barang</th>
+								<th style="vertical-align: middle; background-color: #008000; text-align: left; ">BUNDLE</th>
 								<th style="vertical-align: middle; background-color: #008000; text-align: left; ">Nama Barang</th>
 								<th style="vertical-align: middle; background-color: #008000; text-align: right; ">Qty</th>
 								<th style="vertical-align: middle; background-color: #008000; text-align: center; ">Satuan</th>
@@ -96,6 +97,7 @@ color: white;
 											<td align=center>$tipe</td>           
 											<td align=center>$resep_inline</td>
 											<td align=left>$r[kd_barang]</td>
+											<td align=left>$r[nm_bundle]</td>
 											<td>$r[nmbrg_dtrkasir]</td>
 											<td align=right>$qty_inline</td>
 											<td align=center>$r[sat_dtrkasir]</td>

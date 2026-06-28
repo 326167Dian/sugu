@@ -15,12 +15,15 @@ $qty_dtrkasir   = $r['qty_dtrkasir'];
 $kd_trbmasuk    = $r['kd_trkasir'];
 $no_batch       = $r['no_batch'];
 $kd_barang      = $r['kd_barang'];
+$kd_bundle      = $r['kd_bundle'];
 
 // UPDATE STOK ATOMIC - Tambah stok kembali saat hapus detail
 // Menggunakan single UPDATE statement untuk menghindari race condition
-$getkode = substr($kd_barang,0,4);
+$getkode = substr($kd_bundle,0,4);
 if ($getkode == 'BUND') {
     // code...
+    echo $kd_bundle;
+    die();
     $update_stok_bundle = $db->prepare("UPDATE bundle SET
                                     qty_bundle = qty_bundle + :qty_dikembalikan
                                     WHERE kd_bundle = :kd_bundle

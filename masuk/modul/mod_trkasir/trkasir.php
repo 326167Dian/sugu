@@ -2685,6 +2685,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                     'tipe': jns_transaksi
                 },
                 success: function(result) {
+                    console.log(result);
                     if (result && result.status === 'error') {
                         alert(result.data);
                         return false;
@@ -2706,17 +2707,18 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                     tabel_detail();
                     // console.log(result);
                 },
-                error: function(xhr) {
-                    var pesan = 'Gagal menyimpan detail transaksi.';
+                // error: function(xhr) {
+                //     // var pesan = 'Gagal menyimpan detail transaksi.';
 
-                    if (xhr.responseJSON && xhr.responseJSON.data) {
-                        pesan += '\n' + xhr.responseJSON.data;
-                    } else if (xhr.responseText) {
-                        pesan += '\n' + xhr.responseText.replace(/<[^>]*>/g, '').trim().substring(0, 300);
-                    }
+                //     // if (xhr.responseJSON && xhr.responseJSON.data) {
+                //     //     pesan += '\n' + xhr.responseJSON.data;
+                //     // } else if (xhr.responseText) {
+                //     //     pesan += '\n' + xhr.responseText.replace(/<[^>]*>/g, '').trim().substring(0, 300);
+                //     // }
 
-                    alert(pesan);
-                }
+                //     // alert(pesan);
+                //     console.log(xhr)
+                // }
             });
         }
     }
@@ -2736,6 +2738,15 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             },
 
             success: function(data) {
+                if(data.substring(0,4) === 'BUND'){
+                    let hasilKonfirmasi = confirm("Anda akan menghapus semua item dalam bundle");
+                    if (hasilKonfirmasi) {
+                        // console.log("Pengguna menekan OK. Nilai: " + hasilKonfirmasi);
+                        // Tindakan jika OK dipilih
+                        hapus_bundle(data);
+                    } 
+                    return;
+                }
                 //setelah simpan data, tabel_detail data terbaru
                 //alert('Hapus data detail berhasil');
                 tabel_detail();
@@ -2748,7 +2759,25 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         });
 
     });
-
+    
+    function hapus_bundle(param){
+        // console.log(param);
+        var kd_bundle = param;
+        $.ajax({
+            type: 'post',
+            url: "modul/mod_trkasir/hapus_bundletrkasir.php",
+            data: {
+                kd_bundle: kd_bundle
+            },
+            success: function(data) {
+                // console.log(data);
+                //setelah simpan data, tabel_detail data terbaru
+                //alert('Hapus data detail berhasil');
+                tabel_detail();
+                // console.log(data);
+            }
+        });
+    }
 
 
     //fungsi tabel detail
