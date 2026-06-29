@@ -37,7 +37,7 @@ if ($_GET['action'] == "table_data") {
             FROM bundle ORDER BY $order $dir LIMIT $limit OFFSET $start");
     } else {
         $search = $_POST['search']['value'];
-        $query = $db->prepare("SELECT SELECT id_bundle,
+        $query = $db->prepare("SELECT id_bundle,
                                     kd_bundle,
                                     nm_bundle,
                                     qty_bundle,
@@ -51,7 +51,7 @@ if ($_GET['action'] == "table_data") {
             ORDER BY $order $dir LIMIT $limit OFFSET $start");
 
         $querycount = $db->prepare("SELECT count(id_bundle) as jumlah 
-            FROM barang WHERE kd_bundle LIKE '%$search%' 
+            FROM bundle WHERE kd_bundle LIKE '%$search%' 
                         OR nm_bundle LIKE '%$search%'
                         OR qty_bundle LIKE '%$search%'
                         OR sat_bundle LIKE '%$search%'

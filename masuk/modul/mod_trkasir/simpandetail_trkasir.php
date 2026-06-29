@@ -63,8 +63,8 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
 
     //cek apakah barang sudah ada
     $cekdetail = $db->prepare("SELECT * FROM trkasir_detail 
-                                WHERE kd_trkasir=?");
-    $cekdetail->execute([$kd_trkasir]);
+                                WHERE kd_barang=? AND kd_trkasir=?");
+    $cekdetail->execute([$kd_barang, $kd_trkasir]);
     $ketemucekdetail = $cekdetail->rowCount();
     $rcek = $cekdetail->fetch(PDO::FETCH_ASSOC);
 

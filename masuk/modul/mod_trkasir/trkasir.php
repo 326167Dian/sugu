@@ -2550,7 +2550,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
     // });
 
-    $(document).on('click', '#pilihbarang', function() {
+    $(document).on('click', '#pilihbarang, .pilihbarang', function() {
 
         var id_barang       = $(this).data('id_barang');
         var kd_barang       = $(this).data('kd_barang');
@@ -2592,7 +2592,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
     });
     
-    $(document).on('click', '#pilihbundle', function() {
+    $(document).on('click', '#pilihbundle, .pilihbundle', function() {
 
         var id_barang       = $(this).data('id_bundle');
         var kd_barang       = $(this).data('kd_bundle');
@@ -2657,12 +2657,6 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         // }
         else if (parseInt(disc || 0, 10) > 100) {
             alert('Input Diskon lebih kecil dari 100');
-        }
-        else if (level == "petugas" && resep == "YA") {
-    			alert('Transaksi resep hanya bisa di proses Apoteker');
-    //     }
-    //     else if (no_batch == "" && exp_date == "") {
-  		// 	alert('No. batch tidak boleh kosong');
         } else {
             $.ajax({
                 type: 'post',
@@ -2686,8 +2680,23 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 },
                 success: function(result) {
                     console.log(result);
-                    if (result && result.status === 'error') {
-                        alert(result.data);
+
+                    if (typeof result === 'string') {
+                        try { result = JSON.parse(result); } catch (e) {}
+                    }
+
+                    if (!result) {
+                        alert('Simpan detail gagal: respons kosong dari server.');
+                        return false;
+                    }
+
+                    if (result.status && result.status === 'error') {
+                        alert(result.data ? result.data : 'Simpan detail gagal.');
+                        return false;
+                    }
+
+                    if (result.status && result.status !== 'success') {
+                        alert(result.data ? result.data : 'Simpan detail gagal.');
                         return false;
                     }
 
@@ -2705,19 +2714,26 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
                     $('#nmbrg_dtrkasir').focus();
                     tabel_detail();
-                    // console.log(result);
                 },
-                // error: function(xhr) {
-                //     var pesan = 'Gagal menyimpan detail transaksi.';
+                error: function(xhr) {
+                    var pesan = 'Gagal menyimpan detail transaksi.';
+                    var responseText = (xhr && xhr.responseText) ? xhr.responseText : '';
 
-                //     if (xhr.responseJSON && xhr.responseJSON.data) {
-                //         pesan += '\n' + xhr.responseJSON.data;
-                //     } else if (xhr.responseText) {
-                //         pesan += '\n' + xhr.responseText.replace(/<[^>]*>/g, '').trim().substring(0, 300);
-                //     }
+                    if (xhr && xhr.responseJSON && xhr.responseJSON.data) {
+                        pesan += '\n' + xhr.responseJSON.data;
+                    } else if (responseText) {
+                        var plain = responseText.replace(/<[^>]*>/g, '').trim();
+                        if (plain.length > 0) {
+                            if (/stok/i.test(plain) && /tidak mencukupi|kosong/i.test(plain)) {
+                                pesan = 'Stok nol / tidak mencukupi.';
+                            } else {
+                                pesan += '\n' + plain.substring(0, 300);
+                            }
+                        }
+                    }
 
-                //     alert(pesan);
-                // }
+                    alert(pesan);
+                }
             });
         }
     }

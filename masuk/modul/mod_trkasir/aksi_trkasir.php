@@ -290,10 +290,8 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 					$stmt_del_batch->execute([$r['kd_trkasir'], $r['no_batch']]);
 				}
 
-				// rollback poin pelanggan hanya jika kolom total_poin tersedia
-				$cek_kolom_poin = $db->prepare("SHOW COLUMNS FROM pelanggan LIKE 'total_poin'");
-				$cek_kolom_poin->execute();
-				if ($cek_kolom_poin->rowCount() > 0 && !empty($r1['id_pelanggan'])) {
+				// rollback poin pelanggan
+				if (!empty($r1['id_pelanggan'])) {
 					$stmt_update_poin = $db->prepare("UPDATE pelanggan SET total_poin = (total_poin - :tambahan_poin) + :redeem_poin WHERE id_pelanggan = :id_pelanggan");
 					$stmt_update_poin->execute([
 						':tambahan_poin'    => isset($r1['tambahan_poin']) ? $r1['tambahan_poin'] : 0,
