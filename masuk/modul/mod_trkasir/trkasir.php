@@ -2708,16 +2708,15 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                     // console.log(result);
                 },
                 // error: function(xhr) {
-                //     // var pesan = 'Gagal menyimpan detail transaksi.';
+                //     var pesan = 'Gagal menyimpan detail transaksi.';
 
-                //     // if (xhr.responseJSON && xhr.responseJSON.data) {
-                //     //     pesan += '\n' + xhr.responseJSON.data;
-                //     // } else if (xhr.responseText) {
-                //     //     pesan += '\n' + xhr.responseText.replace(/<[^>]*>/g, '').trim().substring(0, 300);
-                //     // }
+                //     if (xhr.responseJSON && xhr.responseJSON.data) {
+                //         pesan += '\n' + xhr.responseJSON.data;
+                //     } else if (xhr.responseText) {
+                //         pesan += '\n' + xhr.responseText.replace(/<[^>]*>/g, '').trim().substring(0, 300);
+                //     }
 
-                //     // alert(pesan);
-                //     console.log(xhr)
+                //     alert(pesan);
                 // }
             });
         }
@@ -2745,7 +2744,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                         // Tindakan jika OK dipilih
                         hapus_bundle(data);
                     } 
-                    return;
+                    return false;
                 }
                 //setelah simpan data, tabel_detail data terbaru
                 //alert('Hapus data detail berhasil');
@@ -2770,11 +2769,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 kd_bundle: kd_bundle
             },
             success: function(data) {
-                // console.log(data);
-                //setelah simpan data, tabel_detail data terbaru
-                //alert('Hapus data detail berhasil');
                 tabel_detail();
-                // console.log(data);
             }
         });
     }

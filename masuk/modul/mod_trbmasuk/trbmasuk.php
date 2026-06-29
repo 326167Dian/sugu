@@ -277,7 +277,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 											<div class='input-group'>
 												<input type='text' class='form-control' name='kd_barang' id='kd_barang' autocomplete='off'>
 													<div class='input-group-addon'>
-														<button type=button data-toggle='modal' data-target='#ModalItem' href='#'><span class='glyphicon glyphicon-search'></span></button>
+														<button type='button' data-toggle='modal' data-target='#ModalItem' href='#' id='kode'><span class='glyphicon glyphicon-search'></span></button>
 													</div>
 													<div class='input-group-addon'>
                                                         <button type=button data-toggle='modal' data-target='#ModalScanBarcode' href='#' id='btnScanBarcode'><span class='glyphicon glyphicon-camera'></span></button>

@@ -24,6 +24,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         $kd_bundle      = get_kode_bundle();
         
         // Bundle Detail
+        $id_barang      = $_POST['obat_id'];
         $kd_barang      = $_POST['obat_kd'];
         $nm_barang      = $_POST['obat_nama'];
         $qty_barang     = $_POST['qty'];
@@ -55,18 +56,19 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         	                                                subtotal        = ?,
         	                                                update_at       = ?
         	                                           WHERE kd_bundle = ?
-        	                                           AND kd_barang = ?");
+        	                                           AND kd_barang = ?
+        	                                           AND id_barang = ?");
         	
-        	$insertbundledetail = $db->prepare("INSERT INTO bundle_detail(kd_bundle, kd_barang, nm_barang, qty_barang, sat_barang, hrgjual_barang, subtotal, created_at) VALUES (?,?,?,?,?,?,?,?)");
+        	$insertbundledetail = $db->prepare("INSERT INTO bundle_detail(kd_bundle, id_barang, kd_barang, nm_barang, qty_barang, sat_barang, hrgjual_barang, subtotal, created_at) VALUES (?,?,?,?,?,?,?,?,?)");
         	
         	for ($i = 0; $i < $count_item; $i++) {
         	    $getbundledetail->execute([$kd_bundle, $kd_barang[$i]]);
         	    
         	    if ($getbundledetail->rowCount() > 0) {
-        	        $updatebundledetail->execute([$qty_barang[$i], $hrgjual_barang[$i], $subtotal_brg[$i], $created_at, $kd_bundle, $kd_barang[$i]]);
+        	        $updatebundledetail->execute([$qty_barang[$i], $hrgjual_barang[$i], $subtotal_brg[$i], $created_at, $kd_bundle, $kd_barang[$i], $id_barang[$i]]);
         	    } else {
         	        
-        	        $insertbundledetail->execute([$kd_bundle, $kd_barang[$i], $nm_barang[$i], $qty_barang[$i], $sat_barang[$i], $hrgjual_barang[$i], $subtotal_brg[$i], $created_at]);
+        	        $insertbundledetail->execute([$kd_bundle, $id_barang[$i], $kd_barang[$i], $nm_barang[$i], $qty_barang[$i], $sat_barang[$i], $hrgjual_barang[$i], $subtotal_brg[$i], $created_at]);
         	    }
         	}
     	} else {
@@ -74,9 +76,9 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
     	                                        VALUES (?,?,?,?,?,?,?)");
     	    $insertbundle->execute([$kd_bundle, $nm_bundle, $sat_bundle, $qty_bundle, $hrgjual_bundle, $petugas, $created_at]);
     	    
-    	    $insertbundledetail = $db->prepare("INSERT INTO bundle_detail(kd_bundle, kd_barang, nm_barang, qty_barang, sat_barang, hrgjual_barang, subtotal, created_at) VALUES (?,?,?,?,?,?,?,?)");
+    	    $insertbundledetail = $db->prepare("INSERT INTO bundle_detail(kd_bundle, id_barang, kd_barang, nm_barang, qty_barang, sat_barang, hrgjual_barang, subtotal, created_at) VALUES (?,?,?,?,?,?,?,?,?)");
     	    for ($i = 0; $i < $count_item; $i++) {
-    	        $insertbundledetail->execute([$kd_bundle, $kd_barang[$i], $nm_barang[$i], $qty_barang[$i], $sat_barang[$i], $hrgjual_barang[$i], $subtotal_brg[$i], $created_at]);
+    	        $insertbundledetail->execute([$kd_bundle, $id_barang[$i], $kd_barang[$i], $nm_barang[$i], $qty_barang[$i], $sat_barang[$i], $hrgjual_barang[$i], $subtotal_brg[$i], $created_at]);
     	    }
     	}
     	

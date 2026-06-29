@@ -11,6 +11,7 @@ $json = [];
 while($re = $stmt->fetch(PDO::FETCH_ASSOC)){
     $json[] = array(
                 'nm_barang'         => $re['nm_barang'],
+                'id_barang'         => $re['id_barang'],
                 'kd_barang'         => $re['kd_barang'],
                 'sat_barang'        => $re['sat_barang'],
                 'hrgjual_barang'    => $re['hrgjual_barang']

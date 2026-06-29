@@ -21,48 +21,48 @@ $kd_bundle      = $r['kd_bundle'];
 // Menggunakan single UPDATE statement untuk menghindari race condition
 $getkode = substr($kd_bundle,0,4);
 if ($getkode == 'BUND') {
-    // code...
     echo $kd_bundle;
     die();
-    $update_stok_bundle = $db->prepare("UPDATE bundle SET
-                                    qty_bundle = qty_bundle + :qty_dikembalikan
-                                    WHERE kd_bundle = :kd_bundle
-                                    AND id_bundle = :id_bundle");
-    $update_stok_bundle->execute([
-        ':qty_dikembalikan' => $qty_dtrkasir,
-        ':kd_bundle'        => $kd_barang,
-        ':id_bundle'        => $id_barang
-    ]);
+    // code...
+    // $update_stok_bundle = $db->prepare("UPDATE bundle SET
+    //                                 qty_bundle = qty_bundle + :qty_dikembalikan
+    //                                 WHERE kd_bundle = :kd_bundle
+    //                                 AND id_bundle = :id_bundle");
+    // $update_stok_bundle->execute([
+    //     ':qty_dikembalikan' => $qty_dtrkasir,
+    //     ':kd_bundle'        => $kd_barang,
+    //     ':id_bundle'        => $id_barang
+    // ]);
     
-    $get_bundle_detail = $db->prepare("SELECT * FROM bundle_detail
-                                        WHERE kd_bundle = ?");
-    $get_bundle_detail->execute([$kd_barang]);
-    while($rbundle = $get_bundle_detail->fetch(PDO::FETCH_ASSOC)){
-        $update_stok_barang = $db->prepare("UPDATE barang SET
-                                    stok_barang = stok_barang + :qty_dikembalikan
-                                    WHERE kd_barang = :kd_barang");
-        $update_stok_barang->execute([
-            ':qty_dikembalikan' => ($rbundle['qty_barang'] * $qty_dtrkasir),
-            ':kd_barang'        => $rbundle['kd_barang']
-        ]);
+    // $get_bundle_detail = $db->prepare("SELECT * FROM bundle_detail
+    //                                     WHERE kd_bundle = ?");
+    // $get_bundle_detail->execute([$kd_barang]);
+    // while($rbundle = $get_bundle_detail->fetch(PDO::FETCH_ASSOC)){
+    //     $update_stok_barang = $db->prepare("UPDATE barang SET
+    //                                 stok_barang = stok_barang + :qty_dikembalikan
+    //                                 WHERE kd_barang = :kd_barang");
+    //     $update_stok_barang->execute([
+    //         ':qty_dikembalikan' => ($rbundle['qty_barang'] * $qty_dtrkasir),
+    //         ':kd_barang'        => $rbundle['kd_barang']
+    //     ]);
         
         
-        $delete_batch = $db->prepare("DELETE FROM batch WHERE
-                                        kd_barang = :kd_barang  AND
-                                        kd_transaksi = :kd_transaksi AND
-                                        status = :status");
-        $delete_batch->execute([
-            ':kd_barang'    => $rbundle['kd_barang'],
-            ':kd_transaksi' => $kd_trbmasuk,
-            ':status'       => 'keluar'
-        ]);
-    }
+    //     $delete_batch = $db->prepare("DELETE FROM batch WHERE
+    //                                     kd_barang = :kd_barang  AND
+    //                                     kd_transaksi = :kd_transaksi AND
+    //                                     status = :status");
+    //     $delete_batch->execute([
+    //         ':kd_barang'    => $rbundle['kd_barang'],
+    //         ':kd_transaksi' => $kd_trbmasuk,
+    //         ':status'       => 'keluar'
+    //     ]);
+    // }
     
-    // Ambil stok terbaru untuk ditampilkan
-    $cekstok = $db->prepare("SELECT qty_bundle FROM bundle WHERE id_bundle =? AND kd_bundle =?");
-    $cekstok->execute([$id_barang, $kd_barang]);
-    $rst = $cekstok->fetch(PDO::FETCH_ASSOC);
-    $stokakhir = $rst['qty_bundle'];
+    // // Ambil stok terbaru untuk ditampilkan
+    // $cekstok = $db->prepare("SELECT qty_bundle FROM bundle WHERE id_bundle =? AND kd_bundle =?");
+    // $cekstok->execute([$id_barang, $kd_barang]);
+    // $rst = $cekstok->fetch(PDO::FETCH_ASSOC);
+    // $stokakhir = $rst['qty_bundle'];
 } else {
     $stmt_update_barang = $db->prepare("UPDATE barang SET 
                                     stok_barang = stok_barang + :qty_dikembalikan

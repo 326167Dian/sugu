@@ -15,7 +15,8 @@ if ($_GET['action'] == "table_data") {
         8 => 'id_trbmasuk'
     );
 
-    $querycount = $db->query("SELECT count(id_trbmasuk) as jumlah FROM trbmasuk WHERE id_resto = 'pusat' AND jenis = 'nonpbf'");
+    $querycount = $db->prepare("SELECT count(id_trbmasuk) as jumlah FROM trbmasuk WHERE id_resto = 'pusat' AND jenis = 'nonpbf'");
+    $querycount->execute();
     $datacount = $querycount->fetch(PDO::FETCH_ASSOC);
 
     $totalData = $datacount['jumlah'];
@@ -28,13 +29,13 @@ if ($_GET['action'] == "table_data") {
     $dir = $_POST['order']['0']['dir'];
 
     if (empty($_POST['search']['value'])) {
-        $query = $db->query("SELECT *
+        $query = $db->prepare("SELECT *
             FROM trbmasuk
             WHERE trbmasuk.id_resto = 'pusat' AND trbmasuk.jenis = 'nonpbf'
             ORDER BY $order DESC LIMIT $limit OFFSET $start");
     } else {
         $search = $_POST['search']['value'];
-        $query = $db->query("SELECT * 
+        $query = $db->prepare("SELECT * 
             FROM trbmasuk
             WHERE trbmasuk.id_resto = 'pusat' AND trbmasuk.jenis = 'nonpbf'
                         AND (kd_trbmasuk LIKE '%$search%'
@@ -46,7 +47,7 @@ if ($_GET['action'] == "table_data") {
                         OR carabayar LIKE '%$search%')
             ORDER BY $order DESC LIMIT $limit OFFSET $start");
 
-        $querycount = $db->query("SELECT count(id_trbmasuk) as jumlah 
+        $querycount = $db->prepare("SELECT count(id_trbmasuk) as jumlah 
             FROM trbmasuk
             WHERE trbmasuk.id_resto = 'pusat' AND trbmasuk.jenis = 'nonpbf'
                         AND (trbmasuk.kd_trbmasuk LIKE '%$search%'
@@ -57,6 +58,7 @@ if ($_GET['action'] == "table_data") {
                         OR trbmasuk.sisa_bayar LIKE '%$search%'
                         OR trbmasuk.carabayar LIKE '%$search%')");
 
+        $querycount->execute();
         $datacount = $querycount->fetch(PDO::FETCH_ASSOC);
         $totalFiltered = $datacount['jumlah'];
     }
@@ -65,6 +67,7 @@ if ($_GET['action'] == "table_data") {
     // $totalNilaiBarang = 0;
     if (!empty($query)) {
         $no = $start + 1;
+        $query->execute();
         while ($value = $query->fetch(PDO::FETCH_ASSOC)) {
             // for column
             $nestedData['no'] = $no;

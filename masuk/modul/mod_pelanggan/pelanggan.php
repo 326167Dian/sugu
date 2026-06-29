@@ -1,26 +1,8 @@
 <?php
 
-date_default_timezone_set('Asia/Jakarta');
-
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-
-function format_pelanggan_local_datetime($datetime)
-{
-	if (empty($datetime) || $datetime === '0000-00-00 00:00:00') {
-		return '-';
-	}
-
-	try {
-		$jakarta_timezone = new DateTimeZone('Asia/Jakarta');
-		$local_datetime = new DateTime($datetime, $jakarta_timezone);
-
-		return $local_datetime->format('d-m-Y H:i:s');
-	} catch (Exception $e) {
-		return $datetime;
-	}
-}
 
 // session_start(); // Sudah aktif di media_admin.php
 if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
@@ -30,6 +12,21 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
 	$aksi = "modul/mod_pelanggan/aksi_pelanggan.php";
 	$aksi_pelanggan = "masuk/modul/mod_pelanggan/aksi_pelanggan.php";
+	if (!function_exists('get_riwayat_obat_table_name')) {
+		function get_riwayat_obat_table_name($db)
+		{
+			$candidates = array('riwayat_pelanggan_obat', 'tabel_riwayat_pelanggan_obat');
+			foreach ($candidates as $tableName) {
+				$stmt = $db->prepare("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? LIMIT 1");
+				$stmt->execute(array($tableName));
+				if ($stmt->fetchColumn() !== false) {
+					return $tableName;
+				}
+			}
+
+			return '';
+		}
+	}
 	switch (isset($_GET['act']) ? $_GET['act'] : '') {
 			// Tampil Siswa
 		default:
@@ -57,6 +54,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 					<a class='btn btn-info btn-flat' href='?module=homecare' target='_blank'>HOME CARE </a>
 					<a class='btn btn-info btn-flat' href='?module=swamedikasi' target='_blank'>SWAMEDIKASI </a>
 					<a class='btn btn-info btn-flat' href='?module=cekdarah' target='_blank'>CEK DARAH</a>
+					<a class='btn btn-info btn-flat' data-toggle='modal' data-target='#ModalPoin' href='#'>POIN MEMBER</a>
 					<br><br>
 
 
@@ -196,12 +194,8 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 			$stmt = $db->prepare("SELECT * FROM pelanggan WHERE id_pelanggan = ?");
 			$stmt->execute([$_GET['id']]);
 			$p = $stmt->fetch(PDO::FETCH_ASSOC);
-			if (!$p) {
-				$_SESSION['flash'] = "<div class='alert alert-danger'>Data pelanggan tidak ditemukan.</div>";
-				header('location:media_admin.php?module=pelanggan');
-				exit;
-			}
-			$has_riwayat_obat_table = ($db->query("SHOW TABLES LIKE 'riwayat_pelanggan_obat'")->rowCount() > 0);
+			$riwayat_obat_table = get_riwayat_obat_table_name($db);
+			$has_riwayat_obat_table = ($riwayat_obat_table !== '');
 			// Generate CSRF token for riwayat actions if not set
 			if (!isset($_SESSION['csrf_pelanggan']) || empty($_SESSION['csrf_pelanggan'])) {
 				if (function_exists('random_bytes')) {
@@ -283,13 +277,6 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 					</div>
 				</div>
 				<div class='form-group'>
-					<label class='col-sm-2 control-label'>Foto</label>
-					<div class='col-sm-4'>
-						<input type='file' name='foto' class='form-control' accept='image/*'>
-						<p class='help-block' style='margin-bottom:0;'>Format: jpg, jpeg, png, gif, webp (maks 2MB)</p>
-					</div>
-				</div>
-				<div class='form-group'>
 					<label class='col-sm-2 control-label'>Saran konsultasi</label>
 					<div class='col-sm-4'>
 						<textarea name='followup' class='form-control' rows='3'></textarea>
@@ -338,10 +325,8 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 					<tr>
 						<th>No</th>
 						<th>Tanggal</th>
-						<th>Admin Input</th>
 						<th>Diagnosa</th>
 						<th>Tindakan</th>
-						<th>Foto</th>
 						<th>Saran Konsultasi</th>
 						<th>Tgl Follow Up</th>
 						<th>Follow Up oleh</th>
@@ -354,14 +339,14 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 			$tgl_from = isset($_GET['tgl_from'])? $_GET['tgl_from']:'';
 			$tgl_to = isset($_GET['tgl_to'])? $_GET['tgl_to']:date('Y-m-d',time());
 			
-			$stmt = $db->prepare("SELECT rp.*, a.nama_lengkap AS nama_admin_input FROM riwayat_pelanggan rp LEFT JOIN admin a ON a.id_admin = rp.id_admin WHERE rp.id_pelanggan = ? AND rp.tgl BETWEEN ? AND ? ORDER BY rp.tgl DESC");
+			$stmt = $db->prepare("SELECT * FROM riwayat_pelanggan WHERE id_pelanggan = ? AND tgl BETWEEN ? AND ? ORDER BY tgl DESC");
 			$stmt->execute([$_GET['id'], $tgl_from, $tgl_to]);
 			$riwayat = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			$riwayat_ids = array_map(function($x){ return (int)$x['id']; }, $riwayat);
 			$obat_map = [];
 			if ($has_riwayat_obat_table && count($riwayat_ids) > 0) {
 				$in_placeholders = implode(',', array_fill(0, count($riwayat_ids), '?'));
-				$obat_stmt = $db->prepare("SELECT id_riwayat, kd_barang, nm_barang, aturan_pakai FROM riwayat_pelanggan_obat WHERE id_riwayat IN ($in_placeholders) ORDER BY id ASC");
+				$obat_stmt = $db->prepare("SELECT id_riwayat, kd_barang, nm_barang, aturan_pakai FROM " . $riwayat_obat_table . " WHERE id_riwayat IN ($in_placeholders) ORDER BY id ASC");
 				$obat_stmt->execute($riwayat_ids);
 				while ($ob = $obat_stmt->fetch(PDO::FETCH_ASSOC)) {
 					$txt = htmlspecialchars($ob['nm_barang']);
@@ -379,35 +364,20 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 				$edit_link = "?module=pelanggan&act=edit_riwayat&id=$_GET[id]&idr=".$rw['id'];
 				$delete_link = $aksi."?module=pelanggan&act=hapus_riwayat&id=".$rw['id']."&token=".$token;
 				$obat_tindakan = isset($obat_map[$rw['id']]) ? implode("<br>", $obat_map[$rw['id']]) : htmlspecialchars($rw['tindakan']);
-				$fotoCell = '-';
-				if (!empty($rw['foto'])) {
-					$fotoNama = htmlspecialchars($rw['foto']);
-					$fotoCell = "<a href='#' onclick=\"showImgModal('images/".$fotoNama."')\" style='cursor:zoom-in;'><img src='images/".$fotoNama."' alt='Foto Riwayat' style='max-width:80px; max-height:80px; border:1px solid #ddd;'></a>";
-				}
-				$tgl_followup = (isset($rw['tgl_followup']))? $rw['tgl_followup']:'<button type="button" data-id="'.$rw['id'].'" class="tgl_followup btn btn-danger">Klik untuk followup</button>';
-				$created_at_local = format_pelanggan_local_datetime($rw['created_at']);
-				$nama_admin_input = '-';
-				if (!empty($rw['nama_admin_input'])) {
-					$nama_admin_input = htmlspecialchars($rw['nama_admin_input']);
-				} elseif (isset($rw['id_admin']) && $rw['id_admin'] !== '' && $rw['id_admin'] !== null) {
-					$nama_admin_input = 'ID: ' . (int)$rw['id_admin'];
-				}
-				$followup_by_cell = htmlspecialchars(isset($rw['followup_by']) ? $rw['followup_by'] : '');
-				if (!empty($rw['foto2'])) {
-					$foto2_nama = htmlspecialchars($rw['foto2']);
-					$followup_by_cell .= "<br><a href='#' onclick=\"showImgModal('images/".$foto2_nama."')\" style='cursor:zoom-in;'><img src='images/".$foto2_nama."' alt='Foto Follow Up' style='max-width:90px;max-height:90px;border:1px solid #ddd;margin-top:4px;'></a>";
-				}
+				$has_tgl_followup = isset($rw['tgl_followup']) && $rw['tgl_followup'] !== '' && $rw['tgl_followup'] !== '0000-00-00 00:00:00';
+				$tgl_followup = $has_tgl_followup
+					? htmlspecialchars((string)$rw['tgl_followup'])
+					: '<button type="button" data-id="'.$rw['id'].'" class="btn btn-danger btn-followup">Klik untuk follow up</button>';
+				$followup_by = isset($rw['followup_by']) && $rw['followup_by'] !== '' ? htmlspecialchars((string)$rw['followup_by']) : '-';
 				echo "<tr>
 					<td>$no</td>
 					<td>$rw[tgl]</td>
-					<td>$nama_admin_input</td>
 					<td>$rw[diagnosa]</td>
 					<td>$obat_tindakan</td>
-					<td>$fotoCell</td>
 					<td>$rw[followup]</td>
 					<td>$tgl_followup</td>
-					<td>$followup_by_cell</td>
-					<td>$created_at_local</td>
+					<td>$followup_by</td>
+					<td>$rw[created_at]</td>
 					<td>
 						<a href='".$edit_link."' title='EDIT' class='btn btn-warning btn-xs'>EDIT</a>
 						<a href=javascript:confirmdelete('".$delete_link."') title='HAPUS' class='btn btn-danger btn-xs'>HAPUS</a>
@@ -430,10 +400,11 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 			}
 			$rw = $stmt->fetch(PDO::FETCH_ASSOC);
 			$token = isset($_SESSION['csrf_pelanggan']) ? $_SESSION['csrf_pelanggan'] : '';
-			$has_riwayat_obat_table = ($db->query("SHOW TABLES LIKE 'riwayat_pelanggan_obat'")->rowCount() > 0);
+			$riwayat_obat_table = get_riwayat_obat_table_name($db);
+			$has_riwayat_obat_table = ($riwayat_obat_table !== '');
 			$riwayat_obat = [];
 			if ($has_riwayat_obat_table) {
-				$riwayat_obat_stmt = $db->prepare("SELECT kd_barang, nm_barang, aturan_pakai FROM riwayat_pelanggan_obat WHERE id_riwayat = ? ORDER BY id ASC");
+				$riwayat_obat_stmt = $db->prepare("SELECT kd_barang, nm_barang, aturan_pakai FROM " . $riwayat_obat_table . " WHERE id_riwayat = ? ORDER BY id ASC");
 				$riwayat_obat_stmt->execute([$rw['id']]);
 				$riwayat_obat = $riwayat_obat_stmt->fetchAll(PDO::FETCH_ASSOC);
 			}
@@ -454,7 +425,6 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 			<form method=POST action='$aksi?module=pelanggan&act=update_riwayat' enctype='multipart/form-data' class='form-horizontal'>
 				<input type=hidden name='id_pelanggan' value='$_GET[id]'>
 				<input type=hidden name='id_riwayat' value='".$rw['id']."'>
-				<input type=hidden name='foto_lama' value='".htmlspecialchars(isset($rw['foto']) ? $rw['foto'] : '')."'>
 				<input type=hidden name='token' value='".$token."'>
 				<div class='form-group'>
 					<label class='col-sm-2 control-label'>Tanggal</label>
@@ -524,17 +494,6 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 			echo "
 						</div>
 						<button type='button' id='btn-tambah-obat-edit' class='btn btn-default btn-sm'>+Tambah Obat</button>
-					</div>
-				</div>
-				<div class='form-group'>
-					<label class='col-sm-2 control-label'>Foto</label>
-					<div class='col-sm-4'>
-						<input type='file' name='foto' class='form-control' accept='image/*'>
-						<p class='help-block' style='margin-bottom:0;'>Kosongkan jika foto tidak diganti.</p>";
-			if (!empty($rw['foto'])) {
-				echo "<div style='margin-top:8px;'><a href='#' onclick=\"showImgModal('images/".htmlspecialchars($rw['foto'])."')\" style='cursor:zoom-in;'><img src='images/".htmlspecialchars($rw['foto'])."' alt='Foto Riwayat' style='max-width:100px; max-height:100px; border:1px solid #ddd;'></a></div>";
-			}
-			echo "
 					</div>
 				</div>
 				<div class='form-group'>
@@ -678,8 +637,85 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 </div>
 <!-- end modal item -->
 
+<!-- modal poin -->
+<div id="ModalPoin" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Input Ketentuan Poin</h4>
+            </div>
+            <div class="modal-body ">
+                <?php
+                    $stmt = $db->prepare("SELECT * FROM setheader");
+                	$stmt->execute();
+                	$r = $stmt->fetch(PDO::FETCH_ASSOC);
+                	
+                	$stmt_poin = $db->prepare("SELECT * FROM poin_pelanggan");
+                	$stmt_poin->execute();
+                	$rp = $stmt_poin->fetch(PDO::FETCH_ASSOC);
+                	
+                	$nm_outlet      = ($rp)? $rp['nm_outlet'] : $r['satu'];
+                	$is_outlet      = ($rp)? (($rp['is_outlet']=='ya')?'checked':''):'';
+                	$is_kelipatan   = ($rp)? (($rp['is_kelipatan']=='ya')?'checked':''):'';
+                	$min_penjualan  = ($rp)? $rp['min_penjualan']:'';
+                	$poin_pelanggan = ($rp)? $rp['poin_pelanggan']:'';
+                	$id_poin        = ($rp)? $rp['id_poin']:'';
+                ?>
+                <form method="POST" action="<?=$aksi?>?module=pelanggan&act=input_poin">
+                    <div class="form-group">
+                        <label for="nm_outlet">Nama Outlet</label>
+                        <input type="text" class="form-control" name="nm_outlet" id="nm_outlet" placeholder="Nama Outlet" value="<?=$nm_outlet?>">
+                        <input type="hidden" name="id_poin" id="id_poin" value="<?=$id_poin?>">
+                     </div>
+  
+                    <div class="checkbox">
+                        <label>
+                          <input type="checkbox" name="is_outlet" id="is_outlet" <?=$is_outlet?>> Gunakan Nama Outlet Pada Kartu Member
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="min_penjualan">Minimal Penjualan</label>
+                        <div class="form-group">
+                            <div class="input-group">
+                                <div class="input-group-addon">Rp</div>
+                                <input type="number" class="form-control" id="min_penjualan" name="min_penjualan" placeholder="Amount" value="<?=$min_penjualan?>">
+                                <div class="input-group-addon">.00</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox">
+                        <label>
+                          <input type="checkbox" name="is_kelipatan" id="is_kelipatan" <?=$is_kelipatan?>> Berlaku kelipatan
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="poin_member">Poin yang diberikan</label>
+                        <div class="form-group">
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="poin_member" name="poin_member" placeholder="Amount" value="<?=$poin_pelanggan?>">
+                                <div class="input-group-addon">Poin</div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <button type="submit" class="btn btn-success">Submit</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Tutup</button>
+                </form>
+            </div>
+            <!--<div class="modal-footer">-->
+            <!--    <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>-->
+            <!--</div>-->
+        </div>
+    </div>
+</div>
+<!-- end modal poin -->
 
 <script>
+    
     /* =========================
        Modal Item Pop Up
     ========================= */
@@ -1299,54 +1335,44 @@ $(document).ready(function() {
 
 // 	bindObatAutocomplete('body');
 
-    $(document).on('click', '.tgl_followup', function() {
+	$(document).on('click', '.btn-followup', function() {
 
-        var id = $(this).data('id');
-        $.ajax({
-            url: "modul/mod_pelanggan/updateFollowUp.php",
-            type: "POST",
-            dataType: "json",
-            data:{
-                id: id
-            },
-            success:function(data){
-                if(data.status === 'success'){
-                    window.location.reload();
-                }
-            }
-        });
-    });
+		var $button = $(this);
+		var id = $button.data('id');
+
+		if (!id) {
+			alert('ID follow up tidak ditemukan.');
+			return;
+		}
+
+		$button.prop('disabled', true).text('Menyimpan...');
+
+		$.ajax({
+			url: "modul/mod_pelanggan/updateFollowUp.php",
+			type: "POST",
+			dataType: "json",
+			data:{
+				id: id
+			},
+			success:function(data){
+				if(data && data.status === 'success'){
+					window.location.reload();
+					return;
+				}
+
+				$button.prop('disabled', false).text('Klik untuk follow up');
+				alert(data && data.message ? data.message : 'Gagal menyimpan follow up.');
+			},
+			error:function(xhr){
+				$button.prop('disabled', false).text('Klik untuk follow up');
+				alert('Gagal menghubungi server follow up.');
+			}
+		});
+	});
     
     
 });
-
-function showImgModal(src) {
-    document.getElementById('imgModalSrc').src = src;
-    if ($.fn && typeof $.fn.modal === 'function') {
-        $('#imgViewerModal').modal('show');
-    } else {
-        window.open(src, '_blank');
-    }
-}
 </script>
-
-<div class="modal fade" id="imgViewerModal" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-lg" role="document" style="max-width:90vw;">
-    <div class="modal-content">
-      <div class="modal-header" style="padding:10px 15px;">
-        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-        <h4 class="modal-title">Lihat Foto</h4>
-      </div>
-      <div class="modal-body" style="text-align:center;padding:10px;">
-        <img id="imgModalSrc" src="" alt="Foto" style="max-width:100%;max-height:80vh;border-radius:4px;">
-      </div>
-      <div class="modal-footer" style="padding:10px 15px;">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Kembali</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <style>
 .typeahead.dropdown-menu > li.active > a,
 ul.typeahead.dropdown-menu > li.active > a,

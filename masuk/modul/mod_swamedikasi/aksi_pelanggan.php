@@ -63,59 +63,6 @@ function build_riwayat_obat_items($db, $obatKds, $aturanPakaiList){
 $module=$_GET['module'];
 $act=$_GET['act'];
 
-// ---- helpers foto riwayat ----
-function sw_riwayat_image_dir()
-{
-    return realpath(__DIR__ . '/../../') . DIRECTORY_SEPARATOR . 'images';
-}
-
-function sw_upload_foto($fileInput, $maxBytes = 2097152)
-{
-    if (!isset($_FILES[$fileInput])) {
-        return ['ok' => true, 'filename' => ''];
-    }
-    $file = $_FILES[$fileInput];
-    if (!isset($file['error']) || $file['error'] === UPLOAD_ERR_NO_FILE) {
-        return ['ok' => true, 'filename' => ''];
-    }
-    if ($file['error'] !== UPLOAD_ERR_OK) {
-        return ['ok' => false, 'error' => 'Upload gagal.'];
-    }
-    if ($file['size'] > $maxBytes) {
-        return ['ok' => false, 'error' => 'Ukuran foto melebihi batas (' . round($maxBytes / 1048576, 0) . 'MB).'];
-    }
-    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    if (!in_array($ext, ['jpg','jpeg','png','gif','webp'], true)) {
-        return ['ok' => false, 'error' => 'Format foto tidak didukung.'];
-    }
-    $suffix = function_exists('random_bytes') ? bin2hex(random_bytes(4)) : str_replace('.', '', uniqid('', true));
-    $safeName = 'riwayat_' . date('Ymd_His') . '_' . $suffix . '.' . $ext;
-    $targetDir = sw_riwayat_image_dir();
-    if ($targetDir === false) {
-        return ['ok' => false, 'error' => 'Folder images tidak ditemukan.'];
-    }
-    if (!move_uploaded_file($file['tmp_name'], $targetDir . DIRECTORY_SEPARATOR . $safeName)) {
-        return ['ok' => false, 'error' => 'Gagal menyimpan file.'];
-    }
-    return ['ok' => true, 'filename' => $safeName];
-}
-
-function sw_delete_foto($filename)
-{
-    $filename = trim((string) $filename);
-    if ($filename === '') return;
-    $path = sw_riwayat_image_dir() . DIRECTORY_SEPARATOR . $filename;
-    if (is_file($path)) @unlink($path);
-}
-
-function sw_ensure_column($db, $column, $definition)
-{
-    $stmt = $db->query("SHOW COLUMNS FROM riwayat_pelanggan LIKE '$column'");
-    if ($stmt && $stmt->rowCount() > 0) return;
-    $db->exec("ALTER TABLE riwayat_pelanggan ADD COLUMN $column $definition");
-}
-// ---- end helpers ----
-
 // Input admin
 if ($module=='pelanggan' AND $act=='input_pelanggan'){
 
@@ -313,58 +260,11 @@ elseif ($module=='pelanggan' AND $act=='update_riwayat'){
         exit;
     }
 
-    // pastikan kolom foto dan foto2 ada sebelum masuk transaksi
-    sw_ensure_column($db, 'foto',  "VARCHAR(255) NULL AFTER followup");
-    sw_ensure_column($db, 'foto2', "VARCHAR(255) NULL AFTER foto");
-
     try {
         $db->beginTransaction();
 
-        // --- proses foto ---
-        $foto_lama  = isset($_POST['foto_lama'])  ? trim($_POST['foto_lama'])  : '';
-        $foto2_lama = isset($_POST['foto2_lama']) ? trim($_POST['foto2_lama']) : '';
-
-        $uploadFoto = sw_upload_foto('foto', 2 * 1024 * 1024);
-        if (!$uploadFoto['ok']) {
-            $db->rollBack();
-            $_SESSION['flash'] = "<div class='alert alert-danger'>" . htmlspecialchars($uploadFoto['error']) . "</div>";
-            header('location:../../media_admin.php?module='.$module.'&act=edit_riwayat&idr='.$id_r);
-            exit;
-        }
-        $uploadFoto2 = sw_upload_foto('foto2', 1 * 1024 * 1024);
-        if (!$uploadFoto2['ok']) {
-            $db->rollBack();
-            $_SESSION['flash'] = "<div class='alert alert-danger'>" . htmlspecialchars($uploadFoto2['error']) . "</div>";
-            header('location:../../media_admin.php?module='.$module.'&act=edit_riwayat&idr='.$id_r);
-            exit;
-        }
-
-        // tentukan nilai foto baru
-        $hapus_foto  = isset($_POST['hapus_foto'])  && $_POST['hapus_foto']  === '1';
-        $hapus_foto2 = isset($_POST['hapus_foto2']) && $_POST['hapus_foto2'] === '1';
-
-        if ($uploadFoto['filename'] !== '') {
-            $foto_baru = $uploadFoto['filename'];
-            sw_delete_foto($foto_lama);
-        } elseif ($hapus_foto) {
-            $foto_baru = '';
-            sw_delete_foto($foto_lama);
-        } else {
-            $foto_baru = $foto_lama;
-        }
-
-        if ($uploadFoto2['filename'] !== '') {
-            $foto2_baru = $uploadFoto2['filename'];
-            sw_delete_foto($foto2_lama);
-        } elseif ($hapus_foto2) {
-            $foto2_baru = '';
-            sw_delete_foto($foto2_lama);
-        } else {
-            $foto2_baru = $foto2_lama;
-        }
-
-        $stmt = $db->prepare("UPDATE riwayat_pelanggan SET tgl = ?, diagnosa = ?, tindakan = ?, followup = ?, foto = ?, foto2 = ? WHERE id = ?");
-        $stmt->execute([$tgl, $diagnosa, $tindakan, $followup, $foto_baru ?: null, $foto2_baru ?: null, $id_r]);
+        $stmt = $db->prepare("UPDATE riwayat_pelanggan SET tgl = ?, diagnosa = ?, tindakan = ?, followup = ? WHERE id = ?");
+        $stmt->execute([$tgl, $diagnosa, $tindakan, $followup, $id_r]);
 
         $db->prepare("DELETE FROM riwayat_pelanggan_obat WHERE id_riwayat = ?")->execute([$id_r]);
 

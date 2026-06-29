@@ -154,7 +154,6 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                                     <th>Opsi Harga</th>
                                     <th class="text-center">Harga Jual</th>
                                     <th class="text-center">Sub Total</th>
-                                    <th class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                 
@@ -166,6 +165,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                                     <td>
                                         <!--<div class='row-obat'>-->
                                             <div class='autocomplete-wrapper'>
+                                                <input type='hidden' name='obat_id[]' class='obat-id'>
                                                 <input type='hidden' name='obat_kd[]' class='obat-kd'>
         							            <input type='text' name='obat_nama[]' class='form-control obat-nama' placeholder='Nama obat (ketik lalu Enter)'>
                                                 <div class='autocomplete-panel'></div>
@@ -191,9 +191,6 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                                     </td>
                                     <td>
                                         <input type="text" name="subtotal[]" class="form-control subtotal" readonly style="text-align:right">
-                                    </td>
-                                    <td class="text-center">
-                                        <button type="button" class="btn-remove-row" title="Hapus item" style="border:0; background:transparent; color:#ff0000; font-weight:bold; font-size:22px; line-height:1; padding:0 6px;">x</button>
                                     </td>
                 
                                     
@@ -256,6 +253,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                             </td>
                             <td>
                                 <div class='autocomplete-wrapper'>
+                                    <input type='hidden' name='obat_id[]' class='obat-id'>
                                     <input type='hidden' name='obat_kd[]' class='obat-kd'>
         							<input type='text' name='obat_nama[]' class='form-control obat-nama' placeholder='Nama obat (ketik lalu Enter)'>
                                     <div class='autocomplete-panel'></div>
@@ -283,37 +281,14 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                             <td>
                                 <input type="text" name="subtotal[]" class="form-control subtotal" readonly style="text-align:right">
                             </td>
-                            <td class="text-center">
-                                <button type="button" class="btn-remove-row" title="Hapus item" style="border:0; background:transparent; color:#ff0000; font-weight:bold; font-size:22px; line-height:1; padding:0 6px;">x</button>
-                            </td>
                         </tr>
                         `);
                 
                     });
-
-                $(document).on('click', '.btn-remove-row', function(){
-                    var totalRows = $('#dynamic_field tr').length;
-
-                    if (totalRows <= 1) {
-                        var $row = $('#dynamic_field tr').first();
-                        $row.find('.obat-kd').val('');
-                        $row.find('.obat-nama').val('');
-                        $row.find('.qty').val('');
-                        $row.find('.satuan').val('');
-                        $row.find('.opsiharga').val('harga1');
-                        $row.find('.hrgjual').val('');
-                        $row.find('.subtotal').val('');
-                    } else {
-                        $(this).closest('tr').remove();
-                    }
-
-                    $('#dynamic_field tr').each(function(index){
-                        $(this).find('#nomor').text((index + 1) + '.');
-                    });
-
-                    var totalItem = hitungTotal();
-                    $('#total_item').val(totalItem);
-                    document.getElementById('total').innerHTML = formatRupiah(totalItem);
+            
+                $(document).on('click', '.btn_remove', function(){
+                    var button_id = $(this).attr("id");
+                    $('#row'+button_id).remove();
                 });
             
             });
@@ -399,6 +374,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                                     </td>
                                     <td>
                                         <div class='autocomplete-wrapper'>
+                                            <input type='hidden' name='obat_id[]' class='obat-id' value="<?=$r1['id_barang']?>">
                                             <input type='hidden' name='obat_kd[]' class='obat-kd' value="<?=$r1['kd_barang']?>">
         							        <input type='text' name='obat_nama[]' class='form-control obat-nama' placeholder='Nama obat (ketik lalu Enter)' value="<?=$r1['nm_barang']?>">
                                             <div class='autocomplete-panel'></div>
@@ -497,6 +473,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                             </td>
                             <td>
                                 <div class='autocomplete-wrapper'>
+                                    <input type='hidden' name='obat_id[]' class='obat-id'>
                                     <input type='hidden' name='obat_kd[]' class='obat-kd'>
         							<input type='text' name='obat_nama[]' class='form-control obat-nama' placeholder='Nama obat (ketik lalu Enter)'>
                                     <div class='autocomplete-panel'></div>
@@ -617,6 +594,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                                     </td>
                                     <td>
                                         <div class='autocomplete-wrapper'>
+                                            <input type='hidden' name='obat_id[]' class='obat-id' value="<?=$r1['id_barang']?>" disabled>
                                             <input type='hidden' name='obat_kd[]' class='obat-kd' value="<?=$r1['kd_barang']?>" disabled>
         							        <input type='text' name='obat_nama[]' class='form-control obat-nama' placeholder='Nama obat (ketik lalu Enter)' value="<?=$r1['nm_barang']?>" disabled>
                                             <div class='autocomplete-panel'></div>
@@ -700,6 +678,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                             </td>
                             <td>
                                 <div class='autocomplete-wrapper'>
+                                    <input type='hidden' name='obat_id[]' class='obat-id'>
                                     <input type='hidden' name='obat_kd[]' class='obat-kd'>
         							<input type='text' name='obat_nama[]' class='form-control obat-nama' placeholder='Nama obat (ketik lalu Enter)'>
                                     <div class='autocomplete-panel'></div>
@@ -916,6 +895,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                         // console.log(item)});
                         var html = `
                         <div class="autocomplete-item"
+                             data-id="${item.id_barang}"
                              data-kode="${item.kd_barang}"
                              data-nama="${item.nm_barang}"
                              data-satuan="${item.sat_barang}"
@@ -1028,6 +1008,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
     $(document).on("click",".autocomplete-item",function(){
     
         var nama    = $(this).data("nama");
+        var id      = $(this).data("id");
         var kode    = $(this).data("kode");
         var satuan  = $(this).data("satuan");
         var hrgjual = $(this).data("hrgjual");
@@ -1035,6 +1016,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         var $row = $(this).closest(".row-obat");
     
         $row.find(".obat-nama").val(nama);
+        $row.find(".obat-id").val(id);
         $row.find(".obat-kd").val(kode);
     
         $row.find(".autocomplete-panel").hide();

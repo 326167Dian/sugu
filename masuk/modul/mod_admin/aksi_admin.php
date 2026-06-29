@@ -285,14 +285,15 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 	}
 	// Update admin
 	elseif ($module == 'admin' and $act == 'update_admin') {
+	    
 		if (empty($_POST['password'])) {
-
-			$usernamenya = $_POST['username'];
+           
+			$usernamenya = trim($_POST['username']);
 
 			if (!preg_match("/^[a-zA-Z0-9]*$/", $usernamenya)) {
 				echo "<script type='text/javascript'>alert('Ubah Username hanya huruf dan angka yang diijinkan, dan tidak boleh menggunakan spasi ...!');history.go(-1);</script>";
 			} else {
-
+			    
 				$stmt = $db->prepare("UPDATE admin SET username = ?,
                                 nama_lengkap = ?,
                                 no_telp = ?,
