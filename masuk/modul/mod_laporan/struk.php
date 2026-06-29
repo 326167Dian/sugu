@@ -59,23 +59,68 @@ if (!$r1) {
     ];
 }
 
-$detailQueryForPaper = $db->prepare("SELECT nmbrg_dtrkasir, resep FROM trkasir_detail WHERE kd_trkasir=? ORDER BY id_dtrkasir ASC");
+$detailQueryForPaper = $db->prepare("SELECT * FROM trkasir_detail WHERE kd_trkasir=? ORDER BY id_dtrkasir ASC");
 $detailQueryForPaper->execute([$kd_trkasir]);
 $detailRowsForPaper = $detailQueryForPaper->fetchAll(PDO::FETCH_ASSOC);
 
-$ukuran1 = 20.7; //setingan kertas
-$tambahukuran = 0;
+// Siapkan baris cetak agar bundle digabung per kd_bundle, resep digabung per kd_transaksi
+$printRows = [];
+$bundleMap = [];
+$totalresep = 0;
+$adaResep = false;
+
 foreach ($detailRowsForPaper as $rowPaper) {
     $isResepLine = isset($rowPaper['resep']) && strtoupper((string)$rowPaper['resep']) === 'YA';
     if ($isResepLine) {
-        $tambahukuran += 0.6;
+        $adaResep = true;
+        $totalresep += (float)$rowPaper['hrgttl_dtrkasir'];
         continue;
     }
 
-    $wrappedName = wrapReceiptText(isset($rowPaper['nmbrg_dtrkasir']) ? $rowPaper['nmbrg_dtrkasir'] : '', 35);
+    $kdBundle = isset($rowPaper['kd_bundle']) ? trim((string)$rowPaper['kd_bundle']) : '';
+    $nmBundle = isset($rowPaper['nm_bundle']) ? trim((string)$rowPaper['nm_bundle']) : '';
+
+    if ($kdBundle !== '' && $nmBundle !== '') {
+        if (!isset($bundleMap[$kdBundle])) {
+            $bundleMap[$kdBundle] = [
+                'type' => 'bundle',
+                'nm' => $nmBundle,
+                'qty' => 1,
+                'harga' => 0,
+                'jumlah' => 0,
+                'sat' => ''
+            ];
+        }
+        $bundleMap[$kdBundle]['harga'] += (float)$rowPaper['hrgttl_dtrkasir'];
+        $bundleMap[$kdBundle]['jumlah'] += (float)$rowPaper['hrgttl_dtrkasir'];
+        continue;
+    }
+
+    $printRows[] = [
+        'type' => 'item',
+        'nm' => isset($rowPaper['nmbrg_dtrkasir']) ? $rowPaper['nmbrg_dtrkasir'] : '',
+        'qty' => isset($rowPaper['qty_dtrkasir']) ? $rowPaper['qty_dtrkasir'] : 0,
+        'sat' => isset($rowPaper['sat_dtrkasir']) ? $rowPaper['sat_dtrkasir'] : '',
+        'harga' => isset($rowPaper['hrgjual_dtrkasir']) ? $rowPaper['hrgjual_dtrkasir'] : 0,
+        'jumlah' => isset($rowPaper['hrgttl_dtrkasir']) ? $rowPaper['hrgttl_dtrkasir'] : 0
+    ];
+}
+
+// Sisipkan baris bundle sebagai 1 baris per kd_bundle
+foreach ($bundleMap as $bundleRow) {
+    $printRows[] = $bundleRow;
+}
+
+$ukuran1 = 20.7; //setingan kertas
+$tambahukuran = 0;
+foreach ($printRows as $rowPaper) {
+    $wrappedName = wrapReceiptText(isset($rowPaper['nm']) ? $rowPaper['nm'] : '', 35);
     $lineCount = max(1, substr_count($wrappedName, "\n") + 1);
     // Tinggi nama + detail qty/harga + jarak antar item.
     $tambahukuran += ($lineCount * 0.24) + 0.52;
+}
+if ($adaResep) {
+    $tambahukuran += 0.6;
 }
 $tinggikertas = $ukuran1 + $tambahukuran;
 
@@ -161,40 +206,25 @@ $pdf->Cell(1.5, 0.5, 'Jumlah', 0, 1, 'R');
 $pdf->SetX(0.2);
 $pdf->SetFont('Arial', 'B', 8);
 
-$no = 1;
-
-$query = $db->prepare("SELECT * FROM trkasir_detail WHERE kd_trkasir=?
-	                    ORDER BY id_dtrkasir ASC");
-$query->execute([$kd_trkasir]);
-
 $st = [];
-$totalresep = 0;
-$adaResep = false;
+foreach ($detailRowsForPaper as $rowAll) {
+    $st[] = $rowAll['hrgttl_dtrkasir'];
+}
 
-while ($r2 = $query->fetch(PDO::FETCH_ASSOC)) {
-    $st[] = $r2['hrgttl_dtrkasir'];
-
-    if (isset($r2['resep']) && $r2['resep'] === 'YA') {
-        $adaResep = true;
-        $totalresep += $r2['hrgjual_dtrkasir'];
-        continue;
-    }
-
+foreach ($printRows as $pr) {
     $pdf->SetX(0.2);
 
-    $namaBarangWrapped = wrapReceiptText($r2['nmbrg_dtrkasir'], 32);
+    $namaBarangWrapped = wrapReceiptText($pr['nm'], 32);
     $pdf->SetFont('Arial', 'B', 8);
     $pdf->MultiCell(4.6, 0.24, $namaBarangWrapped, 0, 'L');
 
     $pdf->SetX(0.2);
     $pdf->SetFont('Arial', 'B', 8);
-    $pdf->Cell(1.2, 0.34, $r2['qty_dtrkasir'], 0, 0, 'R');
-    $pdf->Cell(0.7, 0.34, $r2['sat_dtrkasir'], 0, 0, 'C');
-    $pdf->Cell(1.3, 0.34, format_rupiah($r2['hrgjual_dtrkasir']), 0, 0, 'R');
-    $pdf->Cell(1.4, 0.34, format_rupiah($r2['hrgttl_dtrkasir']), 0, 1, 'R');
+    $pdf->Cell(1.2, 0.34, $pr['qty'], 0, 0, 'R');
+    $pdf->Cell(0.7, 0.34, isset($pr['sat']) ? $pr['sat'] : '', 0, 0, 'C');
+    $pdf->Cell(1.3, 0.34, format_rupiah($pr['harga']), 0, 0, 'R');
+    $pdf->Cell(1.4, 0.34, format_rupiah($pr['jumlah']), 0, 1, 'R');
     $pdf->Ln(0.12);
-
-    $no++;
 }
 
 if ($adaResep) {
@@ -204,7 +234,6 @@ if ($adaResep) {
     $pdf->Cell(1, 0.4, '', 0, 0, 'C');
     $pdf->Cell(1, 0.4, format_rupiah($totalresep), 0, 0, 'R');
     $pdf->Cell(1.5, 0.4, format_rupiah($totalresep), 0, 1, 'R');
-    
     $pdf->Ln(0.1);
 }
 
