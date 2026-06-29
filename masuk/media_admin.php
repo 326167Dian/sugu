@@ -408,7 +408,7 @@ if ($_SESSION['login'] == 0) {
 									<?php if ($_SESSION['neraca'] == "Y") { ?><li><a href="?module=neraca"><i class='glyphicon glyphicon-print'></i> Neraca Laba Rugi</a></li><?php } ?>
 									<?php if ($_SESSION['level'] == "pemilik" and $_SESSION['komisi'] == "Y") { ?><li><a href="?module=lapkomisi"><i class='glyphicon glyphicon-print'></i> Komisi Pegawai</a></li><?php } ?>
 									<?php if ($_SESSION['level'] == "pemilik") { ?><li><a href="?module=evaluasi"><i class='glyphicon glyphicon-print'></i> Evaluasi Pegawai</a></li><?php } ?>
-									<?php if ($_SESSION['level'] == "pemilik") { ?><li><a href="?module=lapstokopname"><i class='glyphicon glyphicon-print'></i> Stok Opname</a></li><?php } ?>
+									<?php if ($_SESSION['level'] == "pemilik" || $_SESSION['level'] == "petugas") { ?><li><a href="?module=lapstokopname"><i class='glyphicon glyphicon-print'></i> Stok Opname</a></li><?php } ?>
 								</ul>
 							</li>
 
