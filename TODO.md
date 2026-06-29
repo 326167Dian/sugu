@@ -1,4 +1,8 @@
-- [ ] Tambah aksi delete item detail pada halaman tambah bundle (act=tambah) di `masuk/modul/mod_bundle/bundle.php`
-- [ ] Lengkapi script sekitar baris 157 agar tombol delete detail item berfungsi sesuai skema UI (ikon/tombol X merah per baris)
-- [ ] Pastikan reindex nomor baris dan hitung ulang total setelah item dihapus
-- [ ] Verifikasi tidak menghapus seluruh baris terakhir, tetapi reset input saat tinggal satu baris
+# TODO Perbaikan Hapus Transaksi Kasir
+
+- [ ] Review blok `act=hapus` di `masuk/modul/mod_trkasir/aksi_trkasir.php`
+- [ ] Tambahkan transaksi database (beginTransaction/commit/rollback)
+- [ ] Pastikan hapus header `trkasir` konsisten berbasis `kd_trkasir` (dengan fallback `id_trkasir`)
+- [ ] Tambahkan validasi kegagalan hapus agar tidak terjadi partial delete
+- [ ] Uji sintaks PHP untuk file yang diubah
+- [ ] Update TODO setelah selesai
