@@ -3,12 +3,14 @@ session_start();
 include "../../../configurasi/koneksi.php";
 
 $kd_bundle  = $_POST['kd_bundle'];
-$ambildata=$db->prepare("SELECT * FROM trkasir_detail 
+
+try {
+    $db->beginTransaction();
+
+$ambildata=$db->prepare("SELECT * FROM trkasir_detail
                         WHERE kd_bundle = ?");
 $ambildata->execute([$kd_bundle]);
 
-// print_r($ambildata->fetch(PDO::FETCH_ASSOC));
-// die
 $qty_bundle = 0;
 while($r = $ambildata->fetch(PDO::FETCH_ASSOC)){
     $id_barang      = $r['id_barang'];
@@ -101,7 +103,17 @@ while($r = $ambildata->fetch(PDO::FETCH_ASSOC)){
 $updatebundle = $db->prepare("UPDATE bundle SET qty_bundle = qty_bundle + :qty_bundle
                                 WHERE kd_bundle = :kd_bundle");
 $updatebundle->execute([
-    ':qty_bundle'   => $qty_bundle, 
+    ':qty_bundle'   => $qty_bundle,
     ':kd_bundle'    => $kd_bundle
     ]);
+
+    $db->commit();
+
+    echo json_encode(['status' => 'success']);
+} catch (Throwable $e) {
+    if ($db->inTransaction()) {
+        $db->rollBack();
+    }
+    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+}
 ?>

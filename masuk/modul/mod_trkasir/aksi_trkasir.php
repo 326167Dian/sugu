@@ -36,7 +36,9 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 $data['error'] = 'Detail transaksi masih kosong.';
 			    echo json_encode($data);
             } else {
-                
+                $db->beginTransaction();
+
+
                 $stmt_trkasir = $db->prepare("SELECT SUM(hrgttl_dtrkasir) AS total_harga FROM trkasir_detail
                                             WHERE kd_trkasir = :kd_trkasir");
                 $stmt_trkasir->execute([
@@ -130,15 +132,20 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
     
     //             }
                 
+    			$db->commit();
     			$data['message'] = 'success';
     			echo json_encode($data);
     		} else {
+    			$db->rollBack();
     			$data['message'] = 'failed';
     			echo json_encode($data);
     		}
 
             }
         } catch (Throwable $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
             echo json_encode([
                 'message' => 'failed',
                 'error' => $e->getMessage()
@@ -150,6 +157,9 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 	//updata trkasir
 	elseif ($module == 'trkasir' and $act == 'ubah_trkasir') {
         header('Content-Type: application/json');
+
+        try {
+            $db->beginTransaction();
 
 		$stmt_update_trkasir = $db->prepare("UPDATE trkasir SET tgl_trkasir = ?,
 									petugas = ?,
@@ -188,12 +198,23 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         $stmt_update_detail->execute([$_POST['id_user'], $_POST['kd_trkasir']]);
 
         if($ubah){
+            $db->commit();
             $data['message'] = 'success';
     		echo json_encode($data);
     	} else {
+    		$db->rollBack();
     		$data['message'] = 'failed';
     		echo json_encode($data);
     	}
+        } catch (Throwable $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            echo json_encode([
+                'message' => 'failed',
+                'error' => $e->getMessage()
+            ]);
+        }
 		//echo "<script type='text/javascript'>alert('Transkasi berhasil Ubah !');window.location='../../media_admin.php?module=".$module."'</script>";
 
 

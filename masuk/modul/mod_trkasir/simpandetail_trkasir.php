@@ -58,6 +58,8 @@ if($qty_dtrkasir == ""){
     $qty_dtrkasir = "1";
 }
 
+try {
+    $db->beginTransaction();
 
 if($id_dtrkasir == "" || $id_dtrkasir == null){
 
@@ -200,13 +202,8 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
                 
                 // menghentikan proses jika ada stok bundle yang tidak mencukupi
                 if ($status != "") {
-                    $data = array(
-                        "status"    => "error",
-                        "data"      => $status
-                    );
-                    echo json_encode($data);        
-                    die();
-                } 
+                    throw new Exception($status);
+                }
                 
                 $get_bundle_detail = $db->prepare("SELECT * FROM bundle_detail
                                                     WHERE kd_bundle = ?");
@@ -223,13 +220,7 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
                     $stokbarang = $cekstokbarang->fetch(PDO::FETCH_ASSOC);
                     
                     if($stokbarang['stok_barang'] < $qty_dikurangi){
-                        $data = array(
-                            "status"    => "error",
-                            "data"      => "Stok barang tidak mencukupi!"
-                        );
-                        echo json_encode($data);        
-                        die();
-                        // break;
+                        throw new Exception("Stok barang tidak mencukupi!");
                     }
                     
                     $update_stok_barang = $db->prepare("UPDATE barang SET stok_barang = stok_barang - :qty_dikurangi
@@ -534,13 +525,8 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
                 
                 // menghentikan proses jika ada stok bundle yang tidak mencukupi
                 if ($status != "") {
-                    $data = array(
-                        "status"    => "error",
-                        "data"      => $status
-                    );
-                    echo json_encode($data);        
-                    die();
-                } 
+                    throw new Exception($status);
+                }
                 
                 $get_bundle_detail = $db->prepare("SELECT * FROM bundle_detail
                                                     WHERE kd_bundle = ?");
@@ -557,12 +543,7 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
                     $stokbarang = $cekstokbarang->fetch(PDO::FETCH_ASSOC);
                     
                     if($stokbarang['stok_barang'] < $qty_dikurangi){
-                        $data = array(
-                            "status"    => "error",
-                            "data"      => "Stok barang tidak mencukupi!"
-                        );
-                        echo json_encode($data);        
-                        die();
+                        throw new Exception("Stok barang tidak mencukupi!");
                     }
                     
                     $update_stok_barang = $db->prepare("UPDATE barang SET stok_barang = stok_barang - :qty_dikurangi
@@ -695,8 +676,20 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
     }
 }
 
-echo json_encode(array(
-    "status" => "success"
-));
+    $db->commit();
+
+    echo json_encode(array(
+        "status" => "success"
+    ));
+} catch (Throwable $e) {
+    if ($db->inTransaction()) {
+        $db->rollBack();
+    }
+
+    echo json_encode(array(
+        "status" => "error",
+        "data"    => $e->getMessage()
+    ));
+}
 
 ?>
