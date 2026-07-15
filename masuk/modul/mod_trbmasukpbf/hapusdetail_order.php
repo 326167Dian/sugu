@@ -3,6 +3,9 @@ include "../../../configurasi/koneksi.php";
 
 $id_dtrbmasuk  = $_POST['id_dtrbmasuk'];
 
+try {
+    $db->beginTransaction();
+
 // $trbmasuk = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM trbmasuk_detail WHERE kd_orders='$r[kd_trbmasuk]' AND id_barang='$r[id_barang]'");
 $stmt = $db->prepare("SELECT * FROM trbmasuk_detail WHERE id_dtrbmasuk = ? AND kd_orders = ?");
 $stmt->execute([$id_dtrbmasuk, $_POST['kd_orders']]);
@@ -74,6 +77,14 @@ if ($r1_num > 0) {
     $stmt_update = $db->prepare("UPDATE ordersdetail SET masuk = '0' WHERE id_dtrbmasuk = ? AND kd_trbmasuk = ?");
     $stmt_update->execute([$id_dtrbmasuk, $_POST['kd_trbmasuk']]);
 }
- 
 
+    $db->commit();
+    echo 'OK';
+} catch (Exception $e) {
+    if ($db->inTransaction()) {
+        $db->rollBack();
+    }
+    http_response_code(500);
+    echo $e->getMessage();
+}
 ?>

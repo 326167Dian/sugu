@@ -30,9 +30,12 @@ if ($qty_dtrbmasuk == "") {
 } else {
 }
 
+try {
+    $db->beginTransaction();
+
 //cek apakah barang sudah ada
-$cekdetail = $db->prepare("SELECT * FROM trbmasuk_detail 
-                            WHERE kd_barang=? 
+$cekdetail = $db->prepare("SELECT * FROM trbmasuk_detail
+                            WHERE kd_barang=?
                             AND kd_trbmasuk=?
                             AND no_batch=?");
 $cekdetail->execute([$kd_barang, $kd_trbmasuk, $no_batch]);
@@ -168,4 +171,14 @@ if ($ketemucekdetail > 0) {
 								// 		'masuk'
 								// 		)");
 	$stmt_insert_batch->execute([$datetime, $no_batch, $exp_date, $qty_dtrbmasuk, $sat_dtrbmasuk, $kd_trbmasuk, $kd_barang, 'masuk']);
+}
+
+    $db->commit();
+    echo 'OK';
+} catch (Exception $e) {
+    if ($db->inTransaction()) {
+        $db->rollBack();
+    }
+    http_response_code(500);
+    echo $e->getMessage();
 }

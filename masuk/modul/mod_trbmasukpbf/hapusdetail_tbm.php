@@ -3,6 +3,9 @@ include "../../../configurasi/koneksi.php";
 
 $id_dtrbmasuk  = $_POST['id_dtrbmasuk'];
 
+try {
+    $db->beginTransaction();
+
 //ambil data
 $stmt = $db->prepare("SELECT * FROM trbmasuk_detail WHERE id_dtrbmasuk=?");
 $stmt->execute([$id_dtrbmasuk]);
@@ -24,4 +27,13 @@ $db->prepare("UPDATE barang SET stok_barang = ? WHERE id_barang = ?")->execute([
 $db->prepare("DELETE FROM trbmasuk_detail WHERE id_dtrbmasuk = ?")->execute([$id_dtrbmasuk]);
 $db->prepare("DELETE FROM batch WHERE kd_transaksi = ? AND kd_barang = ? AND no_batch = ?")->execute([$r['kd_trbmasuk'],$r['kd_barang'],$r['no_batch']]);
 
+    $db->commit();
+    echo 'OK';
+} catch (Exception $e) {
+    if ($db->inTransaction()) {
+        $db->rollBack();
+    }
+    http_response_code(500);
+    echo $e->getMessage();
+}
 ?>

@@ -24,6 +24,9 @@ $timestamp = date('Y-m-d H:i:s', time());
 // Input admin
 if ($module=='trbmasukpbf' AND $act=='input_trbmasuk'){
 
+  try {
+    $db->beginTransaction();
+
     if($_POST['carabayar'] == 'LUNAS'){
         $tgl_lunas      = date('Y-m-d', time());
         $petugas_lunas  = $_POST['petugas'];
@@ -90,10 +93,18 @@ if ($module=='trbmasukpbf' AND $act=='input_trbmasuk'){
 	$db->prepare("INSERT INTO kartu_stok(kode_transaksi, tgl_sekarang) VALUES(?,?)")->execute([$_POST['kd_trbmasuk'], $tgl_sekarang]);
 	
 	$db->prepare("UPDATE kdbm SET stt_kdbm = 'OFF' WHERE id_admin = ? AND id_resto = 'pusat' AND kd_trbmasuk = ?")->execute([$_SESSION['idadmin'], $_POST['kd_trbmasuk']]);
-										
-										
+
+    $db->commit();
+
 	//echo "<script type='text/javascript'>alert('Transkasi berhasil ditambahkan !');window.location='../../media_admin.php?module=".$module."'</script>";
-	
+
+  } catch (Exception $e) {
+    if ($db->inTransaction()) {
+        $db->rollBack();
+    }
+    http_response_code(500);
+    echo $e->getMessage();
+  }
 
 }
  //updata trbmasukpbf
@@ -145,9 +156,12 @@ if ($module=='trbmasukpbf' AND $act=='input_trbmasuk'){
 //Hapus Proyek
 elseif ($module=='trbmasukpbf' AND $act=='hapus'){
 
+  try {
+    $db->beginTransaction();
+
   //update bagian stok dulu
   //ambil data induk
-	$ambildatainduk = $db->prepare("SELECT id_trbmasuk, kd_trbmasuk FROM trbmasuk 
+	$ambildatainduk = $db->prepare("SELECT id_trbmasuk, kd_trbmasuk FROM trbmasuk
 	WHERE id_trbmasuk=?");
 	$ambildatainduk->execute([$_GET['id']]);
 	$r1 = $ambildatainduk->fetch(PDO::FETCH_ASSOC);
@@ -243,12 +257,24 @@ elseif ($module=='trbmasukpbf' AND $act=='hapus'){
   $db->prepare("DELETE FROM trbmasuk WHERE id_trbmasuk = ?")->execute([$_GET['id']]);
   $db->prepare("DELETE FROM kartu_stok WHERE kode_transaksi = ?")->execute([$kd_trbmasuk]);
 
+    $db->commit();
+
     $module2 = $_GET['module2'];
   echo "<script type='text/javascript'>alert('Data berhasil dihapus !');window.location='../../media_admin.php?module=".$module2."'</script>";
+  } catch (Exception $e) {
+    if ($db->inTransaction()) {
+        $db->rollBack();
+    }
+    echo "<script type='text/javascript'>alert('Gagal menghapus data: " . addslashes($e->getMessage()) . "');</script>";
+  }
 }
 //Input order trbmasuk
 elseif ($module=='trbmasukpbf' AND $act=='input_order_trbmasuk'){
-    
+
+  try {
+    $db->beginTransaction();
+
+
     if($_POST['carabayar'] == 'LUNAS'){
         $tgl_lunas      = date('Y-m-d', time());
         $petugas_lunas  = $_POST['petugas'];
@@ -391,9 +417,18 @@ elseif ($module=='trbmasukpbf' AND $act=='input_order_trbmasuk'){
 	$db->prepare("UPDATE kdbm SET stt_kdbm = 'OFF' WHERE id_admin = ? AND id_resto = 'pusat' AND kd_trbmasuk = ?")->execute([$_SESSION['idadmin'], $_POST['kd_trbmasuk1']]);
 										
 	// Update order karena barang sudah masuk
-    $db->prepare("UPDATE orders SET 
+    $db->prepare("UPDATE orders SET
                     masuk = '0'
                     WHERE kd_trbmasuk = ?")->execute([$_POST['kd_trbmasuk1']]);
+
+    $db->commit();
+  } catch (Exception $e) {
+    if ($db->inTransaction()) {
+        $db->rollBack();
+    }
+    http_response_code(500);
+    echo $e->getMessage();
+  }
 }
 }
 ?>

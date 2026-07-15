@@ -3,8 +3,11 @@ include "../../../configurasi/koneksi.php";
 
 $id_dtrbmasuk  = $_POST['id_dtrbmasuk'];
 
+try {
+    $db->beginTransaction();
+
 //ambil data
-$ambildata = $db->prepare("SELECT * FROM trbmasuk_detail 
+$ambildata = $db->prepare("SELECT * FROM trbmasuk_detail
                             WHERE id_dtrbmasuk=?");
 $ambildata->execute([$id_dtrbmasuk]);
 $r = $ambildata->fetch(PDO::FETCH_ASSOC);
@@ -57,10 +60,19 @@ $stmt_insert_detailhist->execute([$r['kd_trbmasuk'], $r['kd_orders'], $r['id_bar
 // Hapus detail
 $delete_trbmasukdetail= $db->prepare("DELETE FROM trbmasuk_detail WHERE id_dtrbmasuk = ?");
 $delete_trbmasukdetail->execute([$id_dtrbmasuk]);
-$delete_batch = $db->prepare("DELETE FROM batch 
-                        WHERE kd_transaksi = ? 
-                        AND no_batch = ? 
+$delete_batch = $db->prepare("DELETE FROM batch
+                        WHERE kd_transaksi = ?
+                        AND no_batch = ?
                         AND status = ?");
 $delete_batch->execute([$kd_trbmasuk, $no_batch, 'masuk']);
 
+    $db->commit();
+    echo 'OK';
+} catch (Exception $e) {
+    if ($db->inTransaction()) {
+        $db->rollBack();
+    }
+    http_response_code(500);
+    echo $e->getMessage();
+}
 ?>

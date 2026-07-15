@@ -23,7 +23,10 @@ $act=$_GET['act'];
 // Input admin
 if ($module=='trbmasuk' AND $act=='input_trbmasuk'){
 
-    $stmt = $db->prepare("INSERT INTO trbmasuk(id_resto,
+    try {
+        $db->beginTransaction();
+
+        $stmt = $db->prepare("INSERT INTO trbmasuk(id_resto,
 										kd_trbmasuk,
 										tgl_trbmasuk,
 										id_supplier,
@@ -38,18 +41,25 @@ if ($module=='trbmasuk' AND $act=='input_trbmasuk'){
 										carabayar,
 										jenis)
 								 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->execute(['pusat', $_POST['kd_trbmasuk'], $_POST['tgl_trbmasuk'], $_POST['id_supplier'], $_POST['petugas'], $_POST['nm_supplier'], $_POST['tlp_supplier'], $_POST['alamat_trbmasuk'], $_POST['ttl_trkasir'], $_POST['dp_bayar'], $_POST['sisa_bayar'], $_POST['ket_trbmasuk'], $_POST['carabayar'], 'nonpbf']);
-										
-	$tgl_sekarang = date('Y-m-d H:i:s', time());									
-	$stmt2 = $db->prepare("INSERT INTO kartu_stok(kode_transaksi, tgl_sekarang) VALUES(?,?)");
-	$stmt2->execute([$_POST['kd_trbmasuk'], $tgl_sekarang]);
-	
-	$stmt3 = $db->prepare("UPDATE kdbm SET stt_kdbm = 'OFF' WHERE id_admin = ? AND id_resto = 'pusat' AND kd_trbmasuk = ?");
-	$stmt3->execute([$_SESSION['id_admin'], $_POST['kd_trbmasuk']]);
-										
-										
-	//echo "<script type='text/javascript'>alert('Transkasi berhasil ditambahkan !');window.location='../../media_admin.php?module=".$module."'</script>";
-	
+        $stmt->execute(['pusat', $_POST['kd_trbmasuk'], $_POST['tgl_trbmasuk'], $_POST['id_supplier'], $_POST['petugas'], $_POST['nm_supplier'], $_POST['tlp_supplier'], $_POST['alamat_trbmasuk'], $_POST['ttl_trkasir'], $_POST['dp_bayar'], $_POST['sisa_bayar'], $_POST['ket_trbmasuk'], $_POST['carabayar'], 'nonpbf']);
+
+        $tgl_sekarang = date('Y-m-d H:i:s', time());
+        $stmt2 = $db->prepare("INSERT INTO kartu_stok(kode_transaksi, tgl_sekarang) VALUES(?,?)");
+        $stmt2->execute([$_POST['kd_trbmasuk'], $tgl_sekarang]);
+
+        $stmt3 = $db->prepare("UPDATE kdbm SET stt_kdbm = 'OFF' WHERE id_admin = ? AND id_resto = 'pusat' AND kd_trbmasuk = ?");
+        $stmt3->execute([$_SESSION['id_admin'], $_POST['kd_trbmasuk']]);
+
+        $db->commit();
+
+        //echo "<script type='text/javascript'>alert('Transkasi berhasil ditambahkan !');window.location='../../media_admin.php?module=".$module."'</script>";
+    } catch (Exception $e) {
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+        http_response_code(500);
+        echo $e->getMessage();
+    }
 
 }
  //updata trbmasuk
@@ -76,9 +86,12 @@ if ($module=='trbmasuk' AND $act=='input_trbmasuk'){
 //Hapus Proyek
 elseif ($module=='trbmasuk' AND $act=='hapus'){
 
+  try {
+    $db->beginTransaction();
+
   //update bagian stok dulu
   //ambil data induk
-	$ambildatainduk = $db->prepare("SELECT id_trbmasuk, kd_trbmasuk FROM trbmasuk 
+	$ambildatainduk = $db->prepare("SELECT id_trbmasuk, kd_trbmasuk FROM trbmasuk
 	WHERE id_trbmasuk=?");
 	$ambildatainduk->execute([$_GET['id']]);
 	$r1 = $ambildatainduk->fetch(PDO::FETCH_ASSOC);
@@ -140,9 +153,17 @@ elseif ($module=='trbmasuk' AND $act=='hapus'){
   $stmt8->execute([$_GET['id']]);
   $stmt9 = $db->prepare("DELETE FROM kartu_stok WHERE kode_transaksi = ?");
   $stmt9->execute([$kd_trbmasuk]);
-  
+
+    $db->commit();
+
   $module2 = $_GET['module2'];
   echo "<script type='text/javascript'>alert('Data berhasil dihapus !');window.location='../../media_admin.php?module=".$module2."'</script>";
+  } catch (Exception $e) {
+    if ($db->inTransaction()) {
+        $db->rollBack();
+    }
+    echo "<script type='text/javascript'>alert('Gagal menghapus data: " . addslashes($e->getMessage()) . "');</script>";
+  }
 }
 
 }
