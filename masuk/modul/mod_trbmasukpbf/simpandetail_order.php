@@ -31,6 +31,9 @@ if($diskon == ""){
     $diskon = "0";
 }else{}
 
+try {
+    $db->beginTransaction();
+
 //cek apakah barang sudah ada
 $cekdetail = $db->prepare("SELECT * FROM trbmasuk_detail WHERE kd_barang = ? AND kd_trbmasuk = ?");
 $cekdetail->execute([$kd_barang, $kd_trbmasuk]);
@@ -109,14 +112,23 @@ $cekstok = $db->prepare("SELECT * FROM barang WHERE id_barang = ?");
     //                                             hrgjual_barang1='$hrgjual_barang1',
     //                                             hrgjual_barang3='$hrgjual_barang3'
     //                                             WHERE id_barang = '$id_barang'");
-    mysqli_query($GLOBALS["___mysqli_ston"], "UPDATE barang SET 
-                                                stok_barang = '$stokakhir',
-                                                hna = '$hnasat_dtrbmasuk',
-                                                konversi = '$konversi',
-                                                hrgsat_barang = '$hrgsat_dtrbmasuk',
-                                                hrgjual_barang='$hrgjual_barang'
-                                                WHERE id_barang = '$id_barang'");
+    $db->prepare("UPDATE barang SET
+                                                stok_barang = ?,
+                                                hna = ?,
+                                                konversi = ?,
+                                                hrgsat_barang = ?,
+                                                hrgjual_barang = ?
+                                                WHERE id_barang = ?")->execute([$stokakhir, $hnasat_dtrbmasuk, $konversi, $hrgsat_dtrbmasuk, $hrgjual_barang, $id_barang]);
 
 }
 
+    $db->commit();
+    echo 'OK';
+} catch (Exception $e) {
+    if ($db->inTransaction()) {
+        $db->rollBack();
+    }
+    http_response_code(500);
+    echo $e->getMessage();
+}
 ?>

@@ -7,9 +7,12 @@ $kd_trbmasuk            = $_POST['kd_trbmasuk'];
 $kd_orders              = $_POST['kd_orders'];
 $id_dtrbmasuk           = $_POST['id_dtrbmasuk'];
 
-$trbmasuk = $db->prepare("SELECT * FROM trbmasuk_detail 
-                            WHERE kd_barang=? 
-                            AND kd_trbmasuk=? 
+try {
+    $db->beginTransaction();
+
+$trbmasuk = $db->prepare("SELECT * FROM trbmasuk_detail
+                            WHERE kd_barang=?
+                            AND kd_trbmasuk=?
                             AND id_dtrbmasuk= ?");
 $trbmasuk->execute([$kd_barang, $kd_trbmasuk, $id_dtrbmasuk]);
 $detail = $trbmasuk->fetch(PDO::FETCH_ASSOC);
@@ -127,5 +130,15 @@ else {
 // 										status)
 // 								  VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
 //     $stmt_insert_batch->execute([$datetime, $odt['no_batch'], $exp_date, $odt['qty_dtrbmasuk'], $odt['sat_dtrbmasuk'], $kd_trbmasuk, $odt['kd_barang'], 'masuk']);
+}
+
+    $db->commit();
+    echo 'OK';
+} catch (Exception $e) {
+    if ($db->inTransaction()) {
+        $db->rollBack();
+    }
+    http_response_code(500);
+    echo $e->getMessage();
 }
 ?>

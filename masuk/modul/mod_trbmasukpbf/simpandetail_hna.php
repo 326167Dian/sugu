@@ -7,9 +7,12 @@ $kd_trbmasuk            = $_POST['kd_trbmasuk'];
 $kd_orders              = $_POST['kd_orders'];
 $id_dtrbmasuk           = $_POST['id_dtrbmasuk'];
 
-$trbmasuk = $db->prepare("SELECT * FROM trbmasuk_detail 
-                            WHERE kd_barang=? 
-                            AND kd_trbmasuk=? 
+try {
+    $db->beginTransaction();
+
+$trbmasuk = $db->prepare("SELECT * FROM trbmasuk_detail
+                            WHERE kd_barang=?
+                            AND kd_trbmasuk=?
                             AND id_dtrbmasuk= ?");
 $trbmasuk->execute([$kd_barang, $kd_trbmasuk, $id_dtrbmasuk]);
 $detail = $trbmasuk->fetch(PDO::FETCH_ASSOC);
@@ -141,7 +144,16 @@ else {
 										waktu)
 								  VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 	$stmt_insert_detail->execute([$kd_trbmasuk, $kd_orders, $odt['id_barang'], $odt['kd_barang'], $odt['nmbrg_dtrbmasuk'], $qty_dtrbmasuk, $_POST['qtygrosir_dtrbmasuk'], $odt['sat_dtrbmasuk'], $odt['satgrosir_dtrbmasuk'], $odt['konversi'], $hnasat_dtrbmasuk, $odt['diskon'], $harga_satuan, $hrgjual_barang, $total_harga, $odt['no_batch'], $odt['exp_date'], $waktu]);
-										
-	
+
+}
+
+    $db->commit();
+    echo 'OK';
+} catch (Exception $e) {
+    if ($db->inTransaction()) {
+        $db->rollBack();
+    }
+    http_response_code(500);
+    echo $e->getMessage();
 }
 ?>

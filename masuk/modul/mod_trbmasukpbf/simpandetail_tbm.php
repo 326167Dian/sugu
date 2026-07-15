@@ -62,7 +62,10 @@ if($diskon == ""){
 // $ketemucekdetail=mysqli_num_rows($cekdetail);
 // $rcek=mysqli_fetch_array($cekdetail);
 
-$cekdetail = $db->prepare("SELECT * FROM trbmasuk_detail 
+try {
+    $db->beginTransaction();
+
+$cekdetail = $db->prepare("SELECT * FROM trbmasuk_detail
                             WHERE kd_barang = :kd_barang AND kd_trbmasuk = :kd_trbmasuk AND no_batch = :no_batch");
 $cekdetail->execute([
     ':kd_barang'    => $kd_barang,
@@ -249,7 +252,7 @@ if ($ketemucekdetail > 0){
     	$rowbatch   = $getbatch->fetch(PDO::FETCH_ASSOC);
     	if ($countbatch > 0) {
     	   $qtyoldbatch = $rowbatch['qty'];
-    	   $ttlqtybatch = $qtyoldbatch + $odt['qty_dtrbmasuk'];
+    	  
     	   
     	   $db->prepare("UPDATE batch SET qty = ?
     	                WHERE kd_transaksi = ?
@@ -281,4 +284,13 @@ if ($ketemucekdetail > 0){
     }
 }
 
+    $db->commit();
+    echo 'OK';
+} catch (Exception $e) {
+    if ($db->inTransaction()) {
+        $db->rollBack();
+    }
+    http_response_code(500);
+    echo $e->getMessage();
+}
 ?>

@@ -7,9 +7,12 @@ $kd_trbmasuk            = $_POST['kd_trbmasuk'];
 $kd_orders              = $_POST['kd_orders'];
 $id_dtrbmasuk           = $_POST['id_dtrbmasuk'];
 
-$trbmasuk = $db->prepare("SELECT * FROM trbmasuk_detail 
-                            WHERE kd_barang=? 
-                            AND kd_trbmasuk=? 
+try {
+    $db->beginTransaction();
+
+$trbmasuk = $db->prepare("SELECT * FROM trbmasuk_detail
+                            WHERE kd_barang=?
+                            AND kd_trbmasuk=?
                             AND id_dtrbmasuk= ?");
 $trbmasuk->execute([$kd_barang, $kd_trbmasuk, $id_dtrbmasuk]);
 $detail = $trbmasuk->fetch(PDO::FETCH_ASSOC);
@@ -60,8 +63,7 @@ else {
     $order = $db->prepare("SELECT * FROM ordersdetail WHERE kd_barang = ? AND kd_trbmasuk = ?");
     $order->execute([$kd_barang, $kd_orders]);
     $odt = $order->fetch(PDO::FETCH_ASSOC);
-    $odt    = mysqli_fetch_array($order);
-    
+
     // Update stok
     $cekstok = $db->prepare("SELECT * FROM barang WHERE id_barang = ?");
     $cekstok->execute([$odt['id_barang']]);
@@ -96,8 +98,16 @@ else {
                                                 
     // Insert trbmasuk detail
     $db->prepare("INSERT INTO trbmasuk_detail (kd_trbmasuk, kd_orders, id_barang, kd_barang, nmbrg_dtrbmasuk, qty_dtrbmasuk, qty_grosir, sat_dtrbmasuk, satgrosir_dtrbmasuk, konversi, hnasat_dtrbmasuk, diskon, hrgsat_dtrbmasuk, hrgjual_dtrbmasuk, hrgttl_dtrbmasuk, no_batch, exp_date, waktu) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")->execute([$kd_trbmasuk, $kd_orders, $odt['id_barang'], $odt['kd_barang'], $odt['nmbrg_dtrbmasuk'], $qty_dtrbmasuk, $qtygrosir_dtrbmasuk, $odt['sat_dtrbmasuk'], $odt['satgrosir_dtrbmasuk'], $odt['konversi'], $rst['hna'], $odt['diskon'], $harga_satuan, $hrgjual_barang, $total_harga, $odt['no_batch'], $odt['exp_date'], $waktu]);
-										
-	
 
+}
+
+    $db->commit();
+    echo 'OK';
+} catch (Exception $e) {
+    if ($db->inTransaction()) {
+        $db->rollBack();
+    }
+    http_response_code(500);
+    echo $e->getMessage();
 }
 ?>
