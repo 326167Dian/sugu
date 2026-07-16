@@ -1,8 +1,13 @@
 <?php
 session_start();
 include "../../../configurasi/koneksi.php";
+include "../../../configurasi/fungsi_perubahan_trkasir.php";
 
 $kd_bundle  = $_POST['kd_bundle'];
+
+// DDL (ALTER/CREATE TABLE) menyebabkan implicit commit di MySQL, jadi harus
+// dijalankan SEBELUM beginTransaction() supaya tidak menutup transaction secara diam-diam.
+pastikan_skema_perubahan_trkasir($db);
 
 try {
     $db->beginTransaction();
@@ -12,6 +17,9 @@ $ambildata=$db->prepare("SELECT * FROM trkasir_detail
 $ambildata->execute([$kd_bundle]);
 
 $qty_bundle = 0;
+$sudahFinal = null;
+$tipetxBaru = null;
+$idAdminHapus = isset($_SESSION['idadmin']) ? $_SESSION['idadmin'] : null;
 while($r = $ambildata->fetch(PDO::FETCH_ASSOC)){
     $id_barang      = $r['id_barang'];
     $qty_dtrkasir   = $r['qty_dtrkasir'];
@@ -19,7 +27,16 @@ while($r = $ambildata->fetch(PDO::FETCH_ASSOC)){
     $no_batch       = $r['no_batch'];
     $kd_barang      = $r['kd_barang'];
     $kd_bundle      = $r['kd_bundle'];
-    
+
+    if ($sudahFinal === null) {
+        $sudahFinal = apakah_transaksi_final($db, $kd_trbmasuk);
+        if ($sudahFinal) {
+            $tipetxBaru = catat_revisi_transaksi($db, $kd_trbmasuk);
+        }
+    }
+    $tipetxAsal = isset($r['tipetx']) ? $r['tipetx'] : 1;
+    $tipetxHapus = $sudahFinal ? $tipetxBaru : $tipetxAsal;
+
     // Insert History
     $insert_history = $db->prepare("INSERT INTO trkasir_detail_hist(
                                         kd_trkasir,
@@ -41,8 +58,11 @@ while($r = $ambildata->fetch(PDO::FETCH_ASSOC)){
                                         komisi,
                                         idadmin,
                                         kd_bundle,
-                                        nm_bundle)
-                                    VALUE(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                                        nm_bundle,
+                                        tipetx_asal,
+                                        tipetx_hapus,
+                                        id_admin_hapus)
+                                    VALUE(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
     $insert_history->execute([
         $r['kd_trkasir'],
         $r['id_barang'],
@@ -63,7 +83,10 @@ while($r = $ambildata->fetch(PDO::FETCH_ASSOC)){
         $r['komisi'],
         $r['idadmin'],
         $r['kd_bundle'],
-        $r['nm_bundle']
+        $r['nm_bundle'],
+        $tipetxAsal,
+        $tipetxHapus,
+        $idAdminHapus
     ]);
     
     $get_bundle_detail = $db->prepare("SELECT * FROM bundle_detail

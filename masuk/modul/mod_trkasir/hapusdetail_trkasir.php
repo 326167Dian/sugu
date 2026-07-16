@@ -1,6 +1,11 @@
 <?php
 session_start();
 include "../../../configurasi/koneksi.php";
+include "../../../configurasi/fungsi_perubahan_trkasir.php";
+
+// DDL (ALTER/CREATE TABLE) menyebabkan implicit commit di MySQL, jadi harus
+// dijalankan SEBELUM beginTransaction() supaya tidak menutup transaction secara diam-diam.
+pastikan_skema_perubahan_trkasir($db);
 
 $id_dtrkasir  = $_POST['id_dtrkasir'];
 
@@ -26,6 +31,14 @@ if ($getkode == 'BUND') {
 
 try {
     $db->beginTransaction();
+
+    $sudahFinal = apakah_transaksi_final($db, $kd_trbmasuk);
+    $tipetxAsal = isset($r['tipetx']) ? $r['tipetx'] : 1;
+    $tipetxHapus = $tipetxAsal;
+    $idAdminHapus = isset($_SESSION['idadmin']) ? $_SESSION['idadmin'] : null;
+    if ($sudahFinal) {
+        $tipetxHapus = catat_revisi_transaksi($db, $kd_trbmasuk);
+    }
 
     // UPDATE STOK ATOMIC - Tambah stok kembali saat hapus detail
     // Menggunakan single UPDATE statement untuk menghindari race condition
@@ -59,12 +72,16 @@ try {
                                             waktu,
                                             tipe,
                                             komisi,
-                                            idadmin
+                                            idadmin,
+                                            tipetx_asal,
+                                            tipetx_hapus,
+                                            id_admin_hapus
                                             )
-                                        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                                        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
     $stmt_insert_hist->execute([$r['kd_trkasir'],$r['id_barang'],$r['kd_barang'],$r['nmbrg_dtrkasir'],$r['qty_dtrkasir'],
                                 $r['sat_dtrkasir'],$r['hrgjual_dtrkasir'],$r['disc'],
-                                $r['hrgttl_dtrkasir'],$r['no_batch'],$r['exp_date'],$r['waktu'],$r['tipe'],$r['komisi'],$r['idadmin']]);
+                                $r['hrgttl_dtrkasir'],$r['no_batch'],$r['exp_date'],$r['waktu'],$r['tipe'],$r['komisi'],$r['idadmin'],
+                                $tipetxAsal, $tipetxHapus, $idAdminHapus]);
 
     //Hapus detail
     $stmt_del_trkasirdetail = $db->prepare("DELETE FROM trkasir_detail WHERE id_dtrkasir = ?");
