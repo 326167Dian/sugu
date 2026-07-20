@@ -285,14 +285,18 @@ $stmt_pelanggan = $db->prepare("SELECT * FROM pelanggan WHERE id_pelanggan = :id
 $stmt_pelanggan->execute([
     ':id_pelanggan' => $r1['id_pelanggan']
 ]);
+
 $poin = $stmt_pelanggan->fetch(PDO::FETCH_ASSOC);
 $total_poin = ($poin && isset($poin['total_poin'])) ? $poin['total_poin'] : 0;
 
 $pdf->ln(0.4);
-$pdf->SetX(0.2);
-$pdf->SetFont('Arial', 'B', 8);
-$pdf->Cell(2, 0.4, 'Poin Awal : ', 0, 0, 'L');
-$pdf->Cell(2.7, 0.4, format_rupiah($r1['poin_awal']), 0, 1, 'R');
+
+if ($r1['poin_awal'] != 0) {
+    $pdf->SetX(0.2);
+    $pdf->SetFont('Arial', 'B', 8);
+    $pdf->Cell(2, 0.4, 'Poin Awal : ', 0, 0, 'L');
+    $pdf->Cell(2.7, 0.4, format_rupiah($r1['poin_awal']), 0, 1, 'R');
+
 
 $pdf->SetX(0.2);
 $pdf->SetFont('Arial', 'B', 8);
@@ -308,6 +312,7 @@ $pdf->SetX(0.2);
 $pdf->SetFont('Arial', 'B', 8);
 $pdf->Cell(2, 0.4, 'Sisa Poin : ', 0, 0, 'L');
 $pdf->Cell(2.7, 0.4, format_rupiah($total_poin), 0, 1, 'R');
+}
 
 // $pdf->ln(0.1);
 // $pdf->SetX(0.6);
