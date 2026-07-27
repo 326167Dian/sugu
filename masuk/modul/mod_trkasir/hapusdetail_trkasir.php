@@ -64,7 +64,7 @@ try {
                                         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
     $stmt_insert_hist->execute([$r['kd_trkasir'],$r['id_barang'],$r['kd_barang'],$r['nmbrg_dtrkasir'],$r['qty_dtrkasir'],
                                 $r['sat_dtrkasir'],$r['hrgjual_dtrkasir'],$r['disc'],
-                                $r['hrgttl_dtrkasir'],$r['no_batch'],$r['exp_date'],$r['waktu'],$r['tipe'],$r['komisi'],$r['idadmin']]);
+                                $r['hrgttl_dtrkasir'],($r['no_batch'] !== null ? $r['no_batch'] : ''),$r['exp_date'],$r['waktu'],$r['tipe'],$r['komisi'],$r['idadmin']]);
 
     //Hapus detail
     $stmt_del_trkasirdetail = $db->prepare("DELETE FROM trkasir_detail WHERE id_dtrkasir = ?");

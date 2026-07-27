@@ -56,7 +56,7 @@ while($r = $ambildata->fetch(PDO::FETCH_ASSOC)){
         $r['profit'],
         $r['resep'],
         $r['hrgttl_dtrkasir'],
-        $r['no_batch'],
+        $r['no_batch'] !== null ? $r['no_batch'] : '',
         $r['exp_date'],
         $r['waktu'],
         $r['tipe'],

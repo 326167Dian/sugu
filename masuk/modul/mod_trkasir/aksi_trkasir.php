@@ -293,7 +293,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 						$r['hrgjual_dtrkasir'],
 						$r['disc'],
 						$r['hrgttl_dtrkasir'],
-						$r['no_batch'],
+						$r['no_batch'] !== null ? $r['no_batch'] : '',
 						$r['exp_date'],
 						$r['waktu'],
 						$r['tipe'],
