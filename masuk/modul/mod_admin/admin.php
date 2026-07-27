@@ -10,7 +10,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 			// Tampil User
 		default:
 			if ($_SESSION['level'] == 'pemilik') {
-				$tampil_admin = $db->query("SELECT * FROM admin where id_admin != 1 ORDER BY username");
+				$tampil_admin = $db->query("SELECT * FROM admin where id_admin != 2 ORDER BY username");
 ?>
 				<div class="box box-primary box-solid">
 					<div class="box-header with-border">
