@@ -1558,7 +1558,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 trkasir_detail.no_batch,
                 trkasir_detail.exp_date
             FROM trkasir_detail join trkasir on (trkasir_detail.kd_trkasir=trkasir.kd_trkasir)
-            WHERE kd_barang = ? order by trkasir.tgl_trkasir desc ";
+            WHERE kd_barang = ? order by trkasir.tgl_trkasir desc, trkasir.id_trkasir desc ";
             $penjualan = $db->prepare($jual);
             $penjualan->execute([$jokul]);
             
@@ -1581,7 +1581,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 </div>
 
                 <div class='box-body'>
-                    <table id="example1" class="table table-condensed table-bordered table-striped table-hover">
+                    <table id="tblRiwayatJual" class="table table-condensed table-bordered table-striped table-hover">
                         <thead>
                             <tr>
                                 <th style="text-align: center; ">No Transaksi</th>
@@ -1653,7 +1653,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 </div>
 
                 <div class='box-body'>
-                    <table id="example2" class="table table-condensed table-bordered table-striped table-hover">
+                    <table id="tblRiwayatBeli" class="table table-condensed table-bordered table-striped table-hover">
                         <thead>
                             <tr>
                                 <th style="text-align: center; ">id Transaksi</th>
@@ -1704,11 +1704,21 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 </div>
             </div>
         <input style="text-align:center;" class='btn btn-success' type='button' value=KEMBALI onclick=self.history.back()>
+            <script type="text/javascript">
+                $(function() {
+                    $("#tblRiwayatJual").DataTable({
+                        "order": []
+                    });
+                    $("#tblRiwayatBeli").DataTable({
+                        "order": []
+                    });
+                });
+            </script>
 <?php
 
 
             break;
-    
+
         case "order":
             $jokul = $_GET['id'];
             $k = $db->prepare("SELECT * FROM barang WHERE kd_barang = ?");
