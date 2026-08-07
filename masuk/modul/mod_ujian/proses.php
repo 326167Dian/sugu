@@ -168,6 +168,16 @@ try {
 } catch (Exception $e) {
     // Penyimpanan hasil tidak menghentikan tampilan nilai agar user tetap mendapatkan hasil ujian.
 }
+
+try {
+    $stmtHapusProgress = $db->prepare("DELETE FROM ujian_progress WHERE id_admin = ? AND ujian_id = ?");
+    $stmtHapusProgress->execute(array(
+        isset($_SESSION['idadmin']) ? (int) $_SESSION['idadmin'] : 0,
+        $ujian_id
+    ));
+} catch (Exception $e) {
+    // Abaikan jika tabel progres belum ada / gagal dihapus, tidak memengaruhi hasil akhir.
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">

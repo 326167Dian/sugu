@@ -30,7 +30,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         $prefill_ujian_id = isset($_GET['ujian_id']) ? (int) $_GET['ujian_id'] : 0;
         $edit_header_id = isset($_GET['edit_header_id']) ? (int) $_GET['edit_header_id'] : 0;
 
-        if (in_array($act, array('kelola', 'tambahsoal', 'editsoal', 'hasilujian'), true) && !$isPemilik) {
+        if (in_array($act, array('kelola', 'tambahsoal', 'editsoal', 'hasilujian', 'detailhasil'), true) && !$isPemilik) {
             echo "<link href=../css/style.css rel=stylesheet type=text/css>";
             echo "<div class='error msg'>Fitur CRUD soal hanya untuk status pemilik.</div>";
             return;
@@ -43,6 +43,11 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         $error_load_soal = "";
         $error_load_hasil = "";
         $daftar_hasil = array();
+        $daftar_progress = array();
+        $detail_hasil = null;
+        $detail_soal = array();
+        $detail_jawaban = array();
+        $error_load_detail = "";
 
         try {
             $stmtUjian = $db->query("SELECT id_soal, nm_ujian, durasi FROM soal_header ORDER BY id_soal DESC");
@@ -82,15 +87,68 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             } elseif ($act === 'hasilujian') {
                 try {
                     if ($selected_ujian_id > 0) {
-                        $stmtHasil = $db->prepare("SELECT nama_lengkap, nama_ujian, total_soal, jawaban_benar, jawaban_salah, tidak_dijawab, nilai_akhir FROM hasil_ujian WHERE ujian_id = ? ORDER BY id_hasil DESC LIMIT 500");
+                        $stmtHasil = $db->prepare("SELECT id_hasil, nama_lengkap, nama_ujian, total_soal, jawaban_benar, jawaban_salah, tidak_dijawab, nilai_akhir FROM hasil_ujian WHERE ujian_id = ? ORDER BY id_hasil DESC LIMIT 500");
                         $stmtHasil->execute(array($selected_ujian_id));
                         $daftar_hasil = $stmtHasil->fetchAll(PDO::FETCH_ASSOC);
                     } else {
-                        $stmtHasil = $db->query("SELECT nama_lengkap, nama_ujian, total_soal, jawaban_benar, jawaban_salah, tidak_dijawab, nilai_akhir FROM hasil_ujian ORDER BY id_hasil DESC LIMIT 500");
+                        $stmtHasil = $db->query("SELECT id_hasil, nama_lengkap, nama_ujian, total_soal, jawaban_benar, jawaban_salah, tidak_dijawab, nilai_akhir FROM hasil_ujian ORDER BY id_hasil DESC LIMIT 500");
                         $daftar_hasil = $stmtHasil->fetchAll(PDO::FETCH_ASSOC);
                     }
                 } catch (Exception $e) {
                     $error_load_hasil = "Tabel hasil ujian belum siap. Jalankan migrasi hasil ujian terlebih dahulu.";
+                }
+
+                try {
+                    if ($selected_ujian_id > 0) {
+                        $stmtProgress = $db->prepare("SELECT nama_lengkap, nama_ujian, ujian_id, jawaban_json, waktu_mulai, waktu_update FROM ujian_progress WHERE ujian_id = ? ORDER BY waktu_update DESC LIMIT 500");
+                        $stmtProgress->execute(array($selected_ujian_id));
+                    } else {
+                        $stmtProgress = $db->query("SELECT nama_lengkap, nama_ujian, ujian_id, jawaban_json, waktu_mulai, waktu_update FROM ujian_progress ORDER BY waktu_update DESC LIMIT 500");
+                    }
+                    $rowsProgress = $stmtProgress->fetchAll(PDO::FETCH_ASSOC);
+
+                    $totalSoalPerUjian = array();
+                    foreach ($rowsProgress as $p) {
+                        $uid = (int) $p['ujian_id'];
+                        if (!isset($totalSoalPerUjian[$uid])) {
+                            $stmtTotal = $db->prepare("SELECT COUNT(*) FROM soal WHERE id_soal = ?");
+                            $stmtTotal->execute(array($uid));
+                            $totalSoalPerUjian[$uid] = (int) $stmtTotal->fetchColumn();
+                        }
+                        $jawaban = json_decode((string) $p['jawaban_json'], true);
+                        $daftar_progress[] = array(
+                            'nama_lengkap' => $p['nama_lengkap'],
+                            'nama_ujian' => $p['nama_ujian'],
+                            'terjawab' => is_array($jawaban) ? count($jawaban) : 0,
+                            'total_soal' => $totalSoalPerUjian[$uid],
+                            'waktu_mulai' => $p['waktu_mulai'],
+                            'waktu_update' => $p['waktu_update'],
+                        );
+                    }
+                } catch (Exception $e) {
+                    // Tabel progres belum ada / gagal dimuat; cukup sembunyikan bagian "Belum Submit".
+                }
+            } elseif ($act === 'detailhasil') {
+                $id_hasil_detail = isset($_GET['id_hasil']) ? (int) $_GET['id_hasil'] : 0;
+                try {
+                    if ($id_hasil_detail > 0) {
+                        $stmtDetail = $db->prepare("SELECT id_hasil, nama_lengkap, nama_ujian, ujian_id, total_soal, jawaban_benar, jawaban_salah, tidak_dijawab, nilai_akhir, jawaban_json FROM hasil_ujian WHERE id_hasil = ? LIMIT 1");
+                        $stmtDetail->execute(array($id_hasil_detail));
+                        $detail_hasil = $stmtDetail->fetch(PDO::FETCH_ASSOC);
+                    }
+
+                    if ($detail_hasil) {
+                        $jawaban_decoded = json_decode((string) $detail_hasil['jawaban_json'], true);
+                        $detail_jawaban = is_array($jawaban_decoded) ? $jawaban_decoded : array();
+
+                        $stmtDetailSoal = $db->prepare("SELECT id, pertanyaan, opsi_a, opsi_b, opsi_c, jawaban_benar FROM soal WHERE id_soal = ? ORDER BY id ASC");
+                        $stmtDetailSoal->execute(array((int) $detail_hasil['ujian_id']));
+                        $detail_soal = $stmtDetailSoal->fetchAll(PDO::FETCH_ASSOC);
+                    } else {
+                        $error_load_detail = "Data hasil ujian tidak ditemukan.";
+                    }
+                } catch (Exception $e) {
+                    $error_load_detail = "Gagal memuat detail hasil ujian.";
                 }
             } elseif ($selected_ujian_id > 0) {
                 $stmt = $db->prepare("SELECT id, id_soal, pertanyaan, opsi_a, opsi_b, opsi_c, jawaban_benar FROM soal WHERE id_soal = ? ORDER BY id ASC");
@@ -292,6 +350,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                             <th>Jawaban Salah</th>
                             <th>Tidak dijawab</th>
                             <th>Nilai akhir</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -304,10 +363,107 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                                 <td><?php echo (int) $h['jawaban_salah']; ?></td>
                                 <td><?php echo (int) $h['tidak_dijawab']; ?></td>
                                 <td><?php echo (float) $h['nilai_akhir']; ?></td>
+                                <td><a href="?module=ujian&act=detailhasil&id_hasil=<?php echo (int) $h['id_hasil']; ?>&ujian_id=<?php echo (int) $selected_ujian_id; ?>" class="btn btn-info btn-xs">Detail</a></td>
                             </tr>
                         <?php } ?>
                     </tbody>
                 </table>
+            </div>
+        <?php } ?>
+
+        <?php if (!empty($daftar_progress)) { ?>
+            <h4 style="margin-top:25px;">Belum Submit (Sedang/Meninggalkan Ujian)</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nama Lengkap</th>
+                            <th>Nama Ujian</th>
+                            <th>Terjawab</th>
+                            <th>Waktu Mulai</th>
+                            <th>Terakhir Update</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($daftar_progress as $p) { ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars((string) $p['nama_lengkap']); ?></td>
+                                <td><?php echo htmlspecialchars((string) $p['nama_ujian']); ?></td>
+                                <td><?php echo (int) $p['terjawab']; ?> / <?php echo (int) $p['total_soal']; ?></td>
+                                <td><?php echo htmlspecialchars((string) $p['waktu_mulai']); ?></td>
+                                <td><?php echo htmlspecialchars((string) $p['waktu_update']); ?></td>
+                            </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php } ?>
+    </div>
+</div>
+
+<?php
+        } elseif ($act === 'detailhasil') {
+?>
+
+<div class="box box-primary box-solid">
+    <div class="box-header with-border">
+        <h3 class="box-title">Detail Hasil Ujian</h3>
+        <div class="box-tools pull-right">
+            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+    </div>
+    <div class="box-body">
+        <a href="?module=ujian&act=hasilujian&ujian_id=<?php echo isset($detail_hasil['ujian_id']) ? (int) $detail_hasil['ujian_id'] : 0; ?>" class="btn btn-default" style="margin-bottom:15px;">&laquo; Kembali ke Hasil Ujian</a>
+
+        <?php if (!empty($error_load_detail)) { ?>
+            <div class="alert alert-warning"><?php echo htmlspecialchars($error_load_detail); ?></div>
+        <?php } else { ?>
+            <p><strong>Nama Peserta Ujian</strong> : <?php echo htmlspecialchars((string) $detail_hasil['nama_lengkap']); ?></p>
+            <p><strong>Nama Ujian</strong> : <?php echo htmlspecialchars((string) $detail_hasil['nama_ujian']); ?></p>
+            <hr>
+
+            <?php foreach ($detail_soal as $index => $soal) {
+                $soal_id = (int) $soal['id'];
+                $user_answer = isset($detail_jawaban[$soal_id]) ? strtolower(trim((string) $detail_jawaban[$soal_id])) : '';
+                $correct_answer = strtolower(trim((string) $soal['jawaban_benar']));
+                $opsi = array('a' => $soal['opsi_a'], 'b' => $soal['opsi_b'], 'c' => $soal['opsi_c']);
+
+                if ($user_answer === '') {
+                    $status_label = 'Tidak Dijawab';
+                    $status_color = '#f0ad4e';
+                } elseif ($user_answer === $correct_answer) {
+                    $status_label = 'Benar';
+                    $status_color = '#5cb85c';
+                } else {
+                    $status_label = 'Salah';
+                    $status_color = '#d9534f';
+                }
+            ?>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="pertanyaan-html"><strong><?php echo ($index + 1) . ". "; ?></strong><?php echo render_pertanyaan_html($soal['pertanyaan']); ?></div>
+                        <ul style="list-style:none; padding-left:10px;">
+                            <?php foreach ($opsi as $letter => $teks) { ?>
+                                <li<?php echo ($letter === $user_answer) ? ' style="font-weight:bold;"' : ''; ?>>
+                                    <?php echo ($letter === $user_answer) ? 'X ' : '&nbsp;&nbsp;'; ?><?php echo htmlspecialchars((string) $teks); ?>
+                                </li>
+                            <?php } ?>
+                        </ul>
+                        <p style="margin-bottom:0;">Jawaban : <strong style="color:<?php echo $status_color; ?>;"><?php echo $status_label; ?></strong>
+                        <?php if ($status_label === 'Salah' && isset($opsi[$correct_answer])) { ?>
+                            <span style="color:#777;"> (Jawaban benar: <?php echo htmlspecialchars((string) $opsi[$correct_answer]); ?>)</span>
+                        <?php } ?>
+                        </p>
+                    </div>
+                </div>
+            <?php } ?>
+
+            <div class="alert alert-info">
+                <strong>Total Soal:</strong> <?php echo (int) $detail_hasil['total_soal']; ?> &nbsp;|&nbsp;
+                <strong>Jawaban Benar:</strong> <?php echo (int) $detail_hasil['jawaban_benar']; ?> &nbsp;|&nbsp;
+                <strong>Jawaban Salah:</strong> <?php echo (int) $detail_hasil['jawaban_salah']; ?> &nbsp;|&nbsp;
+                <strong>Tidak Dijawab:</strong> <?php echo (int) $detail_hasil['tidak_dijawab']; ?> &nbsp;|&nbsp;
+                <strong>Nilai Akhir:</strong> <?php echo (float) $detail_hasil['nilai_akhir']; ?> / 100
             </div>
         <?php } ?>
     </div>
@@ -680,6 +836,25 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
                     tick();
                     setInterval(tick, 1000);
+
+                    var autosaveTimer = null;
+
+                    function autosave() {
+                        var formData = new FormData(form);
+                        fetch('modul/mod_ujian/autosave.php', {
+                            method: 'POST',
+                            body: formData
+                        }).catch(function () {});
+                    }
+
+                    form.addEventListener('change', function (e) {
+                        if (e.target && e.target.name && e.target.name.indexOf('jawaban[') === 0) {
+                            clearTimeout(autosaveTimer);
+                            autosaveTimer = setTimeout(autosave, 500);
+                        }
+                    });
+
+                    setInterval(autosave, 20000);
                 })();
             </script>
         <?php } ?>

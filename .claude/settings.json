@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/d/xampp/mysql/bin/mysql.exe -u root berlian -e \"SELECT ujian_id, nama_ujian, COUNT\\(*\\) as jumlah FROM hasil_ujian GROUP BY ujian_id, nama_ujian;\")",
+      "Bash(/d/xampp/mysql/bin/mysql.exe -u root berlian -e \"SHOW TABLES LIKE '%admin%';\")",
+      "Bash(/d/xampp/mysql/bin/mysql.exe -u root berlian -e \"DESCRIBE admin;\")",
+      "Bash(/d/xampp/php/php -r \"var_dump\\(realpath\\('d:/xampp/htdocs/apotekberlian/masuk/modul/mod_ujian/../../../configurasi/koneksi.php'\\)\\);\")",
+      "Bash(curl -s \"http://127.0.0.1:8099/_test_route.php\")",
+      "Bash(/d/xampp/mysql/bin/mysql.exe -u root berlian -e \"SELECT id_admin, username, password FROM admin WHERE username='bengkel';\")",
+      "Bash(grep -n 'include \"\\\\.\\\\./\\\\.\\\\./\\\\.\\\\./configurasi/koneksi\\\\.php\"' \"d:/xampp/htdocs/apotekberlian/masuk/modul/mod_ujian/\"*.php)",
+      "Read(//c/Program Files/Git/mingw64/etc/ssl/certs/**)",
+      "Bash(GIT_CURL_VERBOSE=0 git ls-remote origin)",
+      "Bash(git config *)",
+      "Bash(git ls-remote *)"
+    ]
+  }
+}
