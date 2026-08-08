@@ -66,6 +66,10 @@ if ($_GET['module'] == 'home') {
                     <div class="box-header with-border">
                         <h3 class="box-title" id="sales-chart-title">Penjualan <?php echo date('F Y'); ?></h3>
                         <div class="box-tools pull-right">
+                            <div class="btn-group" style="margin-right:8px;">
+                                <button type="button" id="sales-type-penjualan" class="btn btn-sm btn-primary" data-tipe="penjualan">Penjualan</button>
+                                <button type="button" id="sales-type-swamedikasi" class="btn btn-sm btn-default" data-tipe="swamedikasi">Swamedikasi</button>
+                            </div>
                             <select id="sales-filter-month" class="form-control input-sm" style="display:inline-block; width:auto; margin-right:6px;">
                                 <?php for ($m = 1; $m <= 12; $m++) { ?>
                                     <option value="<?php echo $m; ?>" <?php echo ((int)date('n') == $m) ? 'selected' : ''; ?>><?php echo str_pad($m, 2, '0', STR_PAD_LEFT); ?></option>
@@ -120,6 +124,7 @@ if ($_GET['module'] == 'home') {
                 var salesChartPreviousItems = [];
                 var salesChartPreviousLabel = 'Bulan Lalu';
                 var salesChartResizeTimer = null;
+                var salesChartTipe = 'penjualan';
 
                 function formatRupiahChart(angka) {
                     var nilai = parseFloat(angka || 0).toFixed(0).toString();
@@ -131,11 +136,11 @@ if ($_GET['module'] == 'home') {
                     var totalPrevious = 0;
 
                     for (var i = 0; i < currentItems.length; i++) {
-                        totalCurrent += parseFloat(currentItems[i].total_penjualan || 0);
+                        totalCurrent += parseFloat(currentItems[i].nilai || 0);
                     }
 
                     for (var j = 0; j < previousItems.length; j++) {
-                        totalPrevious += parseFloat(previousItems[j].total_penjualan || 0);
+                        totalPrevious += parseFloat(previousItems[j].nilai || 0);
                     }
 
                     var growth = 0;
@@ -161,7 +166,10 @@ if ($_GET['module'] == 'home') {
 
                 function renderSalesChart(items, previousItems, previousLabel) {
                     if (!items || items.length === 0) {
-                        $('#sales-chart').html('<div class="text-warning">Belum ada data penjualan pada tabel trkasir.</div>');
+                        var pesanKosong = salesChartTipe === 'swamedikasi' ?
+                            'Belum ada data swamedikasi pada periode ini.' :
+                            'Belum ada data penjualan pada tabel trkasir.';
+                        $('#sales-chart').html('<div class="text-warning">' + pesanKosong + '</div>');
                         return;
                     }
 
@@ -172,13 +180,13 @@ if ($_GET['module'] == 'home') {
                     var ticks = [];
 
                     for (var i = 0; i < items.length; i++) {
-                        var total = parseFloat(items[i].total_penjualan || 0);
+                        var total = parseFloat(items[i].nilai || 0);
                         var totalPrevious = 0;
                         if (previousItems && previousItems[i]) {
-                            totalPrevious = parseFloat(previousItems[i].total_penjualan || 0);
+                            totalPrevious = parseFloat(previousItems[i].nilai || 0);
                         }
 
-                        var tanggalPenuh = items[i].tgl_trkasir || '';
+                        var tanggalPenuh = items[i].tanggal || '';
                         var labelHari = tanggalPenuh;
 
                         if (tanggalPenuh.indexOf('-') > -1) {
@@ -271,13 +279,14 @@ if ($_GET['module'] == 'home') {
                         method: 'GET',
                         data: {
                             bulan: selectedMonth,
-                            tahun: selectedYear
+                            tahun: selectedYear,
+                            tipe: salesChartTipe
                         },
                         dataType: 'json',
                         cache: false,
                         success: function(response) {
                             if (!response.status) {
-                                $('#sales-chart').html('<div class="text-danger">Data penjualan tidak tersedia.</div>');
+                                $('#sales-chart').html('<div class="text-danger">Data tidak tersedia.</div>');
                                 $('#sales-chart-updated').text(response.message || 'Gagal membaca data');
                                 return;
                             }
@@ -288,7 +297,8 @@ if ($_GET['module'] == 'home') {
                             renderSalesChart(salesChartItems, salesChartPreviousItems, salesChartPreviousLabel);
                             updateSalesSummary(salesChartItems, salesChartPreviousItems);
                             if (response.periode_label) {
-                                var title = 'Penjualan ' + response.periode_label;
+                                var judulTipe = response.judul_tipe || 'Penjualan';
+                                var title = judulTipe + ' ' + response.periode_label;
                                 if (response.periode_sebelumnya_label) {
                                     title += ' vs ' + response.periode_sebelumnya_label;
                                 }
@@ -320,6 +330,18 @@ if ($_GET['module'] == 'home') {
                     bindSalesChartResize();
 
                     $('#sales-filter-month, #sales-filter-year').on('change', function() {
+                        loadSalesChart();
+                    });
+
+                    $('#sales-type-penjualan, #sales-type-swamedikasi').on('click', function() {
+                        var tipeBaru = $(this).data('tipe');
+                        if (tipeBaru === salesChartTipe) {
+                            return;
+                        }
+                        salesChartTipe = tipeBaru;
+                        $('#sales-type-penjualan, #sales-type-swamedikasi')
+                            .removeClass('btn-primary').addClass('btn-default');
+                        $(this).removeClass('btn-default').addClass('btn-primary');
                         loadSalesChart();
                     });
 
