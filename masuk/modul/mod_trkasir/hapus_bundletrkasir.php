@@ -68,9 +68,8 @@ while($r = $ambildata->fetch(PDO::FETCH_ASSOC)){
     
     $get_bundle_detail = $db->prepare("SELECT * FROM bundle_detail
                                         WHERE kd_bundle = ?
-                                        AND id_barang = ?
                                         AND kd_barang = ?");
-    $get_bundle_detail->execute([$kd_bundle, $id_barang, $kd_barang]);
+    $get_bundle_detail->execute([$kd_bundle, $kd_barang]);
     $rbundle = $get_bundle_detail->fetch(PDO::FETCH_ASSOC);
     
     // Update Stok Barang

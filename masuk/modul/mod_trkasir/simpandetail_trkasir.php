@@ -188,7 +188,7 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
                 $stokbarangbundle = $db->prepare("SELECT barang.id_barang, barang.kd_barang, barang.stok_barang, bundle_detail.qty_barang
                     FROM barang
                     JOIN bundle_detail
-                    ON barang.id_barang = bundle_detail.id_barang AND barang.kd_barang = bundle_detail.kd_barang
+                    ON barang.kd_barang = bundle_detail.kd_barang
                     WHERE bundle_detail.kd_bundle = :kd_bundle");
                 $stokbarangbundle->execute([
                         ':kd_bundle'    => $kd_barang
@@ -255,21 +255,22 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
                     }
                     
                     $ttlharga   = ($qty_dikurangi) * ($rbundle['hrgjual_barang'] * (1-($disc/100)));
-                    $barang = $db->prepare("SELECT * FROM barang WHERE id_barang = ?
-                                            AND kd_barang = ?");
-                    $barang->execute([$rbundle['id_barang'], $rbundle['kd_barang']]);
+                    $barang = $db->prepare("SELECT * FROM barang WHERE kd_barang = ?");
+                    $barang->execute([$rbundle['kd_barang']]);
                     $brg_modal  = $barang->fetch(PDO::FETCH_ASSOC);
+                    if (!$brg_modal) {
+                        throw new Exception("Data barang bundle tidak ditemukan!");
+                    }
                     $modal      = $brg_modal['hrgsat_barang'];
                     $profit     = $ttlharga - ($modal * $qty_dikurangi);
-                    
-                    $stmt_update_trkasirdetail = $db->prepare("UPDATE trkasir_detail SET 
+
+                    $stmt_update_trkasirdetail = $db->prepare("UPDATE trkasir_detail SET
                             										qty_dtrkasir    = qty_dtrkasir + :qty_dtrkasir,
                             										disc            = :disc,
                                                                     profit          = :profit,
                             										hrgttl_dtrkasir = :ttlharga
                             									WHERE kd_trkasir = :kd_trkasir
                             									AND kd_bundle = :kd_bundle
-                            									AND id_barang = :id_barang
                             									AND kd_barang = :kd_barang");
                     $stmt_update_trkasirdetail->execute([
                             ':qty_dtrkasir' => $qty_dikurangi,
@@ -278,7 +279,6 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
                             ':ttlharga'     => $ttlharga,
                             ':kd_trkasir'   => $kd_trkasir,
                             ':kd_bundle'    => $rbundle['kd_bundle'],
-                            ':id_barang'    => $rbundle['id_barang'],
                             ':kd_barang'    => $rbundle['kd_barang']
                         ]);
                                         
@@ -509,7 +509,7 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
                 $stokbarangbundle = $db->prepare("SELECT barang.id_barang, barang.kd_barang, barang.stok_barang, bundle_detail.qty_barang
                     FROM barang
                     JOIN bundle_detail
-                    ON barang.id_barang = bundle_detail.id_barang AND barang.kd_barang = bundle_detail.kd_barang
+                    ON barang.kd_barang = bundle_detail.kd_barang
                     WHERE bundle_detail.kd_bundle = :kd_bundle");
                 $stokbarangbundle->execute([
                         ':kd_bundle'    => $kd_barang
@@ -579,10 +579,12 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
                 	    
                                             
                 	    $ttlharga   = ($qty_dikurangi) * ($rbundle['hrgjual_barang'] * (1-($disc/100)));
-                        $barang = $db->prepare("SELECT * FROM barang WHERE id_barang = ?
-                                                AND kd_barang = ?");
-                        $barang->execute([$rbundle['id_barang'], $rbundle['kd_barang']]);
+                        $barang = $db->prepare("SELECT * FROM barang WHERE kd_barang = ?");
+                        $barang->execute([$rbundle['kd_barang']]);
                         $brg_modal  = $barang->fetch(PDO::FETCH_ASSOC);
+                        if (!$brg_modal) {
+                            throw new Exception("Data barang bundle tidak ditemukan!");
+                        }
                         $modal      = $brg_modal['hrgsat_barang'];
                         $profit     = $ttlharga - ($modal * $qty_dikurangi);
                         
@@ -607,7 +609,7 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
                                                     nm_bundle,
                                                     waktu)
         	    							  VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-                        $stmt_insert_trkasirdetail->execute([$kd_trkasir, $rbundle['id_barang'], $rbundle['kd_barang'], $rbundle['nm_barang'], $qty_ambil, $rbundle['sat_barang'], $rbundle['hrgjual_barang'], 
+                        $stmt_insert_trkasirdetail->execute([$kd_trkasir, $brg_modal['id_barang'], $rbundle['kd_barang'], $rbundle['nm_barang'], $qty_ambil, $rbundle['sat_barang'], $rbundle['hrgjual_barang'],
                                             $disc, $resep, $modal, $profit, $no_batch, $exp_date, $ttlharga, $tipe, $komisi, $id_admin, $hdbundle['kd_bundle'], $hdbundle['nm_bundle'], $datetime]);
                         
                     }
