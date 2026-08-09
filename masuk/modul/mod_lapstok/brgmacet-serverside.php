@@ -20,13 +20,14 @@ if ($_GET['action'] == "table_data") {
     $querycount = $db->prepare("SELECT
                     COUNT(id_barang) AS jumlah,
                     SUM(hrgsat_barang * stok_barang) AS totalNilaiStok
-                FROM barang 
+                FROM barang
                 WHERE NOT EXISTS (
                     SELECT trkasir_detail.kd_barang FROM trkasir_detail
                     JOIN trkasir ON trkasir_detail.kd_trkasir = trkasir.kd_trkasir
                     WHERE trkasir_detail.kd_barang = barang.kd_barang
                     AND trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
                 )");
+    $querycount->execute();
 
     $datacount = $querycount->fetch(PDO::FETCH_ASSOC);
 
