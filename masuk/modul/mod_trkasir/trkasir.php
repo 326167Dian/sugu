@@ -773,21 +773,21 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 											<input type=text name='kd_hid' id='kd_hid' class='form-control' required='required' value='$re[kd_trkasir]' autocomplete='off' Disabled>
 										</div>
 
-									<label class='col-sm-4 control-label'>Petugas Pelayanan</label>        		
+									<label class='col-sm-4 control-label'>Petugas Pelayanan</label>
 										<div class='col-sm-6'>
-													<select class='form-control' name='id_user' id='id_user'>";
-														$pelayan1 = $db->prepare("SELECT id_user,nama_lengkap FROM trkasir join admin on trkasir.id_user = admin.id_admin
-														WHERE trkasir.kd_trkasir = '$re[kd_trkasir]'");
-														$pelayan1->execute();
-														$rj1 = $pelayan1->fetch(PDO::FETCH_ASSOC);									               		
-													    echo "<option value='$rj1[id_admin]'>$rj1[nama_lengkap]</option>
-													    ";
-														$pelayan = $db->prepare("SELECT * FROM admin WHERE akses_level='petugas' ORDER BY nama_lengkap ASC");
-														$pelayan->execute();
-									               		while($rj = $pelayan->fetch(PDO::FETCH_ASSOC)){	
-                                                          echo "<option value='$rj[id_admin]'>$rj[nama_lengkap]</option>";
+													<select class='form-control' name='id_user' id='id_user'>
+													";
+														$idUserSekarang = isset($re['id_user']) ? (int) $re['id_user'] : 0;
+														$selectedDefault = ($idUserSekarang === 0 || $idUserSekarang === (int) $_SESSION['idadmin']) ? 'selected' : '';
+														echo "<option value='$_SESSION[idadmin]' $selectedDefault>$petugas</option>";
+
+														$pelayan = $db->prepare("SELECT * FROM admin WHERE id_admin != ? ORDER BY nama_lengkap ASC");
+														$pelayan->execute([$_SESSION['idadmin']]);
+									               		while($rj = $pelayan->fetch(PDO::FETCH_ASSOC)){
+                                                          $selectedLain = ($idUserSekarang === (int) $rj['id_admin']) ? 'selected' : '';
+                                                          echo "<option value='$rj[id_admin]' $selectedLain>$rj[nama_lengkap]</option>";
 									                    }
-								
+
 								    		echo "
 													</select>
 											</div>

@@ -281,9 +281,20 @@ if ($kd_trkasir_view !== '') {
                 <?php } ?>
             </p>
 
+            <?php
+                $totalAwal = 0;
+                foreach ($kondisiAwal as $rowAwal) {
+                    $totalAwal += (float) $rowAwal['hrgttl_dtrkasir'];
+                }
+                $totalAkhir = 0;
+                foreach ($kondisiAkhir as $rowAkhir) {
+                    $totalAkhir += (float) $rowAkhir['hrgttl_dtrkasir'];
+                }
+            ?>
+
             <div class="row">
                 <div class="col-md-6">
-                    <h4>Kondisi Awal (saat transaksi final)</h4>
+                    <h4>Kondisi Awal (saat transaksi pertama)</h4>
                     <table class="table table-bordered table-condensed">
                         <thead><tr><th>Item</th><th>Qty</th><th>Total</th></tr></thead>
                         <tbody>
@@ -295,6 +306,12 @@ if ($kd_trkasir_view !== '') {
                             </tr>
 <?php } if (empty($kondisiAwal)) { echo '<tr><td colspan="3">Tidak ada data</td></tr>'; } ?>
                         </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="2" style="text-align:right">Total Transaksi</th>
+                                <th>Rp <?php echo pt_rupiah($totalAwal); ?></th>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
                 <div class="col-md-6">
@@ -310,6 +327,12 @@ if ($kd_trkasir_view !== '') {
                             </tr>
 <?php } if (empty($kondisiAkhir)) { echo '<tr><td colspan="3">Tidak ada data</td></tr>'; } ?>
                         </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="2" style="text-align:right">Total Transaksi</th>
+                                <th>Rp <?php echo pt_rupiah($totalAkhir); ?></th>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>

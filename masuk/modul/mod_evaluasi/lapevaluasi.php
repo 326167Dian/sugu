@@ -73,7 +73,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
 			$tgl_awal = $_POST['tgl_awal'];
 			$tgl_akhir = $_POST['tgl_akhir'];
-			$admin = $db->query("select * from admin where blokir='N' and akses_level='petugas' ");
+			$admin = $db->query("select * from admin where blokir='N' ");
 
 
 
@@ -104,8 +104,10 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 							<?php
 
 							$no = 1;
+							$totalpk = array();
+							$totglobal = array();
 							while ($min = $admin->fetch(PDO::FETCH_ASSOC)) {
-								$kom = $db->query("select sum(profit) as tambahan,qty_dtrkasir,id_user from trkasir_detail join trkasir 
+								$kom = $db->query("select sum(profit) as tambahan,qty_dtrkasir,id_user from trkasir_detail join trkasir
 															on(trkasir_detail.kd_trkasir=trkasir.kd_trkasir) 
 															where trkasir_detail.idadmin='$min[id_admin]' and trkasir.tgl_trkasir between '$tgl_awal' and '$tgl_akhir' ");
 								$misi = $kom->fetch(PDO::FETCH_ASSOC);
@@ -197,6 +199,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 															on(trkasir_detail.kd_trkasir=trkasir.kd_trkasir) 
 															where trkasir_detail.idadmin='$admin' and trkasir.tgl_trkasir between '$tgl_awal' and '$tgl_akhir' ");
 							$no2 = 1;
+							$kumulatif = array();
 							while ($per = $person->fetch(PDO::FETCH_ASSOC)) {
 								$satuan = format_rupiah($per['profit']);
 								$subttl = format_rupiah($per['profit']*$per['qty_dtrkasir']);

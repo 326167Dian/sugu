@@ -36,6 +36,10 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 $data['message'] = 'failed';
                 $data['error'] = 'Detail transaksi masih kosong.';
 			    echo json_encode($data);
+            } elseif (empty($_POST['id_user'])) {
+                $data['message'] = 'failed';
+                $data['error'] = 'Petugas pelayanan belum dipilih.';
+                echo json_encode($data);
             } else {
                 $db->beginTransaction();
 
@@ -158,6 +162,14 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 	//updata trkasir
 	elseif ($module == 'trkasir' and $act == 'ubah_trkasir') {
         header('Content-Type: application/json');
+
+        if (empty($_POST['id_user'])) {
+            echo json_encode([
+                'message' => 'failed',
+                'error' => 'Petugas pelayanan belum dipilih.'
+            ]);
+            exit;
+        }
 
         try {
             $db->beginTransaction();
