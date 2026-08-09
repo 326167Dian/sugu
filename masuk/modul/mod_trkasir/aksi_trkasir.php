@@ -9,6 +9,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 	include "../../../configurasi/koneksi.php";
 	include "../../../configurasi/fungsi_thumb.php";
 	include "../../../configurasi/library.php";
+	include "../../../configurasi/fungsi_perubahan_trkasir.php";
 	$jenistx = $db->prepare("SELECT * FROM trkasir_detail WHERE kd_trkasir='$_POST[kd_trkasir]' GROUP BY kd_trkasir");
 	$jenistx->execute();
 	$jnstx = $jenistx->fetch(PDO::FETCH_ASSOC);
@@ -225,6 +226,10 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 		if ($_SESSION['level'] != 'pemilik') {
 			echo "<script type='text/javascript'>window.location='../../media_admin.php?module=" . $module . "'</script>";
 		} else {
+			// DDL (ALTER/CREATE TABLE) menyebabkan implicit commit di MySQL, jadi harus
+			// dijalankan SEBELUM beginTransaction() supaya tidak menutup transaction secara diam-diam.
+			pastikan_skema_perubahan_trkasir($db);
+
 			try {
 				$db->beginTransaction();
 
@@ -243,6 +248,8 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 				}
 
 				$kd_trkasir = $r1['kd_trkasir'];
+				$tipetx_akhir = isset($r1['tipetx']) ? $r1['tipetx'] : 1;
+				$idAdminHapus = isset($_SESSION['idadmin']) ? $_SESSION['idadmin'] : null;
 
 				// loop data detail
 				$ambildatadetail = $db->prepare("SELECT * FROM trkasir_detail WHERE kd_trkasir=?");
@@ -281,8 +288,11 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 						waktu,
 						tipe,
 						komisi,
-						idadmin
-					) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+						idadmin,
+						tipetx_asal,
+						tipetx_hapus,
+						id_admin_hapus
+					) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 					$stmt_insert_hist->execute([
 						$r['kd_trkasir'],
 						$r['id_barang'],
@@ -298,7 +308,26 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 						$r['waktu'],
 						$r['tipe'],
 						$r['komisi'],
-						$r['idadmin']
+						$r['idadmin'],
+						isset($r['tipetx']) ? $r['tipetx'] : 1,
+						$tipetx_akhir,
+						$idAdminHapus
+					]);
+
+					// Snapshot kondisi akhir transaksi (untuk fitur PERUBAHAN TRANSAKSI)
+					$stmt_insert_restore = $db->prepare("INSERT INTO trkasir_restore (
+						kd_trkasir, petugas, shift, tgl_trkasir, nm_pelanggan, tlp_pelanggan, alamat_pelanggan,
+						ttl_trkasir, dp_bayar, diskon1, diskon2, sisa_bayar, ket_trkasir, id_carabayar,
+						id_dtrkasir, id_barang, kd_barang, nmbrg_dtrkasir, qty_dtrkasir, sat_dtrkasir, hrgjual_dtrkasir, hrgttl_dtrkasir,
+						disc, resep, modal, profit, no_batch, exp_date, waktu, tipe, komisi, idadmin,
+						kd_bundle, nm_bundle, tipetx, id_admin_hapus
+					) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+					$stmt_insert_restore->execute([
+						$r1['kd_trkasir'], $r1['petugas'], $r1['shift'], $r1['tgl_trkasir'], $r1['nm_pelanggan'], $r1['tlp_pelanggan'], $r1['alamat_pelanggan'],
+						$r1['ttl_trkasir'], $r1['dp_bayar'], $r1['diskon1'], $r1['diskon2'], $r1['sisa_bayar'], $r1['ket_trkasir'], $r1['id_carabayar'],
+						$id_dtrkasir, $r['id_barang'], $r['kd_barang'], $r['nmbrg_dtrkasir'], $r['qty_dtrkasir'], $r['sat_dtrkasir'], $r['hrgjual_dtrkasir'], $r['hrgttl_dtrkasir'],
+						$r['disc'], isset($r['resep']) ? $r['resep'] : null, $r['modal'], $r['profit'], $r['no_batch'], $r['exp_date'], $r['waktu'], $r['tipe'], $r['komisi'], $r['idadmin'],
+						isset($r['kd_bundle']) ? $r['kd_bundle'] : null, isset($r['nm_bundle']) ? $r['nm_bundle'] : null, $tipetx_akhir, $idAdminHapus
 					]);
 
 					$stmt_del_detail = $db->prepare("DELETE FROM trkasir_detail WHERE id_dtrkasir = ?");

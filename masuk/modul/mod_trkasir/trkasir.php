@@ -35,6 +35,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 <div class="box-body table-responsive">
                     <a class='btn  btn-success btn-flat' href='?module=trkasir&act=tambah'>(F4)TAMBAH</a>
                     <a class='btn btn-danger btn-flat' href='modul/mod_trkasir/barangmacet.php' target='_blank'>DOWNLOAD STOK MACET</a>
+                    <a class='btn btn-warning btn-flat' href='modul/mod_trkasir/perubahantrkasir.php' target='_blank'>PERUBAHAN TRANSAKSI</a>
                     <?php
                     $lupa = $_SESSION['level'];
                     if ($_SESSION['username'] == 'ernawati') {

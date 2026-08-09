@@ -15,8 +15,9 @@ Jalankan file sesuai urutan nama (timestamp di awal nama file):
 7. `20260516_create_table_hasil_ujian.sql`
 8. `20260516_add_fk_soal_to_soal_header.sql`
 9. `20260516_add_columns_hasil_ujian_for_report.sql`
-10. `20260807_create_table_ujian_progress.sql`
-11. `20260807_fix_hasil_ujian_auto_increment.sql`
+10. `20260716_add_tipetx_perubahan_trkasir.sql`
+11. `20260807_create_table_ujian_progress.sql`
+12. `20260807_fix_hasil_ujian_auto_increment.sql`
 
 ## Cara menjalankan
 
@@ -79,6 +80,13 @@ mysql -u USERNAME -p NAMA_DATABASE < database/migrations/20260223_add_indexes_si
 
 - `ujian_id`, `nama_ujian`, `tidak_dijawab` pada tabel `hasil_ujian`
 
+`20260716_add_tipetx_perubahan_trkasir.sql` menambahkan pelacakan revisi transaksi (fitur "PERUBAHAN TRANSAKSI"):
+
+- kolom `tipetx` pada `trkasir` dan `trkasir_detail`
+- kolom `tipetx_asal`, `tipetx_hapus`, `waktu_hapus`, `id_admin_hapus` pada `trkasir_detail_hist`
+- kolom tambahan pada `trkasir_restore` (termasuk `id_dtrkasir` untuk mencocokkan dengan kondisi awal, dan kolom lain disamakan dengan `trkasir_detail` saat ini) supaya tabel ini bisa dipakai lagi sebagai snapshot kondisi akhir saat transaksi dihapus total
+- tabel baru `trkasir_detail_ubah_qty` untuk mencatat qty sebelum/sesudah saat item yang sudah ada di-tambah qty-nya lagi
+
 `20260807_create_table_ujian_progress.sql` menambahkan tabel autosave progres pengerjaan ujian:
 
 - tabel `ujian_progress` berisi jawaban sementara (JSON) yang tersimpan otomatis saat user memilih opsi, sebelum ujian di-submit. Dipakai untuk menampilkan status "Belum Submit" pada laporan Hasil Ujian. Baris dihapus otomatis begitu user berhasil submit jawaban akhir.
@@ -87,7 +95,7 @@ mysql -u USERNAME -p NAMA_DATABASE < database/migrations/20260223_add_indexes_si
 
 - kolom `id_hasil` (primary key) ternyata kehilangan atribut `AUTO_INCREMENT` di database produksi (migrasi awal sudah benar menyertakannya, tapi struktur live-nya berbeda). Karena `sql_mode` server tidak `STRICT_TRANS_TABLES`, INSERT tanpa `id_hasil` memakai default implisit `0`, sehingga satu baris hasil ujian tersimpan dengan `id_hasil = 0` dan submission berikutnya berisiko gagal total dengan `Duplicate entry '0' for key 'PRIMARY'` (gagal senyap karena ditangkap oleh `try/catch` di `proses.php`). Migrasi ini memindahkan baris `id_hasil = 0` ke id yang aman, lalu mengaktifkan kembali `AUTO_INCREMENT`.
 
-Migrasi bersifat **idempotent** (aman dijalankan ulang). Jika index sudah ada, script akan skip.
+Migrasi index (1-9) bersifat **idempotent**, begitu juga migrasi ke-11 dan ke-12. Migrasi ke-10 (`ADD COLUMN`) **tidak idempotent** (MySQL/MariaDB versi ini tidak mendukung `ADD COLUMN IF NOT EXISTS`) — jangan dijalankan dua kali. Sebagai jaring pengaman, `configurasi/fungsi_perubahan_trkasir.php` melakukan pengecekan `SHOW COLUMNS` di runtime dan akan menambahkan kolom/tabel yang belum ada secara otomatis jika migrasi ini belum sempat dijalankan manual.
 
 ## Verifikasi setelah eksekusi
 
