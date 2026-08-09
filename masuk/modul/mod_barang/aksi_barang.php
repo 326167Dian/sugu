@@ -73,6 +73,25 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 		$tanggal = date('Y-m-d H:i:s');
 		$updated_by = isset($_SESSION['namalengkap']) && !empty($_SESSION['namalengkap']) ? $_SESSION['namalengkap'] : $_SESSION['username'];
 
+		$cekBarang = $db->prepare("SELECT kd_barang, sat_barang FROM barang WHERE id_barang = ?");
+		$cekBarang->execute([$_POST['id']]);
+		$barangLama = $cekBarang->fetch(PDO::FETCH_ASSOC);
+
+		if ($barangLama && $barangLama['sat_barang'] !== $_POST['sat_barang']) {
+			$cekTrbmasuk = $db->prepare("SELECT COUNT(*) FROM trbmasuk_detail WHERE kd_barang = ? AND sat_dtrbmasuk = ?");
+			$cekTrbmasuk->execute([$barangLama['kd_barang'], $barangLama['sat_barang']]);
+			$dipakaiTrbmasuk = (int) $cekTrbmasuk->fetchColumn();
+
+			$cekTrkasir = $db->prepare("SELECT COUNT(*) FROM trkasir_detail WHERE kd_barang = ? AND sat_dtrkasir = ?");
+			$cekTrkasir->execute([$barangLama['kd_barang'], $barangLama['sat_barang']]);
+			$dipakaiTrkasir = (int) $cekTrkasir->fetchColumn();
+
+			if ($dipakaiTrbmasuk > 0 || $dipakaiTrkasir > 0) {
+				echo "<script type='text/javascript'>alert('Satuan tidak bisa diubah karena obat ini sudah digunakan dalam transaksi, bila ingin diubah hubungi developer');history.go(-1);</script>";
+				die();
+			}
+		}
+
 		try {
 			$stmt = $db->prepare("UPDATE barang SET
                                     kd_barang = ?,
