@@ -47,6 +47,20 @@ function pastikan_skema_perubahan_trkasir($db)
                         ADD COLUMN id_admin_hapus INT(11) NULL");
         }
 
+        $cek = $db->prepare("SHOW COLUMNS FROM trkasir_restore LIKE 'id_user'");
+        $cek->execute();
+        if ($cek->rowCount() == 0) {
+            $db->exec("ALTER TABLE trkasir_restore
+                        ADD COLUMN id_user INT(11) NULL,
+                        ADD COLUMN id_pelanggan INT(11) NULL,
+                        ADD COLUMN kodetx VARCHAR(20) NULL,
+                        ADD COLUMN jenistx INT(11) NULL,
+                        ADD COLUMN waktu_trx DATETIME NULL,
+                        ADD COLUMN poin_awal INT(11) NULL,
+                        ADD COLUMN tambahan_poin INT(11) NULL,
+                        ADD COLUMN redeem_poin INT(11) NULL");
+        }
+
         $db->exec("CREATE TABLE IF NOT EXISTS trkasir_detail_ubah_qty (
                         id_log BIGINT(20) NOT NULL AUTO_INCREMENT,
                         kd_trkasir VARCHAR(100) NOT NULL,

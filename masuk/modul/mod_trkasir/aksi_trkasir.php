@@ -326,20 +326,22 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 						$idAdminHapus
 					]);
 
-					// Snapshot kondisi akhir transaksi (untuk fitur PERUBAHAN TRANSAKSI)
+					// Snapshot kondisi akhir transaksi (untuk fitur PERUBAHAN TRANSAKSI & UNDO TRANSAKSI TERHAPUS)
 					$stmt_insert_restore = $db->prepare("INSERT INTO trkasir_restore (
 						kd_trkasir, petugas, shift, tgl_trkasir, nm_pelanggan, tlp_pelanggan, alamat_pelanggan,
 						ttl_trkasir, dp_bayar, diskon1, diskon2, sisa_bayar, ket_trkasir, id_carabayar,
 						id_dtrkasir, id_barang, kd_barang, nmbrg_dtrkasir, qty_dtrkasir, sat_dtrkasir, hrgjual_dtrkasir, hrgttl_dtrkasir,
 						disc, resep, modal, profit, no_batch, exp_date, waktu, tipe, komisi, idadmin,
-						kd_bundle, nm_bundle, tipetx, id_admin_hapus
-					) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+						kd_bundle, nm_bundle, tipetx, id_admin_hapus,
+						id_user, id_pelanggan, kodetx, jenistx, waktu_trx, poin_awal, tambahan_poin, redeem_poin
+					) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 					$stmt_insert_restore->execute([
 						$r1['kd_trkasir'], $r1['petugas'], $r1['shift'], $r1['tgl_trkasir'], $r1['nm_pelanggan'], $r1['tlp_pelanggan'], $r1['alamat_pelanggan'],
 						$r1['ttl_trkasir'], $r1['dp_bayar'], $r1['diskon1'], $r1['diskon2'], $r1['sisa_bayar'], $r1['ket_trkasir'], $r1['id_carabayar'],
 						$id_dtrkasir, $r['id_barang'], $r['kd_barang'], $r['nmbrg_dtrkasir'], $r['qty_dtrkasir'], $r['sat_dtrkasir'], $r['hrgjual_dtrkasir'], $r['hrgttl_dtrkasir'],
 						$r['disc'], isset($r['resep']) ? $r['resep'] : null, $r['modal'], $r['profit'], $r['no_batch'], $r['exp_date'], $r['waktu'], $r['tipe'], $r['komisi'], $r['idadmin'],
-						isset($r['kd_bundle']) ? $r['kd_bundle'] : null, isset($r['nm_bundle']) ? $r['nm_bundle'] : null, $tipetx_akhir, $idAdminHapus
+						isset($r['kd_bundle']) ? $r['kd_bundle'] : null, isset($r['nm_bundle']) ? $r['nm_bundle'] : null, $tipetx_akhir, $idAdminHapus,
+						$r1['id_user'], $r1['id_pelanggan'], $r1['kodetx'], $r1['jenistx'], $r1['waktu_trx'], $r1['poin_awal'], $r1['tambahan_poin'], $r1['redeem_poin']
 					]);
 
 					$stmt_del_detail = $db->prepare("DELETE FROM trkasir_detail WHERE id_dtrkasir = ?");
@@ -386,6 +388,167 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 					$db->rollBack();
 				}
 				echo "<script type='text/javascript'>alert('Gagal menghapus data: " . addslashes($e->getMessage()) . "');window.location='../../media_admin.php?module=" . $module . "'</script>";
+			}
+		}
+	}
+	// Undo transaksi yang sudah dihapus total (kebalikan dari act == 'hapus')
+	elseif ($module == 'trkasir' and $act == 'restore_hapus') {
+
+		if ($_SESSION['level'] != 'pemilik') {
+			echo "<script type='text/javascript'>alert('Menu ini hanya untuk pemilik.');window.location='../../media_admin.php?module=" . $module . "'</script>";
+		} else {
+			include_once "../../../configurasi/fungsi_perubahan_trkasir.php";
+			// DDL (ALTER/CREATE TABLE) menyebabkan implicit commit di MySQL, jadi harus
+			// dijalankan SEBELUM beginTransaction() supaya tidak menutup transaction secara diam-diam.
+			pastikan_skema_perubahan_trkasir($db);
+
+			try {
+				$kd_trkasir = isset($_GET['kd_trkasir']) ? trim($_GET['kd_trkasir']) : '';
+				if ($kd_trkasir === '') {
+					throw new Exception('Kode transaksi tidak valid.');
+				}
+
+				$cekSudahAda = $db->prepare("SELECT 1 FROM trkasir WHERE kd_trkasir = ? LIMIT 1");
+				$cekSudahAda->execute([$kd_trkasir]);
+				if ($cekSudahAda->rowCount() > 0) {
+					throw new Exception('Transaksi ini sudah aktif, tidak perlu di-restore lagi.');
+				}
+
+				$ambilRestore = $db->prepare("SELECT * FROM trkasir_restore WHERE kd_trkasir = ? ORDER BY id_butrkasir ASC");
+				$ambilRestore->execute([$kd_trkasir]);
+				$itemRestore = $ambilRestore->fetchAll(PDO::FETCH_ASSOC);
+
+				if (count($itemRestore) < 1) {
+					throw new Exception('Data transaksi terhapus tidak ditemukan.');
+				}
+
+				// Validasi stok dulu SEBELUM menulis apapun -- kalau ada barang yang stoknya
+				// tidak cukup, seluruh proses restore dibatalkan (tidak boleh minus).
+				// Qty diakumulasi per id_barang dulu (satu barang bisa muncul di beberapa baris
+				// kalau qty aslinya kepotong beberapa batch/FIFO), baru dibandingkan sekali ke stok.
+				$totalQtyPerBarang = array();
+				foreach ($itemRestore as $item) {
+					$idBarang = $item['id_barang'];
+					if (!isset($totalQtyPerBarang[$idBarang])) {
+						$totalQtyPerBarang[$idBarang] = 0;
+					}
+					$totalQtyPerBarang[$idBarang] += (float) $item['qty_dtrkasir'];
+				}
+
+				$kurangStok = array();
+				foreach ($totalQtyPerBarang as $idBarang => $qtyDibutuhkan) {
+					$cekStok = $db->prepare("SELECT nm_barang, stok_barang FROM barang WHERE id_barang = ?");
+					$cekStok->execute([$idBarang]);
+					$brg = $cekStok->fetch(PDO::FETCH_ASSOC);
+
+					$stokTersedia = $brg ? (float) $brg['stok_barang'] : 0;
+					$namaBarang = $brg ? $brg['nm_barang'] : ('barang id ' . $idBarang);
+
+					if ($stokTersedia < $qtyDibutuhkan) {
+						$kurangStok[] = $namaBarang . ' (stok ' . $stokTersedia . ', butuh ' . $qtyDibutuhkan . ')';
+					}
+				}
+
+				if (count($kurangStok) > 0) {
+					throw new Exception('Stok tidak cukup untuk: ' . implode(', ', $kurangStok));
+				}
+
+				$db->beginTransaction();
+
+				$header = $itemRestore[0];
+				$idUser = !empty($header['id_user']) ? $header['id_user'] : $_SESSION['idadmin'];
+				$idPelanggan = isset($header['id_pelanggan']) && $header['id_pelanggan'] !== null ? $header['id_pelanggan'] : 0;
+				$kodetx = isset($header['kodetx']) && $header['kodetx'] !== null ? $header['kodetx'] : '';
+				$jenistx = !empty($header['jenistx']) ? $header['jenistx'] : 1;
+				$waktuTrx = !empty($header['waktu_trx']) ? $header['waktu_trx'] : date('Y-m-d H:i:s');
+				$poinAwal = isset($header['poin_awal']) && $header['poin_awal'] !== null ? $header['poin_awal'] : 0;
+				$tambahanPoin = isset($header['tambahan_poin']) && $header['tambahan_poin'] !== null ? $header['tambahan_poin'] : 0;
+				$redeemPoin = isset($header['redeem_poin']) && $header['redeem_poin'] !== null ? $header['redeem_poin'] : 0;
+
+				$stmt_insert_trkasir = $db->prepare("INSERT INTO trkasir (
+						kd_trkasir, id_user, petugas, shift, tgl_trkasir, id_pelanggan, nm_pelanggan, tlp_pelanggan, alamat_pelanggan,
+						kodetx, ttl_trkasir, dp_bayar, diskon1, diskon2, sisa_bayar, ket_trkasir, id_carabayar, jenistx, tipetx,
+						waktu_trx, poin_awal, tambahan_poin, redeem_poin
+					) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+				$stmt_insert_trkasir->execute([
+					$header['kd_trkasir'], $idUser, $header['petugas'], $header['shift'], $header['tgl_trkasir'], $idPelanggan,
+					$header['nm_pelanggan'], $header['tlp_pelanggan'], $header['alamat_pelanggan'], $kodetx, $header['ttl_trkasir'],
+					$header['dp_bayar'], $header['diskon1'], $header['diskon2'], $header['sisa_bayar'], $header['ket_trkasir'],
+					$header['id_carabayar'], $jenistx, $header['tipetx'], $waktuTrx, $poinAwal, $tambahanPoin, $redeemPoin
+				]);
+
+				foreach ($itemRestore as $item) {
+					$disc = isset($item['disc']) ? $item['disc'] : 0;
+					$resep = !empty($item['resep']) ? $item['resep'] : 'TIDAK';
+					$modal = isset($item['modal']) ? $item['modal'] : 0;
+					$profit = isset($item['profit']) ? $item['profit'] : 0;
+					$noBatch = isset($item['no_batch']) ? $item['no_batch'] : '';
+					$tipe = !empty($item['tipe']) ? $item['tipe'] : 1;
+					$komisi = isset($item['komisi']) ? $item['komisi'] : 0;
+					$idadmin = !empty($item['idadmin']) ? $item['idadmin'] : $idUser;
+					$kdBundle = isset($item['kd_bundle']) ? $item['kd_bundle'] : '';
+					$nmBundle = isset($item['nm_bundle']) ? $item['nm_bundle'] : '';
+
+					$stmt_insert_detail = $db->prepare("INSERT INTO trkasir_detail (
+							kd_trkasir, id_barang, kd_barang, nmbrg_dtrkasir, qty_dtrkasir, sat_dtrkasir, hrgjual_dtrkasir,
+							disc, modal, profit, hrgttl_dtrkasir, no_batch, exp_date, waktu, tipe, komisi, idadmin, tipetx,
+							resep, kd_bundle, nm_bundle
+						) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+					$stmt_insert_detail->execute([
+						$item['kd_trkasir'], $item['id_barang'], $item['kd_barang'], $item['nmbrg_dtrkasir'], $item['qty_dtrkasir'],
+						$item['sat_dtrkasir'], $item['hrgjual_dtrkasir'], $disc, $modal, $profit, $item['hrgttl_dtrkasir'], $noBatch,
+						$item['exp_date'], $item['waktu'], $tipe, $komisi, $idadmin, $item['tipetx'], $resep, $kdBundle, $nmBundle
+					]);
+					$idDtrkasirBaru = $db->lastInsertId();
+
+					// UPDATE STOK ATOMIC - transaksi hidup lagi, barang keluar lagi dari rak.
+					// Sudah divalidasi cukup di awal, tapi cek ulang di sini sebagai jaga-jaga race condition.
+					$stmt_update_barang = $db->prepare("UPDATE barang SET
+										stok_barang = stok_barang - :qty_dikurangi
+										WHERE id_barang = :id_barang AND stok_barang >= :qty_dikurangi2");
+					$stmt_update_barang->execute([
+						':qty_dikurangi' => $item['qty_dtrkasir'],
+						':id_barang' => $item['id_barang'],
+						':qty_dikurangi2' => $item['qty_dtrkasir']
+					]);
+					if ($stmt_update_barang->rowCount() < 1) {
+						throw new Exception('Stok ' . $item['nmbrg_dtrkasir'] . ' berubah menjadi tidak cukup saat proses restore berjalan.');
+					}
+
+					if ((float) $komisi != 0) {
+						$db->prepare("INSERT INTO komisi_pegawai (kd_trkasir, id_dtrkasir, id_admin, ttl_komisi, tgl_komisi, status_komisi)
+										VALUES (?, ?, ?, ?, ?, ?)")
+							->execute([$item['kd_trkasir'], $idDtrkasirBaru, $idadmin, $item['qty_dtrkasir'] * $komisi, date('Y-m-d'), 'on']);
+					}
+
+					if ($noBatch !== '') {
+						$db->prepare("INSERT INTO batch (tgl_transaksi, no_batch, exp_date, qty, satuan, kd_transaksi, kd_barang, status)
+										VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+							->execute([date('Y-m-d H:i:s'), $noBatch, $item['exp_date'], $item['qty_dtrkasir'], $item['sat_dtrkasir'], $item['kd_trkasir'], $item['kd_barang'], 'keluar']);
+					}
+				}
+
+				if ($idPelanggan > 0) {
+					$stmt_update_poin = $db->prepare("UPDATE pelanggan SET total_poin = (total_poin + :tambahan_poin) - :redeem_poin WHERE id_pelanggan = :id_pelanggan");
+					$stmt_update_poin->execute([
+						':tambahan_poin' => $tambahanPoin,
+						':redeem_poin' => $redeemPoin,
+						':id_pelanggan' => $idPelanggan
+					]);
+				}
+
+				$db->prepare("INSERT INTO kartu_stok (kode_transaksi, tgl_sekarang) VALUES (?, ?)")
+					->execute([$kd_trkasir, date('Y-m-d H:i:s')]);
+
+				$db->prepare("DELETE FROM trkasir_restore WHERE kd_trkasir = ?")->execute([$kd_trkasir]);
+
+				$db->commit();
+				echo "<script type='text/javascript'>alert('Transaksi berhasil dikembalikan !');window.location='../../media_admin.php?module=" . $module . "&act=undo_deleted'</script>";
+			} catch (Throwable $e) {
+				if ($db->inTransaction()) {
+					$db->rollBack();
+				}
+				echo "<script type='text/javascript'>alert('Gagal mengembalikan transaksi: " . addslashes($e->getMessage()) . "');window.location='../../media_admin.php?module=" . $module . "&act=undo_deleted'</script>";
 			}
 		}
 	}

@@ -36,6 +36,9 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                     <a class='btn  btn-success btn-flat' href='?module=trkasir&act=tambah'>(F4)TAMBAH</a>
                     <a class='btn btn-danger btn-flat' href='modul/mod_trkasir/barangmacet.php' target='_blank'>DOWNLOAD STOK MACET</a>
                     <a class='btn btn-warning btn-flat' href='modul/mod_trkasir/perubahantrkasir.php' target='_blank'>PERUBAHAN TRANSAKSI</a>
+                    <?php if ($_SESSION['level'] == 'pemilik') { ?>
+                        <a class='btn btn-default btn-flat' href='?module=trkasir&act=undo_deleted'>UNDO TRANSAKSI TERHAPUS</a>
+                    <?php } ?>
                     <?php
                     $lupa = $_SESSION['level'];
                     if ($_SESSION['username'] == 'ernawati') {
@@ -1313,7 +1316,88 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             </div>
         <?php
             break;
-            
+
+        case "undo_deleted":
+            if ($_SESSION['level'] != 'pemilik') {
+                echo "<script type='text/javascript'>alert('Menu ini hanya untuk pemilik.');window.location='media_admin.php?module=trkasir';</script>";
+                break;
+            }
+
+            include_once __DIR__ . "/../../../configurasi/fungsi_perubahan_trkasir.php";
+            pastikan_skema_perubahan_trkasir($db);
+
+            $daftarHapus = $db->query("SELECT kd_trkasir,
+                                            COUNT(*) AS jumlah_item,
+                                            MAX(waktu_hapus) AS tgl_delete,
+                                            MAX(waktu_trx) AS waktu_trx,
+                                            SUM(hrgttl_dtrkasir) AS nilai_transaksi,
+                                            MAX(id_admin_hapus) AS id_admin_hapus
+                                        FROM trkasir_restore
+                                        GROUP BY kd_trkasir
+                                        ORDER BY MAX(waktu_hapus) DESC");
+
+            $petaAdmin = array();
+            $semuaAdmin = $db->query("SELECT id_admin, nama_lengkap FROM admin");
+            while ($a = $semuaAdmin->fetch(PDO::FETCH_ASSOC)) {
+                $petaAdmin[$a['id_admin']] = $a['nama_lengkap'];
+            }
+        ?>
+            <div class="box box-warning box-solid table-responsive">
+                <div class="box-header with-border">
+                    <h3 class="box-title">UNDO TRANSAKSI TERHAPUS</h3>
+                    <div class="box-tools pull-right">
+                        <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="box-body table-responsive">
+                    <a class='btn btn-primary btn-flat' href='?module=trkasir'>KEMBALI KE TRANSAKSI</a>
+                    <br><br>
+
+                    <table id="example1" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Kode Transaksi</th>
+                                <th>Jumlah Item</th>
+                                <th>Tanggal Delete</th>
+                                <th>Waktu Transaksi</th>
+                                <th>Nilai Transaksi</th>
+                                <th>Delete By</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            while ($dh = $daftarHapus->fetch(PDO::FETCH_ASSOC)) {
+                                $tglDelete = !empty($dh['tgl_delete']) ? date('Y-m-d H:i:s', strtotime($dh['tgl_delete'])) : '-';
+                                $waktuTrx = !empty($dh['waktu_trx']) ? date('Y-m-d H:i:s', strtotime($dh['waktu_trx'])) : '-';
+                                $nilai = format_rupiah($dh['nilai_transaksi']);
+                                $deleteBy = isset($petaAdmin[$dh['id_admin_hapus']]) ? $petaAdmin[$dh['id_admin_hapus']] : '-';
+                                $restoreUrl = $aksi . '?module=trkasir&act=restore_hapus&kd_trkasir=' . urlencode($dh['kd_trkasir']);
+
+                                echo "<tr>
+                                        <td>$dh[kd_trkasir]</td>
+                                        <td align='center'>$dh[jumlah_item]</td>
+                                        <td>$tglDelete</td>
+                                        <td>$waktuTrx</td>
+                                        <td align='right'>$nilai</td>
+                                        <td>$deleteBy</td>
+                                        <td><a href=\"javascript:confirmrestore('$restoreUrl')\" class='btn btn-success btn-xs'>Restore</a></td>
+                                      </tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <script>
+                function confirmrestore(restoreUrl) {
+                    if (confirm('Yakin ingin mengembalikan transaksi ini? Stok barang akan dikurangi lagi sesuai qty transaksi.')) {
+                        document.location = restoreUrl;
+                    }
+                }
+            </script>
+        <?php
+            break;
 
     }
 }
