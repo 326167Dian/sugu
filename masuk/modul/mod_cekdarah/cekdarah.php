@@ -58,6 +58,7 @@ switch($_GET['act']){
 	case "tambah":
         $petugas = $_SESSION['namalengkap'];
         $tglharini = date('Y-m-d H-i-s');
+        $id_pelanggan_terpilih = isset($_GET['id']) ? $_GET['id'] : '';
         echo "
 		  <div class='box box-primary box-solid table-responsive'>
 				<div class='box-header with-border'>
@@ -78,7 +79,8 @@ switch($_GET['act']){
 										<select name='id_pelanggan' class='form-control' >";
                                         $tampil = $db->query("SELECT * FROM pelanggan ORDER BY nm_pelanggan ASC");
                                         while ($rk = $tampil->fetch(PDO::FETCH_ASSOC)) {
-                                            echo "<option value=$rk[id_pelanggan]>$rk[nm_pelanggan]</option>";
+                                            $selected = ($id_pelanggan_terpilih !== '' && $rk['id_pelanggan'] == $id_pelanggan_terpilih) ? 'selected' : '';
+                                            echo "<option value=$rk[id_pelanggan] $selected>$rk[nm_pelanggan]</option>";
                                         }
                                         echo "</select>
 									 </div>
