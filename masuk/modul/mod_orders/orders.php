@@ -322,7 +322,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 										
 									<label class='col-sm-4 control-label'>Qty Ecer</label>        		
 										<div class='col-sm-7'>
-											<input type='number' name='qty_dtrbmasuk' id='qty_dtrbmasuk' class='form-control' autocomplete='off'>
+											<input type='number' name='qty_dtrbmasuk' id='qty_dtrbmasuk' class='form-control' autocomplete='off' readonly>
 										</div>
 										
 										
@@ -1061,6 +1061,42 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 			}
 		});
 
+	});
+
+	// edit inline qty grosir -> update qty_dtrbmasuk & hrgttl_dtrbmasuk
+	$(document).on('change', '.edit-qtygrosir', function() {
+
+		var id_dtrbmasuk        = $(this).data('id_dtrbmasuk');
+		var qtygrosir_dtrbmasuk = $(this).val();
+
+		if (qtygrosir_dtrbmasuk === '' || isNaN(qtygrosir_dtrbmasuk) || parseFloat(qtygrosir_dtrbmasuk) <= 0) {
+			alert('Qty Grosir harus diisi angka lebih dari 0');
+			tabel_detail();
+			return;
+		}
+
+		$.ajax({
+			type: 'post',
+			url: 'modul/mod_orders/update_qtygrosir_tbm.php',
+			dataType: 'json',
+			data: {
+				id_dtrbmasuk: id_dtrbmasuk,
+				qtygrosir_dtrbmasuk: qtygrosir_dtrbmasuk
+			},
+			success: function(resp) {
+				if (resp.status !== 'ok') {
+					alert(resp.message || 'Gagal update data');
+				}
+				tabel_detail();
+			}
+		});
+	});
+
+	$(document).on('keydown', '.edit-qtygrosir', function(e) {
+		if (e.which === 13) {
+			e.preventDefault();
+			$(this).trigger('blur');
+		}
 	});
 
 

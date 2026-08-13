@@ -75,7 +75,13 @@
 											 <td align=right>$r[qty_dtrbmasuk]</td>
 											 <td align=center>$r[sat_dtrbmasuk]</td>
 											 <td align=center>$r[konversi]</td>
-											 <td align=center>$r[qtygrosir_dtrbmasuk]</td>
+											 <td align=center>
+											 <input type='number' step='any' min='0.01'
+												 class='form-control input-sm edit-qtygrosir'
+												 data-id_dtrbmasuk='$r[id_dtrbmasuk]'
+												 value='$r[qtygrosir_dtrbmasuk]'
+												 style='width:70px; text-align:center; display:inline-block;'>
+											 </td>
 											 <td align=center>$r[satgrosir_dtrbmasuk]</td>
 											 <td align=right>$hrgsat_dtrbmasuk</td>
 											 <td align=right>$hrgttl_dtrbmasuk</td>
