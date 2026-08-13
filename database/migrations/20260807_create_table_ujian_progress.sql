@@ -12,3 +12,4 @@ CREATE TABLE IF NOT EXISTS ujian_progress (
     PRIMARY KEY (id_progress),
     UNIQUE KEY uniq_ujian_progress_admin_ujian (id_admin, ujian_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+

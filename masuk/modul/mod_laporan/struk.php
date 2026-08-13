@@ -87,6 +87,7 @@ foreach ($detailRowsForPaper as $rowPaper) {
                 'nm' => $nmBundle,
                 'qty' => 1,
                 'harga' => 0,
+                'disc' => '-',
                 'jumlah' => 0,
                 'sat' => ''
             ];
@@ -102,6 +103,7 @@ foreach ($detailRowsForPaper as $rowPaper) {
         'qty' => isset($rowPaper['qty_dtrkasir']) ? $rowPaper['qty_dtrkasir'] : 0,
         'sat' => isset($rowPaper['sat_dtrkasir']) ? $rowPaper['sat_dtrkasir'] : '',
         'harga' => isset($rowPaper['hrgjual_dtrkasir']) ? $rowPaper['hrgjual_dtrkasir'] : 0,
+        'disc' => isset($rowPaper['disc']) ? $rowPaper['disc'] : 0,
         'jumlah' => isset($rowPaper['hrgttl_dtrkasir']) ? $rowPaper['hrgttl_dtrkasir'] : 0
     ];
 }
@@ -114,7 +116,7 @@ foreach ($bundleMap as $bundleRow) {
 $ukuran1 = 20.7; //setingan kertas
 $tambahukuran = 0;
 foreach ($printRows as $rowPaper) {
-    $wrappedName = wrapReceiptText(isset($rowPaper['nm']) ? $rowPaper['nm'] : '', 35);
+    $wrappedName = wrapReceiptText(isset($rowPaper['nm']) ? $rowPaper['nm'] : '', 32);
     $lineCount = max(1, substr_count($wrappedName, "\n") + 1);
     // Tinggi nama + detail qty/harga + jarak antar item.
     $tambahukuran += ($lineCount * 0.24) + 0.52;
@@ -199,9 +201,10 @@ $pdf->ln(0.3);
 $pdf->SetX(0.2);
 $pdf->SetFont('Arial', 'B', 8);
 $pdf->Cell(1, 0.5, 'Item', 0, 0, 'L');
-$pdf->Cell(0.5, 0.5, 'Qty', 0, 0, 'C');
-$pdf->Cell(1.5, 0.5, 'Harga', 0, 0, 'R');
-$pdf->Cell(1.5, 0.5, 'Jumlah', 0, 1, 'R');
+$pdf->Cell(0.7, 0.5, 'Qty', 0, 0, 'C');
+$pdf->Cell(1, 0.5, 'Harga', 0, 0, 'R');
+$pdf->Cell(1.2, 0.5, 'Disc(%)', 0, 0, 'R');
+$pdf->Cell(0.7, 0.5, 'Jml', 0, 1, 'R');
 
 $pdf->SetX(0.2);
 $pdf->SetFont('Arial', 'B', 8);
@@ -220,10 +223,12 @@ foreach ($printRows as $pr) {
 
     $pdf->SetX(0.2);
     $pdf->SetFont('Arial', 'B', 8);
-    $pdf->Cell(1.2, 0.34, $pr['qty'], 0, 0, 'R');
+    $pdf->Cell(1, 0.34, $pr['qty'], 0, 0, 'R');
     $pdf->Cell(0.7, 0.34, isset($pr['sat']) ? $pr['sat'] : '', 0, 0, 'C');
-    $pdf->Cell(1.3, 0.34, format_rupiah($pr['harga']), 0, 0, 'R');
-    $pdf->Cell(1.4, 0.34, format_rupiah($pr['jumlah']), 0, 1, 'R');
+    $pdf->Cell(1.1, 0.34, format_rupiah($pr['harga']), 0, 0, 'R');
+    $discTampil = ($pr['disc'] === '-' || $pr['disc'] === '') ? '-' : $pr['disc'] ;
+    $pdf->Cell(0.7, 0.34, $discTampil, 0, 0, 'R');
+    $pdf->Cell(1.1, 0.34, format_rupiah($pr['jumlah']), 0, 1, 'R');
     $pdf->Ln(0.12);
 }
 
@@ -239,7 +244,7 @@ if ($adaResep) {
 
 $gt = array_sum($st);
 $disc = $gt > 0 ? (($gt - $r1['ttl_trkasir']) / $gt) * 100 : 0;
-$disc_tampil = number_format($disc, 2, ',', '.') . '%';
+$disc_tampil = number_format($disc, 1, ',', '.') . '%';
 $tagihan = format_rupiah($r1['ttl_trkasir']);
 $subtotal = format_rupiah($gt);
 
@@ -263,7 +268,7 @@ $pdf->Cell(1.5, 0.4, $r1['nm_carabayar'], 0, 0, 'L');
 $pdf->SetX(0.2);
 $pdf->SetFont('Arial', 'B', 8);
 $pdf->Cell(2, 0.4, $r1['nm_carabayar'], 0, 0, 'L');
-$pdf->Cell(1.5, 0.4, 'Diskon (%) : ', 0, 0, 'R');
+$pdf->Cell(1.5, 0.4, 'Diskon : ', 0, 0, 'R');
 $pdf->Cell(1.2, 0.4, $disc_tampil, 0, 1, 'R');
 $pdf->SetX(0.2);
 $pdf->SetFont('Arial', 'B', 8);
