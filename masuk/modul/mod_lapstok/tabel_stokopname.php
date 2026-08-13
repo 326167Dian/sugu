@@ -33,44 +33,29 @@ $tgl = $_POST['tgl_awal'];
     </thead>
     <tbody>
         <?php
-        // $query = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT * FROM barang a WHERE a.jenisobat='$jenisobat' AND a.id_barang NOT IN (SELECT id_barang as idb FROM stok_opname b WHERE b.id_barang = a.id_barang AND b.tgl_current = '$time') ORDER BY a.nm_barang");
-
-        $query = $db->prepare("SELECT * FROM barang a 
-                                WHERE a.jenisobat = ? and stok_barang>0 
+        $query = $db->prepare("SELECT a.id_barang, a.kd_barang, a.nm_barang, a.sat_barang, a.hrgsat_barang,
+                                       COALESCE(beli.totalbeli, 0) - COALESCE(jual.totaljual, 0) AS selisih
+                                FROM barang a
+                                LEFT JOIN (
+                                    SELECT kd_barang, SUM(qty_dtrbmasuk) AS totalbeli
+                                    FROM trbmasuk_detail
+                                    GROUP BY kd_barang
+                                ) beli ON beli.kd_barang = a.kd_barang
+                                LEFT JOIN (
+                                    SELECT kd_barang, SUM(qty_dtrkasir) AS totaljual
+                                    FROM trkasir_detail
+                                    GROUP BY kd_barang
+                                ) jual ON jual.kd_barang = a.kd_barang
+                                LEFT JOIN stok_opname so ON so.kd_barang = a.kd_barang AND so.tgl_stokopname = ?
+                                WHERE a.jenisobat = ?
+                                AND (beli.kd_barang IS NOT NULL OR jual.kd_barang IS NOT NULL)
+                                AND so.id_stok_opname IS NULL
                                 ORDER BY a.nm_barang");
-        $query->execute([$jenisobat]);
+        $query->execute([$tgl, $jenisobat]);
 
         $no = 1;
         while ($lihat = $query->fetch(PDO::FETCH_ASSOC)) :
-
-            $stokopname = $db->prepare("SELECT * FROM stok_opname a 
-                                        WHERE a.id_barang = ? 
-                                        AND a.tgl_stokopname = ?");
-            $stokopname->execute([$lihat['id_barang'], $tgl]);
-            $stok = $stokopname->rowCount();
-
-            if ($stok == 0) :
-
-                $beli = "SELECT trbmasuk.tgl_trbmasuk,                                           
-                                       SUM(trbmasuk_detail.qty_dtrbmasuk) AS totalbeli                                            
-                                       FROM trbmasuk_detail join trbmasuk 
-                                       on (trbmasuk_detail.kd_trbmasuk=trbmasuk.kd_trbmasuk)
-                                       WHERE id_barang =?";
-                $buy = $db->prepare($beli);
-                $buy->execute([$lihat['id_barang']]);
-                $buy2 = $buy->fetch(PDO::FETCH_ASSOC);
-
-                $jual = "SELECT trkasir.tgl_trkasir,                                
-                                        sum(trkasir_detail.qty_dtrkasir) AS totaljual
-                                        FROM trkasir_detail join trkasir 
-                                        on (trkasir_detail.kd_trkasir=trkasir.kd_trkasir)
-                                        WHERE id_barang =?";
-
-                $jokul = $db->prepare($jual);
-                $jokul->execute([$lihat['id_barang']]);
-                $sell = $jokul->fetch(PDO::FETCH_ASSOC);
-                $selisih = $buy2['totalbeli'] - $sell['totaljual'];
-
+            $selisih = $lihat['selisih'];
         ?>
 
                 <tr>
@@ -104,7 +89,6 @@ $tgl = $_POST['tgl_awal'];
                 </tr>
 
         <?php
-            endif;
         endwhile; ?>
     </tbody>
 </table>
