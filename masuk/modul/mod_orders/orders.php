@@ -1041,21 +1041,34 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 	}
 
 
+	// hapus baris detail tanpa reload tabel_detail(), supaya halaman DataTable tidak reset ke halaman 1
 	$(document).on('click', '#hapusdetail', function() {
 
-		var id_dtrbmasuk = $(this).data('id_dtrbmasuk');
+		var $btn         = $(this);
+		var id_dtrbmasuk = $btn.data('id_dtrbmasuk');
 
 		$.ajax({
 			type: 'post',
 			url: "modul/mod_orders/hapusdetail_tbm.php",
+			dataType: 'json',
 			data: {
 				id_dtrbmasuk: id_dtrbmasuk
 			},
 
-			success: function() {
-				//setelah simpan data, tabel_detail data terbaru
-				//alert('Hapus data detail berhasil');
-				tabel_detail();
+			success: function(resp) {
+				if (resp.status !== 'ok') {
+					alert(resp.message || 'Gagal menghapus data');
+					return;
+				}
+
+				var $row  = $btn.closest('tr');
+				var table = $('#example5').DataTable();
+
+				table.row($row).remove().draw(false); // false = jangan reset ke halaman 1
+
+				document.getElementById('ttl_trkasir').value = resp.subtotal;
+				HitungDP();
+
 				//hilangkan modal
 				$(".close").click();
 			}

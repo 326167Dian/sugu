@@ -1,12 +1,20 @@
-<?php 
+<?php
 include "../../../configurasi/koneksi.php";
+include "../../../configurasi/fungsi_rupiah.php";
 
-$id_dtrbmasuk  = $_POST['id_dtrbmasuk'];
+$id_dtrbmasuk  = isset($_POST['id_dtrbmasuk']) ? $_POST['id_dtrbmasuk'] : '';
+
+header('Content-Type: application/json');
 
 //ambil data
 $ambildata = $db->prepare("SELECT * FROM ordersdetail WHERE id_dtrbmasuk = ?");
 $ambildata->execute([$id_dtrbmasuk]);
 $r = $ambildata->fetch(PDO::FETCH_ASSOC);
+
+if (!$r) {
+    echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+    exit;
+}
 
 $id_barang = $r['id_barang'];
 $qty_dtrbmasuk = $r['qty_dtrbmasuk'];
@@ -65,4 +73,12 @@ $db->prepare("INSERT INTO ordersdetail_hist(
 // Hapus
 $db->prepare("DELETE FROM ordersdetail WHERE id_dtrbmasuk = ?")->execute([$id_dtrbmasuk]);
 
-?>
+$sumstmt = $db->prepare("SELECT SUM(hrgttl_dtrbmasuk) as grandnya FROM ordersdetail WHERE kd_trbmasuk = ?");
+$sumstmt->execute([$r['kd_trbmasuk']]);
+$rsum = $sumstmt->fetch(PDO::FETCH_ASSOC);
+$subtotal = isset($rsum['grandnya']) ? $rsum['grandnya'] : 0;
+
+echo json_encode([
+    'status'   => 'ok',
+    'subtotal' => format_rupiah($subtotal)
+]);
