@@ -13,6 +13,7 @@ class OrdersPDF extends FPDF {
     private $kdorders;
     private $res;
     private $alt;
+    private $showTableHeader = true;
 
     public function __construct($orientation, $unit, $size, $rh, $kdorders, $res, $alt) {
         parent::__construct($orientation, $unit, $size);
@@ -20,6 +21,12 @@ class OrdersPDF extends FPDF {
         $this->kdorders = $kdorders;
         $this->res = $res;
         $this->alt = $alt;
+    }
+
+    // Dipanggil setelah baris item terakhir dicetak, supaya halaman lanjutan
+    // yang cuma berisi blok tanda tangan tidak ikut menampilkan header tabel barang.
+    public function setShowTableHeader($show) {
+        $this->showTableHeader = $show;
     }
 
     public function Header() {
@@ -92,12 +99,15 @@ class OrdersPDF extends FPDF {
 
         $this->SetLineWidth(0);
         $this->ln(0.8);
-        $this->SetFont('Arial', 'B', 10);
-        $this->Cell(1, 0.7, 'No.', 1, 0, 'C');
-        $this->Cell(6.5, 0.7, 'Nama Obat', 1, 0, 'C');
-        $this->Cell(1.5, 0.7, 'Satuan', 1, 0, 'C');
-        $this->Cell(1.5, 0.7, 'Jumlah', 1, 0, 'C');
-        $this->Cell(2.5, 0.7, 'Ket', 1, 0, 'C');
+
+        if ($this->showTableHeader) {
+            $this->SetFont('Arial', 'B', 10);
+            $this->Cell(1, 0.7, 'No.', 1, 0, 'C');
+            $this->Cell(6.5, 0.7, 'Nama Obat', 1, 0, 'C');
+            $this->Cell(1.5, 0.7, 'Satuan', 1, 0, 'C');
+            $this->Cell(1.5, 0.7, 'Jumlah', 1, 0, 'C');
+            $this->Cell(2.5, 0.7, 'Ket', 1, 0, 'C');
+        }
         // $this->ln(0.7);
         // $this->SetFont('Arial', '', 10);
     }
@@ -171,6 +181,10 @@ while ($lihat = $query1->fetch(PDO::FETCH_ASSOC)) {
     $pdf->SetXY($xAwal, $yAwal + $tinggiBaris);
     $no++;
 }
+
+// Mulai dari sini murni blok tanda tangan; kalau ini meluber ke halaman baru,
+// halaman itu tidak boleh ikut menampilkan header tabel barang (sudah tidak ada itemnya).
+$pdf->setShowTableHeader(false);
 
 $pdf->ln(1.5);
 $pdf->SetFont('Arial', 'B', 10);
