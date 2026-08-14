@@ -1063,15 +1063,23 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
 	});
 
+	// simpan nilai awal saat fokus, untuk rollback jika input tidak valid
+	$(document).on('focus', '.edit-qtygrosir', function() {
+		$(this).data('original-value', $(this).val());
+	});
+
 	// edit inline qty grosir -> update qty_dtrbmasuk & hrgttl_dtrbmasuk
+	// update dilakukan langsung ke sel tabel (bukan reload tabel_detail()) supaya halaman DataTable tidak reset ke halaman 1
 	$(document).on('change', '.edit-qtygrosir', function() {
 
-		var id_dtrbmasuk        = $(this).data('id_dtrbmasuk');
-		var qtygrosir_dtrbmasuk = $(this).val();
+		var $input              = $(this);
+		var id_dtrbmasuk        = $input.data('id_dtrbmasuk');
+		var qtygrosir_dtrbmasuk = $input.val();
+		var originalValue       = $input.data('original-value');
 
 		if (qtygrosir_dtrbmasuk === '' || isNaN(qtygrosir_dtrbmasuk) || parseFloat(qtygrosir_dtrbmasuk) <= 0) {
 			alert('Qty Grosir harus diisi angka lebih dari 0');
-			tabel_detail();
+			$input.val(originalValue);
 			return;
 		}
 
@@ -1086,8 +1094,22 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 			success: function(resp) {
 				if (resp.status !== 'ok') {
 					alert(resp.message || 'Gagal update data');
+					$input.val(originalValue);
+					return;
 				}
-				tabel_detail();
+
+				$input.data('original-value', qtygrosir_dtrbmasuk);
+
+				var $row  = $input.closest('tr');
+				var table = $('#example5').DataTable();
+
+				// index kolom: 0 No, 1 Kode, 2 Nama, 3 Qty Retail, ... 9 Total
+				table.cell($row.find('td').eq(3)).data(resp.qty_dtrbmasuk);
+				table.cell($row.find('td').eq(9)).data(resp.hrgttl_dtrbmasuk);
+				table.draw(false); // false = jangan reset ke halaman 1
+
+				document.getElementById('ttl_trkasir').value = resp.subtotal;
+				HitungDP();
 			}
 		});
 	});
