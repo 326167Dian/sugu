@@ -58,9 +58,9 @@
 			$grandRaw = isset($ttlprice['grandnya']) ? $ttlprice['grandnya'] : 0;
 			$grandnya = format_rupiah($grandRaw);
 
-			$noreq = $db->prepare("SELECT * FROM ordersdetail 
+			$noreq = $db->prepare("SELECT * FROM ordersdetail
 							   WHERE kd_trbmasuk=?
-							   ORDER BY id_dtrbmasuk ASC");
+							   ORDER BY nmbrg_dtrbmasuk ASC");
 			$noreq->execute([$kd_trbmasuk]);
 			$no = 1;
 			while ($r = $noreq->fetch(PDO::FETCH_ASSOC)) {

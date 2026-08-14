@@ -141,7 +141,7 @@ $pdf->AliasNbPages();
 $pdf->AddPage();
 
 $no = 1;
-$query1 = $db->prepare("SELECT * FROM ordersdetail WHERE kd_trbmasuk = ?");
+$query1 = $db->prepare("SELECT * FROM ordersdetail WHERE kd_trbmasuk = ? ORDER BY nmbrg_dtrbmasuk ASC");
 $query1->execute([$kdorders]);
 
 $pdf->ln(0.7);
