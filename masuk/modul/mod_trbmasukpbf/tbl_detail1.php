@@ -52,8 +52,11 @@
         $carabayar = $rf['carabayar'];**/
 
             
-            $stmt_trb = $db->prepare("SELECT * FROM trbmasuk_detail
-                                                WHERE kd_orders =? ORDER BY id_dtrbmasuk ASC");
+            // dibatasi jenis='pbf' supaya item yang sudah diterima lewat modul trbmasuk (non PBF) tidak ikut tampil/bisa diedit di sini
+            $stmt_trb = $db->prepare("SELECT trbmasuk_detail.* FROM trbmasuk_detail
+                                        JOIN trbmasuk ON trbmasuk.kd_trbmasuk = trbmasuk_detail.kd_trbmasuk
+                                        WHERE trbmasuk_detail.kd_orders = ? AND trbmasuk.jenis = 'pbf'
+                                        ORDER BY trbmasuk_detail.id_dtrbmasuk ASC");
             $stmt_trb->execute([$kd_trbmasuk]);
             $ctrb = $stmt_trb->rowCount();
             $no = 1;

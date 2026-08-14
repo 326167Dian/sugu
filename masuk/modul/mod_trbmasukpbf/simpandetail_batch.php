@@ -50,7 +50,11 @@ else {
                             WHERE kd_barang=? AND kd_trbmasuk=? AND id_dtrbmasuk=?");
     $stmt_order->execute([$kd_barang, $kd_orders, $id_dtrbmasuk]);
     $odt = $stmt_order->fetch(PDO::FETCH_ASSOC);
-    
+
+    if (!$odt || $odt['masuk'] != '1') {
+        throw new Exception('Item sudah diterima pada transaksi lain. Silakan muat ulang halaman.');
+    }
+
     $qty_dtrbmasuk  = $_POST['qtygrosir_dtrbmasuk'] * $odt['konversi'];
     
     // Update stok

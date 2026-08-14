@@ -251,7 +251,14 @@ elseif ($module=='trbmasukpbf' AND $act=='hapus'){
 														$r['tipe']
 													]);
 	$db->prepare("DELETE FROM trbmasuk_detail WHERE id_dtrbmasuk = ?")->execute([$id_dtrbmasuk]);
-	
+
+	// Item ini berasal dari pesanan (Cek Pesanan) -> kembalikan statusnya jadi belum diterima
+	// supaya bisa muncul & diterima lagi lewat trbmasukpbf&act=orders, tidak nyangkut/hilang
+	if (!empty($r['kd_orders'])) {
+		$db->prepare("UPDATE ordersdetail SET masuk = '1' WHERE id_barang = ? AND kd_trbmasuk = ?")
+			->execute([$r['id_barang'], $r['kd_orders']]);
+	}
+
 	}
 
   $db->prepare("DELETE FROM trbmasuk WHERE id_trbmasuk = ?")->execute([$_GET['id']]);

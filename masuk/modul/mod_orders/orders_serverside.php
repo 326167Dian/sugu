@@ -96,6 +96,11 @@ if (isset($_GET['action']) && $_GET['action'] == "table_data") {
         $totalFiltered = $datacount['jumlah'];
     }
 
+    $statusstmt = $db->prepare("SELECT
+                                    SUM(CASE WHEN masuk = '1' THEN 1 ELSE 0 END) AS belum_diproses,
+                                    SUM(CASE WHEN masuk = '0' THEN 1 ELSE 0 END) AS telah_diproses
+                                FROM ordersdetail WHERE kd_trbmasuk = ?");
+
     $data = array();
     // $totalNilaiBarang = 0;
     if (!empty($query)) {
@@ -103,15 +108,20 @@ if (isset($_GET['action']) && $_GET['action'] == "table_data") {
         while ($value = $query->fetch(PDO::FETCH_ASSOC)) {
             // for column
 
-            $nestedData['no']           = $no;
-            $nestedData['petugas']      = $value['petugas'];
-            $nestedData['kd_trbmasuk']  = $value['kd_trbmasuk'];
-            $nestedData['tgl_trbmasuk'] = $value['tgl_trbmasuk'];
-            $nestedData['nm_supplier']  = $value['nm_supplier'];
-            $nestedData['ket_trbmasuk'] = $value['ket_trbmasuk'];
-            $nestedData['ttl_trbmasuk'] = $value['ttl_trbmasuk'];
-            $nestedData['dp_bayar']     = $value['dp_bayar'];
-            $nestedData['sisa_bayar']   = $value['sisa_bayar'];
+            $statusstmt->execute([$value['kd_trbmasuk']]);
+            $statusrow = $statusstmt->fetch(PDO::FETCH_ASSOC);
+
+            $nestedData['no']              = $no;
+            $nestedData['petugas']         = $value['petugas'];
+            $nestedData['kd_trbmasuk']     = $value['kd_trbmasuk'];
+            $nestedData['tgl_trbmasuk']    = $value['tgl_trbmasuk'];
+            $nestedData['nm_supplier']     = $value['nm_supplier'];
+            $nestedData['ket_trbmasuk']    = $value['ket_trbmasuk'];
+            $nestedData['ttl_trbmasuk']    = $value['ttl_trbmasuk'];
+            $nestedData['dp_bayar']        = $value['dp_bayar'];
+            $nestedData['sisa_bayar']      = $value['sisa_bayar'];
+            $nestedData['belum_diproses']  = (int) ($statusrow['belum_diproses'] ?? 0);
+            $nestedData['telah_diproses']  = (int) ($statusrow['telah_diproses'] ?? 0);
             $nestedData['aksi'] ="<div class='dropdown'>
   <button class='btn btn-default dropdown-toggle' type='button' id='dropdownMenu1' data-toggle='dropdown' aria-haspopup='true' aria-expanded='true'>
     action

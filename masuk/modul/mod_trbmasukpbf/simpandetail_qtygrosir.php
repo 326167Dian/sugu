@@ -64,6 +64,10 @@ else {
     $order->execute([$kd_barang, $kd_orders]);
     $odt = $order->fetch(PDO::FETCH_ASSOC);
 
+    if (!$odt || $odt['masuk'] != '1') {
+        throw new Exception('Item sudah diterima pada transaksi lain. Silakan muat ulang halaman.');
+    }
+
     // Update stok
     $cekstok = $db->prepare("SELECT * FROM barang WHERE id_barang = ?");
     $cekstok->execute([$odt['id_barang']]);

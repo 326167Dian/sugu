@@ -27,6 +27,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 				</div>
 				<div class="box-body table-responsive">
 					<a class='btn  btn-success btn-flat' href='?module=trbmasuk&act=tambah'>TAMBAH</a>
+					<a class='btn  btn-secondary btn-warning' href='?module=trbmasuk&act=orders'>Cek Pesanan</a>
 					<a class='btn  btn-info btn-flat' href='?module=trbmasuk&act=cari'>CARI NOMOR BATCH</a>
 					<div></div>
 					<p>
@@ -346,14 +347,259 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 						</div>
 						</form>
 							  
-				</div> 
-				
+				</div>
+
 				<div id='tabeldata'>
-				
+
 			</div>";
-            
-           
+
+
 			break;
+
+		case "orders":
+
+			$tampil_pesanan = $db->prepare("SELECT * FROM orders
+										  WHERE id_resto = 'pesan'
+										  ORDER BY orders.id_trbmasuk DESC");
+			$tampil_pesanan->execute();
+		?>
+
+			<div class="box box-primary box-solid">
+				<div class="box-header with-border">
+					<h3 class="box-title">PESANAN OBAT ATAU BARANG</h3>
+					<div class="box-tools pull-right">
+						<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+					</div><!-- /.box-tools -->
+				</div>
+
+				<div class="box-body table-responsive">
+
+					<a class='btn btn-success btn-danger' onclick="javascript: self.history.back()">KEMBALI</a>
+					<hr>
+
+					<table id="tes_pesanan" class="table table-bordered table-striped">
+						<thead>
+							<tr>
+								<th>No</th>
+								<th>Petugas</th>
+								<th>Kode</th>
+								<th>Tanggal</th>
+								<th>Supplier</th>
+								<th>Jenis Pesanan</th>
+								<th>Sub Total</th>
+								<th>Diskon</th>
+								<th>Total Bayar</th>
+								<th width="70">Aksi</th>
+							</tr>
+						</thead>
+						<tbody>
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<script>
+				$(document).ready(function() {
+					$("#tes_pesanan").DataTable({
+						serverSide: true,
+						ajax: {
+							"url": "modul/mod_trbmasuk/orders_serverside.php?action=table_data",
+							"dataType": "JSON",
+							"type": "POST"
+						},
+						columns: [{
+								"data": "no",
+								"className": "text-center"
+							},
+							{
+								"data": "petugas",
+								"className": "text-left"
+							},
+							{
+								"data": "kd_trbmasuk",
+								"className": "text-left"
+							},
+							{
+								"data": "tgl_trbmasuk",
+								"className": "text-center"
+							},
+							{
+								"data": "nm_supplier",
+								"className": "text-left"
+							},
+							{
+								"data": "ket_trbmasuk",
+								"className": "text-left"
+							},
+							{
+								"data": "ttl_trbmasuk",
+								"className": "text-right",
+								"render": function(data, type, row) {
+									return formatRupiah(data);
+								}
+							},
+							{
+								"data": "dp_bayar",
+								"className": "text-right",
+								"render": function(data, type, row) {
+									return formatRupiah(data);
+								}
+							},
+							{
+								"data": "sisa_bayar",
+								"className": "text-right",
+								"render": function(data, type, row) {
+									return formatRupiah(data);
+								}
+							},
+							{
+								"data": "aksi",
+								"className": "text-center"
+							}
+						]
+					});
+				});
+			</script>
+		<?php
+
+			break;
+
+		case "orders_detail":
+
+			$ubah = $db->prepare("SELECT * FROM orders
+									WHERE orders.id_trbmasuk=?");
+			$ubah->execute([$_GET['id']]);
+			$re = $ubah->fetch(PDO::FETCH_ASSOC);
+
+			$cektrbmasuk = $db->prepare("SELECT * FROM trbmasuk
+											WHERE kd_orders=?");
+			$cektrbmasuk->execute([$re['kd_trbmasuk']]);
+			$masuk = $cektrbmasuk->fetch(PDO::FETCH_ASSOC);
+
+			$petugas = $_SESSION['namalengkap'];
+
+			if ($cektrbmasuk->rowCount() > 0) {
+				$kdtransaksi = $masuk['kd_trbmasuk'];
+			} else {
+				$cekkd = $db->prepare("SELECT * FROM kdbm WHERE id_admin=? AND id_resto='pusat' AND stt_kdbm='ON'");
+				$cekkd->execute([$_SESSION['id_admin']]);
+				$ketemucekkd = $cekkd->rowCount();
+				$hcekkd = $cekkd->fetch(PDO::FETCH_ASSOC);
+
+				if ($ketemucekkd > 0) {
+					$kdtransaksi = $hcekkd['kd_trbmasuk'];
+				} else {
+					$kdunik = date('dmyhis');
+					$kdtransaksi = "BMP-" . $kdunik;
+					$cekkd2 = $db->prepare("SELECT * FROM kdbm WHERE kd_trbmasuk=?");
+					$cekkd2->execute([$kdtransaksi]);
+					$ketemucekkd2 = $cekkd2->rowCount();
+					if ($ketemucekkd2 > 0) {
+						$kdunik2 = date('dmyhis') + 1;
+						$kdtransaksi = "BMP-" . $kdunik2;
+					}
+					$stmt_insert_kdbm = $db->prepare("INSERT INTO kdbm(kd_trbmasuk,id_resto,id_admin) VALUES(?, 'pusat', ?)");
+					$stmt_insert_kdbm->execute([$kdtransaksi, $_SESSION['id_admin']]);
+				}
+			}
+
+			$tglharini = date('Y-m-d');
+
+			$stmt_header = $db->prepare("SELECT * FROM setheader");
+			$stmt_header->execute();
+			$rheader = $stmt_header->fetch(PDO::FETCH_ASSOC);
+
+			echo "
+		  <div class='box box-primary box-solid'>
+				<div class='box-header with-border'>
+					<h3 class='box-title'>TERIMA BARANG DARI PESANAN</h3>
+					<div class='box-tools pull-right'>
+						<button class='btn btn-box-tool' data-widget='collapse'><i class='fa fa-minus'></i></button>
+                    </div><!-- /.box-tools -->
+				</div>
+				<div class='box-body table-responsive'>
+
+						<form onsubmit='return false;' method=POST action='$aksi?module=trbmasuk&act=input_order_trbmasuk' enctype='multipart/form-data' class='form-horizontal'>
+
+						        <input type=hidden name='id_trbmasuk' id='id_trbmasuk' value=''>
+							    <input type=hidden name='kd_trbmasuk' id='kd_trbmasuk' value='$kdtransaksi'>
+							    <input type=hidden name='kd_orders' id='kd_orders' value='$re[kd_trbmasuk]'>
+							    <input type=hidden name='stt_aksi' id='stt_aksi' value='input_order_trbmasuk'>
+							    <input type=hidden name='id_supplier' id='id_supplier' value='$re[id_supplier]'>
+							    <input type=hidden name='petugas' id='petugas' value='$petugas'>
+							    <input type=hidden name='min_exp_date' id='min_exp_date' value='$rheader[empatbelas]'>
+
+						<div class='col-lg-6'>
+
+							  <div class='form-group'>
+
+									<label class='col-sm-4 control-label'>Tanggal</label>
+										<div class='col-sm-6'>
+											<div class='input-group date'>
+												<div class='input-group-addon'>
+													<span class='glyphicon glyphicon-th'></span>
+												</div>
+													<input type='text' class='datepicker' name='tgl_trbmasuk' id='tgl_trbmasuk' required='required' value='$tglharini' autocomplete='off'>
+											</div>
+										</div>
+
+									<label class='col-sm-4 control-label'>Kode Pesanan</label>
+										<div class='col-sm-6'>
+											<input type=text name='kd_hid_pesanan' id='kd_hid_pesanan' class='form-control' required='required' value='$re[kd_trbmasuk]' autocomplete='off' Disabled>
+										</div>
+
+									<label class='col-sm-4 control-label'>Kode Transaksi</label>
+										<div class='col-sm-6'>
+											<input type=text name='kd_hid' id='kd_hid' class='form-control' required='required' value='$kdtransaksi' autocomplete='off' Disabled>
+										</div>
+
+									<label class='col-sm-4 control-label'>Supplier</label>
+										<div class='col-sm-6'>
+											<input type='text' class='form-control' name='nm_supplier' id='nm_supplier' required='required' value='$re[nm_supplier]' autocomplete='off' Disabled>
+										</div>
+
+									<label class='col-sm-4 control-label'>Telepon</label>
+										<div class='col-sm-6'>
+											<input type=text name='tlp_supplier' id='tlp_supplier' class='form-control' value='$re[tlp_supplier]' autocomplete='off'>
+										</div>
+
+									<label class='col-sm-4 control-label'>Alamat</label>
+										<div class='col-sm-6'>
+											<textarea name='alamat_supplier' id='alamat_supplier' class='form-control' rows='2'>$re[alamat_trbmasuk]</textarea>
+										</div>
+
+									<label class='col-sm-4 control-label'>No Faktur</label>
+										<div class='col-sm-6'>
+											<textarea name='ket_trbmasuk' id='ket_trbmasuk' class='form-control' rows='2'></textarea>
+											</p>
+											<div class='buttons'>
+												<button type='button' class='btn btn-primary right-block' onclick='simpan_transaksi();'>SIMPAN TRANSAKSI</button>
+												&nbsp&nbsp&nbsp
+												<input class='btn btn-danger' type='button' value=KEMBALI onclick=self.history.back()>
+												</div>
+
+										</div>
+
+							  </div>
+
+						</div>
+						</form>
+
+				</div>
+
+				<div id='tabeldata1'>
+
+			</div>";
+			?>
+			<script>
+				$(document).ready(function() {
+					tabel_detail1();
+				});
+			</script>
+		<?php
+
+			break;
+
 		case "ubah":
 			//cek apakah ada kode transaksi ON berdasarkan user
 
@@ -1198,6 +1444,33 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 		});
 	}
 
+	//fungsi tabel detail pesanan (Cek Pesanan -> Terima Barang)
+	function tabel_detail1() {
+
+		var kd_trbmasuk_el = document.getElementById('kd_trbmasuk');
+		var kd_orders_el = document.getElementById('kd_orders');
+
+		if (!kd_trbmasuk_el || !kd_orders_el) {
+			return;
+		}
+
+		var kd_trbmasuk = kd_trbmasuk_el.value;
+		var kd_orders = kd_orders_el.value;
+
+		$.ajax({
+			url: 'modul/mod_trbmasuk/tbl_detail1.php',
+			type: 'post',
+			data: {
+				'kd_trbmasuk': kd_trbmasuk,
+				'kd_orders': kd_orders
+			},
+			success: function(data) {
+				$('#tabeldata1').html(data);
+			}
+
+		});
+	}
+
 	$('#kd_barang').keydown(function(e) {
 		if (e.which == 13) { // e.which == 13 merupakan kode yang mendeteksi ketika anda   // menekan tombol enter di keyboard
 			//letakan fungsi anda disini
@@ -1250,6 +1523,9 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 		var sisa_bayar = document.getElementById('sisa_bayar').value;
 		var carabayar = document.getElementById('carabayar').value;
 
+		var kd_orders_el = document.getElementById('kd_orders');
+		var kd_orders = kd_orders_el ? kd_orders_el.value : '';
+
 		var ttl_trkasir1 = ttl_trkasir.replace(".", "");
 		var dp_bayar1 = dp_bayar.replace(".", "");
 		var sisa_bayar1 = sisa_bayar.replace(".", "");
@@ -1270,6 +1546,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 				data: {
 					'id_trbmasuk': id_trbmasuk,
 					'kd_trbmasuk': kd_trbmasuk,
+					'kd_orders': kd_orders,
 					'tgl_trbmasuk': tgl_trbmasuk,
 					'id_supplier': id_supplier,
 					'petugas': petugas,

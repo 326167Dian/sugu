@@ -73,7 +73,11 @@ else {
                             WHERE kd_barang=? AND kd_trbmasuk=?");
     $order->execute([$kd_barang, $kd_orders]);
     $odt    = $order->fetch(PDO::FETCH_ASSOC);
-    
+
+    if (!$odt || $odt['masuk'] != '1') {
+        throw new Exception('Item sudah diterima pada transaksi lain. Silakan muat ulang halaman.');
+    }
+
     $qty_dtrbmasuk  = $_POST['qtygrosir_dtrbmasuk'] * $odt['konversi'];
     // $harga_satuan   = round((($hnasat_dtrbmasuk * 1.11) * (1-($odt['diskon']/100))) / $odt['konversi']);
     // $total_harga    = (($hnasat_dtrbmasuk * 1.11) * $odt['qtygrosir_dtrbmasuk']) * (1 - ($odt['diskon']/100));

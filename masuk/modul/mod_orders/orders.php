@@ -53,6 +53,8 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 								<th>Sub Total</th>
 								<th>Diskon</th>
 								<th>Total Bayar</th>
+								<th>Belum Diproses</th>
+								<th>Telah Diproses</th>
 								<th width="70">Aksi</th>
 							</tr>
 						</thead>
@@ -158,6 +160,14 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             				"render": function(data, type, row) {
             					return formatRupiah(data);
             				}
+            			},
+            			{
+            				"data": "belum_diproses",
+            				"className": "text-center"
+            			},
+            			{
+            				"data": "telah_diproses",
+            				"className": "text-center"
             			},
             			{
             				"data": "aksi",
@@ -741,6 +751,14 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 				"render": function(data, type, row) {
 					return formatRupiah(data);
 				}
+			},
+			{
+				"data": "belum_diproses",
+				"className": "text-center"
+			},
+			{
+				"data": "telah_diproses",
+				"className": "text-center"
 			},
 			{
 				"data": "aksi",

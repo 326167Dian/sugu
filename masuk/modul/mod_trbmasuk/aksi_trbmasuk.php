@@ -13,7 +13,7 @@ include "../../../configurasi/library.php";
 
 $module= "trbmasuk";
 $stt_aksi=$_POST['stt_aksi'];
-if($stt_aksi == "input_trbmasuk" || $stt_aksi == "ubah_trbmasuk"){
+if($stt_aksi == "input_trbmasuk" || $stt_aksi == "ubah_trbmasuk" || $stt_aksi == "input_order_trbmasuk"){
 $act=$stt_aksi;
 }else{
 $act=$_GET['act'];
@@ -53,6 +53,65 @@ if ($module=='trbmasuk' AND $act=='input_trbmasuk'){
         $db->commit();
 
         //echo "<script type='text/javascript'>alert('Transkasi berhasil ditambahkan !');window.location='../../media_admin.php?module=".$module."'</script>";
+    } catch (Exception $e) {
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+        http_response_code(500);
+        echo $e->getMessage();
+    }
+
+}
+// Input transaksi barang masuk dari pesanan (Cek Pesanan -> Terima Barang)
+elseif ($module=='trbmasuk' AND $act=='input_order_trbmasuk'){
+
+    try {
+        $db->beginTransaction();
+
+        $cektrbmasuk = $db->prepare("SELECT id_trbmasuk FROM trbmasuk WHERE kd_trbmasuk = ?");
+        $cektrbmasuk->execute([$_POST['kd_trbmasuk']]);
+
+        if ($cektrbmasuk->rowCount() > 0) {
+            $stmt = $db->prepare("UPDATE trbmasuk SET tgl_trbmasuk = ?,
+												id_supplier = ?,
+												nm_supplier = ?,
+												tlp_supplier = ?,
+												alamat_trbmasuk = ?,
+												ttl_trbmasuk = ?,
+												dp_bayar = ?,
+												sisa_bayar = ?,
+												ket_trbmasuk = ?,
+												carabayar = ?
+												WHERE kd_trbmasuk = ?");
+            $stmt->execute([$_POST['tgl_trbmasuk'], $_POST['id_supplier'], $_POST['nm_supplier'], $_POST['tlp_supplier'], $_POST['alamat_trbmasuk'], $_POST['ttl_trkasir'], $_POST['dp_bayar'], $_POST['sisa_bayar'], $_POST['ket_trbmasuk'], $_POST['carabayar'], $_POST['kd_trbmasuk']]);
+        } else {
+            $stmt = $db->prepare("INSERT INTO trbmasuk(id_resto,
+												kd_trbmasuk,
+												kd_orders,
+												tgl_trbmasuk,
+												id_supplier,
+												petugas,
+												nm_supplier,
+												tlp_supplier,
+												alamat_trbmasuk,
+												ttl_trbmasuk,
+												dp_bayar,
+												sisa_bayar,
+												ket_trbmasuk,
+												carabayar,
+												jenis)
+										 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute(['pusat', $_POST['kd_trbmasuk'], $_POST['kd_orders'], $_POST['tgl_trbmasuk'], $_POST['id_supplier'], $_POST['petugas'], $_POST['nm_supplier'], $_POST['tlp_supplier'], $_POST['alamat_trbmasuk'], $_POST['ttl_trkasir'], $_POST['dp_bayar'], $_POST['sisa_bayar'], $_POST['ket_trbmasuk'], $_POST['carabayar'], 'nonpbf']);
+
+            $tgl_sekarang = date('Y-m-d H:i:s', time());
+            $stmt2 = $db->prepare("INSERT INTO kartu_stok(kode_transaksi, tgl_sekarang) VALUES(?,?)");
+            $stmt2->execute([$_POST['kd_trbmasuk'], $tgl_sekarang]);
+        }
+
+        $stmt3 = $db->prepare("UPDATE kdbm SET stt_kdbm = 'OFF' WHERE id_admin = ? AND id_resto = 'pusat' AND kd_trbmasuk = ?");
+        $stmt3->execute([$_SESSION['id_admin'], $_POST['kd_trbmasuk']]);
+
+        $db->commit();
     } catch (Exception $e) {
         if ($db->inTransaction()) {
             $db->rollBack();
@@ -146,7 +205,14 @@ elseif ($module=='trbmasuk' AND $act=='hapus'){
 	$stmt6->execute([$id_dtrbmasuk]);
 	$stmt7 = $db->prepare("DELETE FROM batch WHERE kd_transaksi = ? AND no_batch=? AND status = 'masuk'");
 	$stmt7->execute([$r['kd_trbmasuk'], $r['no_batch']]);
-	
+
+	// Item ini berasal dari pesanan (Cek Pesanan) -> kembalikan statusnya jadi belum diterima
+	// supaya bisa muncul & diterima lagi lewat trbmasuk&act=orders, tidak nyangkut/hilang
+	if (!empty($r['kd_orders'])) {
+		$stmt7b = $db->prepare("UPDATE ordersdetail SET masuk = '1' WHERE id_barang = ? AND kd_trbmasuk = ?");
+		$stmt7b->execute([$r['id_barang'], $r['kd_orders']]);
+	}
+
 	}
 
   $stmt8 = $db->prepare("DELETE FROM trbmasuk WHERE id_trbmasuk = ?");
