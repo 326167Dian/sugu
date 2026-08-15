@@ -17,7 +17,8 @@
       "Bash(curl -s -b PHPSESSID=noo4ph0ht09mnippg7iem5p1kq -X POST -d id_dtrbmasuk=5 -d kd_barang=200553 -d kd_trbmasuk=BMP-140826051710 -d kd_orders=ORD-140826074236 -d hrgsat_dtrbmasuk=4.118 -d qtygrosir_dtrbmasuk=3 http://localhost/apotekberlian/masuk/modul/mod_trbmasuk/simpandetail_hrgbeli_order.php)",
       "Bash(curl -s -b PHPSESSID=noo4ph0ht09mnippg7iem5p1kq -X POST -d draw=1 -d start=0 -d length=5 -d order[0][column]=0 -d order[0][dir]=desc http://localhost/apotekberlian/masuk/modul/mod_orders/orders_serverside.php?action=table_data)",
       "Bash(cat)",
-      "Bash(/d/xampp/php/php.exe /tmp/find_od.php)"
+      "Bash(/d/xampp/php/php.exe /tmp/find_od.php)",
+      "Bash(/d/xampp/php/php.exe /tmp/find_pending2.php)"
     ]
   }
 }

@@ -1,7 +1,12 @@
-<?php 
+<?php
 include "../../../configurasi/koneksi.php";
+include "../../../configurasi/fungsi_rupiah.php";
+include "helper_subtotal.php";
 
 $id_dtrbmasuk  = $_POST['id_dtrbmasuk'];
+$kd_trbmasuk_draft = isset($_POST['kd_trbmasuk']) ? $_POST['kd_trbmasuk'] : '';
+
+header('Content-Type: application/json');
 
 try {
     $db->beginTransaction();
@@ -19,10 +24,11 @@ if ($r1_num > 0) {
     $stmt_stok->execute([$r1['id_barang']]);
     $rst = $stmt_stok->fetch(PDO::FETCH_ASSOC);
     $stok_barang = $rst['stok_barang'];
-    $stokakhir = $stok_barang + $r1['qty_dtrbmasuk'];
-    
+    $stokakhir = $stok_barang - $r1['qty_dtrbmasuk'];
+
     $db->prepare("UPDATE barang SET stok_barang = ? WHERE id_barang = ?")->execute([$stokakhir, $r1['id_barang']]);
-    $db->prepare("UPDATE ordersdetail SET masuk = '0' WHERE id_barang = ? AND kd_trbmasuk = ?")->execute([$r1['id_barang'], $r1['kd_orders']]);
+    // dikembalikan jadi belum diterima ('1') supaya bisa diterima ulang lewat Cek Pesanan, bukan hilang/nyangkut
+    $db->prepare("UPDATE ordersdetail SET masuk = '1' WHERE id_barang = ? AND kd_trbmasuk = ?")->execute([$r1['id_barang'], $r1['kd_orders']]);
     // Insert History Deleted
     
     $stmt_inser_log = $db->prepare("INSERT INTO trbmasuk_detail_hist (
@@ -78,13 +84,18 @@ if ($r1_num > 0) {
     $stmt_update->execute([$id_dtrbmasuk, $_POST['kd_trbmasuk']]);
 }
 
+    $subtotal = hitung_subtotal_pbf($db, $kd_trbmasuk_draft);
+
     $db->commit();
-    echo 'OK';
+    echo json_encode([
+        'status'   => 'ok',
+        'subtotal' => format_rupiah($subtotal)
+    ]);
 } catch (Exception $e) {
     if ($db->inTransaction()) {
         $db->rollBack();
     }
     http_response_code(500);
-    echo $e->getMessage();
+    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }
 ?>

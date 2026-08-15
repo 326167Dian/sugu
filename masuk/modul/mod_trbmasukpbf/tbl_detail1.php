@@ -26,6 +26,7 @@
                 <th style="vertical-align: middle; background-color: #008000; text-align: left; ">Nama Barang</th>
                 <th style="vertical-align: middle; background-color: #008000; text-align: right; ">Qty Grosir</th>
                 <th style="vertical-align: middle; background-color: #008000; text-align: center; ">Satuan Grosir</th>
+                <th style="vertical-align: middle; background-color: #008000; text-align: center; ">Konversi</th>
                 <th style="vertical-align: middle; background-color: #008000; text-align: center; ">No. Batch</th>
                 <th style="vertical-align: middle; background-color: #008000; text-align: center; ">Exp. Date</th>
                 <th style="vertical-align: middle; background-color: #008000; text-align: center; ">HNA</th>
@@ -56,7 +57,7 @@
             $stmt_trb = $db->prepare("SELECT trbmasuk_detail.* FROM trbmasuk_detail
                                         JOIN trbmasuk ON trbmasuk.kd_trbmasuk = trbmasuk_detail.kd_trbmasuk
                                         WHERE trbmasuk_detail.kd_orders = ? AND trbmasuk.jenis = 'pbf'
-                                        ORDER BY trbmasuk_detail.id_dtrbmasuk ASC");
+                                        ORDER BY trbmasuk_detail.nmbrg_dtrbmasuk ASC");
             $stmt_trb->execute([$kd_trbmasuk]);
             $ctrb = $stmt_trb->rowCount();
             $no = 1;
@@ -111,12 +112,19 @@
 											 </td>
 											 <td align='center'>$trb[satgrosir_dtrbmasuk]</td>
 											 <td align='center'>
+											    <input type='number' id='dkonversi' value='$trb[konversi]' style='width: 60px; text-align: center'
+											    data-id_dtrbmasuk           = '$trb[id_dtrbmasuk]'
+											    data-kd_barang              = '$trb[kd_barang]'
+											    data-qtygrosir_dtrbmasuk    = '$trb[qty_grosir]'
+											    >
+											 </td>
+											 <td align='center'>
 											    <input type='text' id='dno_batch' value='$trb[no_batch]' style='width: 100px'
 											    data-id_dtrbmasuk           = '$trb[id_dtrbmasuk]'
 											    data-kd_barang              = '$trb[kd_barang]'
 											    data-qtygrosir_dtrbmasuk    = '$trb[qty_grosir]'
 											    >
-											    
+
 											 </td>
 											 <td align='center'>
 											    <input type='text' class='datepicker' id='dexp_date' value='$trb[exp_date]'
@@ -165,10 +173,10 @@
                     }
             }
             
-            $stmt = $db->prepare("SELECT * FROM ordersdetail 
+            $stmt = $db->prepare("SELECT * FROM ordersdetail
     							   WHERE kd_trbmasuk=?
     							   AND masuk = '1'
-    							   ORDER BY id_dtrbmasuk ASC");
+    							   ORDER BY nmbrg_dtrbmasuk ASC");
             $stmt->execute([$kd_trbmasuk]);
             
             $cord = $stmt->rowCount();
@@ -217,12 +225,19 @@
     						</td>
     						<td align='center'>$r[satgrosir_dtrbmasuk]</td>
     						<td align='center'>
+    							<input type='number' id='dkonversi' value='$r[konversi]' style='width: 60px; text-align: center'
+    							    data-id_dtrbmasuk           = '$r[id_dtrbmasuk]'
+    								data-kd_barang              = '$r[kd_barang]'
+    								data-qtygrosir_dtrbmasuk    = '$r[qtygrosir_dtrbmasuk]'
+    								>
+    						</td>
+    						<td align='center'>
     							<input type='text' id='dno_batch' value='$no_batch' style='width: 100px' required
     							    data-id_dtrbmasuk           = '$r[id_dtrbmasuk]'
     								data-kd_barang              = '$r[kd_barang]'
     								data-qtygrosir_dtrbmasuk    = '$r[qtygrosir_dtrbmasuk]'
     								>
-    											    
+
     						</td>
     						<td align='center'>
     							<input type='text' class='datepicker' id='dexp_date' value='$r[exp_date]' required
@@ -282,8 +297,8 @@
             
             echo "</tbody>
                         <tr>
-                            <td colspan='7'><h4><center>Total Harga </center></h4>  </td>
-                            <td colspan='3'><h4><strong> Rp. $tampiltotalharga  ,- </strong></h4></td> 
+                            <td colspan='8'><h4><center>Total Harga </center></h4>  </td>
+                            <td colspan='3'><h4><strong> Rp. <span id='ttl_harga_display'>$tampiltotalharga</span>  ,- </strong></h4></td>
                         </tr>
 </table>
 						
@@ -346,46 +361,155 @@
 					</div>";
             ?>
             <script>
+                // Update sel-sel yang terkena dampak pada baris yang diedit, tanpa reload seluruh tabel
+                // (supaya baris lain / posisi halaman DataTable tidak ikut berubah)
+                function applyRowUpdatePbf($input, resp) {
+                    var $row = $input.closest('tr');
+
+                    $row.find('[data-id_dtrbmasuk]').each(function() {
+                        $(this).data('id_dtrbmasuk', resp.id_dtrbmasuk);
+                        $(this).attr('data-id_dtrbmasuk', resp.id_dtrbmasuk);
+                    });
+
+                    if (typeof resp.qty_grosir !== 'undefined') {
+                        $row.find('[data-qtygrosir_dtrbmasuk]').each(function() {
+                            $(this).data('qtygrosir_dtrbmasuk', resp.qty_grosir);
+                            $(this).attr('data-qtygrosir_dtrbmasuk', resp.qty_grosir);
+                        });
+                    }
+
+                    if (typeof resp.hnadisc_text !== 'undefined') {
+                        $row.find('td').eq(10).text(resp.hnadisc_text);
+                    }
+                    if (typeof resp.total_text !== 'undefined') {
+                        $row.find('td').eq(12).text(resp.total_text);
+                    }
+
+                    if (typeof resp.subtotal !== 'undefined') {
+                        document.getElementById('ttl_harga_display').textContent = resp.subtotal;
+                        var ppn = Math.round(parseFloat(resp.subtotal.split('.').join('')) * 1.11);
+                        document.getElementById('ttl_trkasir').value = formatRupiah(ppn);
+                        HitungDP();
+                    }
+                }
+
+                function tampilkanErrorPbf(xhr, $input, originalValue) {
+                    var msg = 'Gagal menyimpan perubahan';
+                    try {
+                        var parsed = JSON.parse(xhr.responseText);
+                        if (parsed && parsed.message) {
+                            msg = parsed.message;
+                        }
+                    } catch (e) {}
+                    alert(msg);
+                    if ($input && typeof originalValue !== 'undefined') {
+                        $input.val(originalValue);
+                    }
+                }
+
                 $(document).ready(function() {
                     HitungDP();
                     var table = $("#example5").DataTable()
-                    
+
+                    // simpan nilai awal saat fokus, untuk rollback jika gagal / tidak valid
+                    $('#example5 tbody').on('focus', 'input', function() {
+                        $(this).data('original-value', $(this).val());
+                    });
+
                     $('#example5 tbody').on('change', '#dqtygrosir_dtrbmasuk', function () {
-            		    var id_dtrbmasuk        = $(this).data('id_dtrbmasuk');
-            		    var kd_barang           = $(this).data('kd_barang');
-            		    var qtygrosir_dtrbmasuk = $(this).val();
+                        var $input = $(this);
+                        var originalValue      = $input.data('original-value');
+            		    var id_dtrbmasuk        = $input.data('id_dtrbmasuk');
+            		    var kd_barang           = $input.data('kd_barang');
+            		    var qtygrosir_dtrbmasuk = $input.val();
             		    var kd_orders           = $('#kd_trbmasuk').val();
             		    var kd_trbmasuk         = $('#kd_trbmasuk1').val();
-            		    		
+
+                        if (qtygrosir_dtrbmasuk === '' || isNaN(qtygrosir_dtrbmasuk) || parseFloat(qtygrosir_dtrbmasuk) <= 0) {
+                            alert('Qty Grosir harus diisi angka lebih dari 0');
+                            $input.val(originalValue);
+                            return;
+                        }
+
                         $.ajax({
                             url: 'modul/mod_trbmasukpbf/simpandetail_qtygrosir.php',
                             type: 'post',
+                            dataType: 'json',
                             data: {
                                 'id_dtrbmasuk'          : id_dtrbmasuk,
                                 'kd_trbmasuk'           : kd_trbmasuk,
                                 'kd_orders'             : kd_orders,
                                 'kd_barang'             : kd_barang,
                                 'qtygrosir_dtrbmasuk'   : qtygrosir_dtrbmasuk,
-                                
                             },
-                            success: function (data) {
-                                tabel_detail1();
+                            success: function (resp) {
+                                if (resp.status !== 'ok') {
+                                    alert(resp.message || 'Gagal menyimpan perubahan');
+                                    $input.val(originalValue);
+                                    return;
+                                }
+                                applyRowUpdatePbf($input, resp);
+                            },
+                            error: function (xhr) {
+                                tampilkanErrorPbf(xhr, $input, originalValue);
                             }
-                
                         });
                     });
-            		
-            		$('#example5 tbody').on('change', '#dhnasat_dtrbmasuk', function () {
-            		    var id_dtrbmasuk        = $(this).data('id_dtrbmasuk');
-            		    var kd_barang           = $(this).data('kd_barang');
-            		    var qtygrosir_dtrbmasuk = $(this).data('qtygrosir_dtrbmasuk');
-            		    var hnasat_dtrbmasuk    = $(this).val();
+
+            		$('#example5 tbody').on('change', '#dkonversi', function () {
+                        var $input = $(this);
+                        var originalValue = $input.data('original-value');
+            		    var id_dtrbmasuk        = $input.data('id_dtrbmasuk');
+            		    var kd_barang           = $input.data('kd_barang');
+            		    var konversi            = $input.val();
             		    var kd_orders           = $('#kd_trbmasuk').val();
             		    var kd_trbmasuk         = $('#kd_trbmasuk1').val();
-            		    		
+
+                        if (konversi === '' || isNaN(konversi) || parseFloat(konversi) <= 0) {
+                            alert('Konversi harus diisi angka lebih dari 0');
+                            $input.val(originalValue);
+                            return;
+                        }
+
+                        $.ajax({
+                            url: 'modul/mod_trbmasukpbf/simpandetail_konversi.php',
+                            type: 'post',
+                            dataType: 'json',
+                            data: {
+                                'id_dtrbmasuk'          : id_dtrbmasuk,
+                                'kd_trbmasuk'           : kd_trbmasuk,
+                                'kd_orders'             : kd_orders,
+                                'kd_barang'             : kd_barang,
+                                'konversi'              : konversi,
+                            },
+                            success: function (resp) {
+                                if (resp.status !== 'ok') {
+                                    alert(resp.message || 'Gagal menyimpan perubahan');
+                                    $input.val(originalValue);
+                                    return;
+                                }
+                                applyRowUpdatePbf($input, resp);
+                            },
+                            error: function (xhr) {
+                                tampilkanErrorPbf(xhr, $input, originalValue);
+                            }
+                        });
+                    });
+
+            		$('#example5 tbody').on('change', '#dhnasat_dtrbmasuk', function () {
+                        var $input = $(this);
+                        var originalValue = $input.data('original-value');
+            		    var id_dtrbmasuk        = $input.data('id_dtrbmasuk');
+            		    var kd_barang           = $input.data('kd_barang');
+            		    var qtygrosir_dtrbmasuk = $input.data('qtygrosir_dtrbmasuk');
+            		    var hnasat_dtrbmasuk    = $input.val();
+            		    var kd_orders           = $('#kd_trbmasuk').val();
+            		    var kd_trbmasuk         = $('#kd_trbmasuk1').val();
+
                         $.ajax({
                             url: 'modul/mod_trbmasukpbf/simpandetail_hna.php',
                             type: 'post',
+                            dataType: 'json',
                             data: {
                                 'id_dtrbmasuk'          : id_dtrbmasuk,
                                 'kd_trbmasuk'           : kd_trbmasuk,
@@ -394,24 +518,34 @@
                                 'hnasat_dtrbmasuk'      : hnasat_dtrbmasuk,
                                 'qtygrosir_dtrbmasuk'   : qtygrosir_dtrbmasuk
                             },
-                            success: function (data) {
-                                tabel_detail1();
+                            success: function (resp) {
+                                if (resp.status !== 'ok') {
+                                    alert(resp.message || 'Gagal menyimpan perubahan');
+                                    $input.val(originalValue);
+                                    return;
+                                }
+                                applyRowUpdatePbf($input, resp);
+                            },
+                            error: function (xhr) {
+                                tampilkanErrorPbf(xhr, $input, originalValue);
                             }
-                
                         });
                     });
-                    
+
                     $('#example5 tbody').on('change', '#dno_batch', function () {
-            		    var id_dtrbmasuk        = $(this).data('id_dtrbmasuk');
-            		    var kd_barang           = $(this).data('kd_barang');
-            		    var no_batch            = $(this).val();
-            		    var qtygrosir_dtrbmasuk = $(this).data('qtygrosir_dtrbmasuk');
+                        var $input = $(this);
+                        var originalValue = $input.data('original-value');
+            		    var id_dtrbmasuk        = $input.data('id_dtrbmasuk');
+            		    var kd_barang           = $input.data('kd_barang');
+            		    var no_batch            = $input.val();
+            		    var qtygrosir_dtrbmasuk = $input.data('qtygrosir_dtrbmasuk');
             		    var kd_orders           = $('#kd_trbmasuk').val();
             		    var kd_trbmasuk         = $('#kd_trbmasuk1').val();
-            		    
+
             		    $.ajax({
                             url: 'modul/mod_trbmasukpbf/simpandetail_batch.php',
                             type: 'post',
+                            dataType: 'json',
                             data: {
                                 'id_dtrbmasuk'          : id_dtrbmasuk,
                                 'kd_trbmasuk'           : kd_trbmasuk,
@@ -420,39 +554,45 @@
                                 'no_batch'              : no_batch,
                                 'qtygrosir_dtrbmasuk'   : qtygrosir_dtrbmasuk,
                             },
-                            success: function (data) {
-                                tabel_detail1();
+                            success: function (resp) {
+                                if (resp.status !== 'ok') {
+                                    alert(resp.message || 'Gagal menyimpan perubahan');
+                                    $input.val(originalValue);
+                                    return;
+                                }
+                                applyRowUpdatePbf($input, resp);
                             },
-                            error: function(xhr, error, thrown) {
-                                console.log("AJAX Error:");
-                                console.log(xhr.responseText);
+                            error: function (xhr) {
+                                tampilkanErrorPbf(xhr, $input, originalValue);
                             }
                         });
                     });
-                    
+
                     $('#example5 tbody').on('change', '#dexp_date', function () {
-            		    var id_dtrbmasuk        = $(this).data('id_dtrbmasuk');
-            		    var kd_barang           = $(this).data('kd_barang');
-            		    var qtygrosir_dtrbmasuk = $(this).data('qtygrosir_dtrbmasuk');
-            		    var exp_date            = $(this).val();
+                        var $input = $(this);
+                        var originalValue = $input.data('original-value');
+            		    var id_dtrbmasuk        = $input.data('id_dtrbmasuk');
+            		    var kd_barang           = $input.data('kd_barang');
+            		    var qtygrosir_dtrbmasuk = $input.data('qtygrosir_dtrbmasuk');
+            		    var exp_date            = $input.val();
             		    var kd_orders           = $('#kd_trbmasuk').val();
             		    var kd_trbmasuk         = $('#kd_trbmasuk1').val();
             		    var tgl_trbmasuk = document.getElementById('tgl_trbmasuk').value;
             		    var min_exp_date = document.getElementById('min_exp_date').value;
-        
+
                         const tglAwal = new Date(tgl_trbmasuk);
                         const tglAkhir = new Date(exp_date);
                         const selisih = hitungSelisihBulan(tglAwal, tglAkhir);
-                        console.log(selisih);
                         if(parseInt(selisih) < parseInt(min_exp_date)){
                             alert('Minimum Expired Date '+min_exp_date+' Hari dari Hari Ini!');
-                            tabel_detail1();
+                            $input.val(originalValue);
                             return false;
                         }
-            
+
                         $.ajax({
                             url: 'modul/mod_trbmasukpbf/simpandetail_expdate.php',
                             type: 'post',
+                            dataType: 'json',
                             data: {
                                 'id_dtrbmasuk'          : id_dtrbmasuk,
                                 'kd_trbmasuk'           : kd_trbmasuk,
@@ -461,24 +601,34 @@
                                 'exp_date'              : exp_date,
                                 'qtygrosir_dtrbmasuk'   : qtygrosir_dtrbmasuk
                             },
-                            success: function (data) {
-                                tabel_detail1();
+                            success: function (resp) {
+                                if (resp.status !== 'ok') {
+                                    alert(resp.message || 'Gagal menyimpan perubahan');
+                                    $input.val(originalValue);
+                                    return;
+                                }
+                                applyRowUpdatePbf($input, resp);
+                            },
+                            error: function (xhr) {
+                                tampilkanErrorPbf(xhr, $input, originalValue);
                             }
-                
                         });
                     });
-                    
+
                     $('#example5 tbody').on('change', '#dhrgjual_dtrbmasuk', function () {
-            		    var id_dtrbmasuk        = $(this).data('id_dtrbmasuk');
-            		    var kd_barang           = $(this).data('kd_barang');
-            		    var qtygrosir_dtrbmasuk = $(this).data('qtygrosir_dtrbmasuk');
-            		    var hrgjual_dtrbmasuk   = $(this).val();
+                        var $input = $(this);
+                        var originalValue = $input.data('original-value');
+            		    var id_dtrbmasuk        = $input.data('id_dtrbmasuk');
+            		    var kd_barang           = $input.data('kd_barang');
+            		    var qtygrosir_dtrbmasuk = $input.data('qtygrosir_dtrbmasuk');
+            		    var hrgjual_dtrbmasuk   = $input.val();
             		    var kd_orders           = $('#kd_trbmasuk').val();
             		    var kd_trbmasuk         = $('#kd_trbmasuk1').val();
-            		    		
+
                         $.ajax({
                             url: 'modul/mod_trbmasukpbf/simpandetail_hrgjual.php',
                             type: 'post',
+                            dataType: 'json',
                             data: {
                                 'id_dtrbmasuk'          : id_dtrbmasuk,
                                 'kd_trbmasuk'           : kd_trbmasuk,
@@ -487,24 +637,34 @@
                                 'hrgjual_dtrbmasuk'     : hrgjual_dtrbmasuk,
                                 'qtygrosir_dtrbmasuk'   : qtygrosir_dtrbmasuk
                             },
-                            success: function (data) {
-                                tabel_detail1();
+                            success: function (resp) {
+                                if (resp.status !== 'ok') {
+                                    alert(resp.message || 'Gagal menyimpan perubahan');
+                                    $input.val(originalValue);
+                                    return;
+                                }
+                                applyRowUpdatePbf($input, resp);
+                            },
+                            error: function (xhr) {
+                                tampilkanErrorPbf(xhr, $input, originalValue);
                             }
-                
                         });
                     });
-                    
+
                     $('#example5 tbody').on('change', '#ddiskon', function () {
-            		    var id_dtrbmasuk        = $(this).data('id_dtrbmasuk');
-            		    var kd_barang           = $(this).data('kd_barang');
-            		    var qtygrosir_dtrbmasuk = $(this).val();
-            		    var diskon              = $(this).val();
+                        var $input = $(this);
+                        var originalValue = $input.data('original-value');
+            		    var id_dtrbmasuk        = $input.data('id_dtrbmasuk');
+            		    var kd_barang           = $input.data('kd_barang');
+            		    var qtygrosir_dtrbmasuk = $input.data('qtygrosir_dtrbmasuk');
+            		    var diskon              = $input.val();
             		    var kd_orders           = $('#kd_trbmasuk').val();
             		    var kd_trbmasuk         = $('#kd_trbmasuk1').val();
-            		    		
+
                         $.ajax({
                             url: 'modul/mod_trbmasukpbf/simpandetail_diskon.php',
                             type: 'post',
+                            dataType: 'json',
                             data: {
                                 'id_dtrbmasuk'          : id_dtrbmasuk,
                                 'kd_trbmasuk'           : kd_trbmasuk,
@@ -513,10 +673,17 @@
                                 'diskon'                : diskon,
                                 'qtygrosir_dtrbmasuk'   : qtygrosir_dtrbmasuk,
                             },
-                            success: function (data) {
-                                tabel_detail1();
+                            success: function (resp) {
+                                if (resp.status !== 'ok') {
+                                    alert(resp.message || 'Gagal menyimpan perubahan');
+                                    $input.val(originalValue);
+                                    return;
+                                }
+                                applyRowUpdatePbf($input, resp);
+                            },
+                            error: function (xhr) {
+                                tampilkanErrorPbf(xhr, $input, originalValue);
                             }
-                
                         });
                     });
                 });

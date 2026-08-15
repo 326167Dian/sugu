@@ -2696,29 +2696,51 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
         });
 
+        // hapus baris tanpa reload tabel_detail1(), supaya halaman DataTable tidak reset ke halaman 1
         $(document).on('click', '#hapusorder', function () {
 
-            var id_dtrbmasuk = $(this).data('id_dtrbmasuk');
+            var $btn = $(this);
+            var id_dtrbmasuk = $btn.data('id_dtrbmasuk');
             var kd_orders = $('#kd_trbmasuk').val();
-    
+            var kd_trbmasuk = $('#kd_trbmasuk1').val();
+
             $.ajax({
                 type: 'post',
                 url: "modul/mod_trbmasukpbf/hapusdetail_order.php",
+                dataType: 'json',
                 data: {
                     id_dtrbmasuk: id_dtrbmasuk,
-                    kd_orders: kd_orders
+                    kd_orders: kd_orders,
+                    kd_trbmasuk: kd_trbmasuk
                 },
-    
-                success: function (data) {
-                    //setelah simpan data, tabel_detail data terbaru
-                    //alert('Hapus data detail berhasil');
-                    tabel_detail1();
-                    //hilangkan modal
-                    // $(".close").click();
-                    console.log(data);
+
+                success: function (resp) {
+                    if (resp.status !== 'ok') {
+                        alert(resp.message || 'Gagal menghapus data');
+                        return;
+                    }
+
+                    var $row = $btn.closest('tr');
+                    var table = $('#example5').DataTable();
+                    table.row($row).remove().draw(false); // false = jangan reset ke halaman 1
+
+                    document.getElementById('ttl_harga_display').textContent = resp.subtotal;
+                    var ppn = Math.round(parseFloat(resp.subtotal.split('.').join('')) * 1.11);
+                    document.getElementById('ttl_trkasir').value = formatRupiah(ppn);
+                    HitungDP();
+                },
+                error: function (xhr) {
+                    var msg = 'Gagal menghapus data';
+                    try {
+                        var parsed = JSON.parse(xhr.responseText);
+                        if (parsed && parsed.message) {
+                            msg = parsed.message;
+                        }
+                    } catch (e) {}
+                    alert(msg);
                 }
             });
-    
+
         });
 
 

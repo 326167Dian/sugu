@@ -1,143 +1,114 @@
 <?php
 include "../../../configurasi/koneksi.php";
+include "../../../configurasi/fungsi_rupiah.php";
+include "helper_subtotal.php";
 
 $diskon                 = $_POST['diskon'];
 $kd_barang              = $_POST['kd_barang'];
 $kd_trbmasuk            = $_POST['kd_trbmasuk'];
 $kd_orders              = $_POST['kd_orders'];
 $id_dtrbmasuk           = $_POST['id_dtrbmasuk'];
+$qtygrosir_dtrbmasuk    = isset($_POST['qtygrosir_dtrbmasuk']) ? $_POST['qtygrosir_dtrbmasuk'] : 0;
+
+header('Content-Type: application/json');
 
 try {
     $db->beginTransaction();
 
-$trbmasuk = $db->prepare("SELECT * FROM trbmasuk_detail
-                            WHERE kd_barang=?
-                            AND kd_trbmasuk=?
-                            AND id_dtrbmasuk= ?");
-$trbmasuk->execute([$kd_barang, $kd_trbmasuk, $id_dtrbmasuk]);
-$detail = $trbmasuk->fetch(PDO::FETCH_ASSOC);
-$cari   = $trbmasuk->rowCount();
+    $trbmasuk = $db->prepare("SELECT * FROM trbmasuk_detail WHERE kd_barang=? AND kd_trbmasuk=?");
+    $trbmasuk->execute([$kd_barang, $kd_trbmasuk]);
+    $detail = $trbmasuk->fetch(PDO::FETCH_ASSOC);
 
-if ($cari > 0) {
-    // code...
-    $id_dtrbmasuk   = $detail['id_dtrbmasuk'];
-    $cekstok        = $db->prepare("SELECT * FROM barang 
-                            WHERE id_barang = ?");
-    $cekstok->execute([$detail['id_barang']]);
-    $rsto           = $cekstok->fetch(PDO::FETCH_ASSOC);
-    
-    // $harga_satuan   = round((($detail['hnasat_dtrbmasuk'] * 1.11) * (1 - ($diskon/100))) / $detail['konversi']);
-    // $total_harga    = $harga_satuan * $detail['qty_dtrbmasuk'];
-    // $harga_satuan   = round($rsto['hna'] / $detail['konversi']);
-    // $total_harga    = round(($rsto['hna'] * 1.11) * $detail['qty_grosir']) * (1 - ($diskon/100));
-    
-    // mysqli_query($GLOBALS["___mysqli_ston"], "UPDATE trbmasuk_detail SET 
-    //                                     diskon              = '$diskon',
-				// 						hrgttl_dtrbmasuk    = '$total_harga'
-				// 						WHERE id_dtrbmasuk  = '$id_dtrbmasuk'");
-										
-    $ceksql = $db->prepare("SELECT * FROM trbmasuk_detail 
-                            WHERE kd_barang=? AND kd_trbmasuk=?");
-    $ceksql->execute([$kd_barang, $kd_trbmasuk]);
-    
-    while($sq = $ceksql->fetch(PDO::FETCH_ASSOC)){
-        // $harga_satuan   = round($rsto['hna'] / $sq['konversi']);
-        $harga_satuan   = round(($rsto['hna'] / $sq['konversi']) * (1-($diskon/100)) * 1.11);
-        $harga_grosir   = round($rsto['hna'] );
-        $total_harga    = round(($rsto['hna'] * 1.11) * $sq['qty_grosir']) * (1 - ($diskon/100));
-        
-        $stmt_update_detail = $db->prepare("UPDATE trbmasuk_detail SET 
-                                        diskon              = ?,
-                                        hrgsat_dtrbmasuk    = ?,
-										hrgttl_dtrbmasuk    = ?
-										WHERE id_dtrbmasuk  = ?");
-		$stmt_update_detail->execute([$diskon, $harga_satuan, $total_harga, $sq['id_dtrbmasuk']]);
-		
-		$stmt_update_barang = $db->prepare("UPDATE barang SET 
-                                                hrgsat_barang   = ?,
-                                                hrgsat_grosir   = ?
-                                                WHERE id_barang = ?");
-		$stmt_update_barang->execute([$harga_satuan, $harga_grosir, $detail['id_barang']]);
-    }                   
-}
-else {
-    $order  = $db->prepare("SELECT * FROM ordersdetail 
-                            WHERE kd_barang=? AND kd_trbmasuk=?");
-    $order->execute([$kd_barang, $kd_orders]);
-    $odt    = $order->fetch(PDO::FETCH_ASSOC);
+    if ($trbmasuk->rowCount() > 0) {
+        $id_dtrbmasuk = $detail['id_dtrbmasuk'];
 
-    if (!$odt || $odt['masuk'] != '1') {
-        throw new Exception('Item sudah diterima pada transaksi lain. Silakan muat ulang halaman.');
+        $cekstok        = $db->prepare("SELECT * FROM barang WHERE id_barang = ?");
+        $cekstok->execute([$detail['id_barang']]);
+        $rsto           = $cekstok->fetch(PDO::FETCH_ASSOC);
+
+        $harga_satuan   = round(($rsto['hna'] / $detail['konversi']) * (1-($diskon/100)) * 1.11);
+        $harga_grosir   = round($rsto['hna']);
+        $total_harga    = round(($rsto['hna'] * 1.11) * $detail['qty_grosir']) * (1 - ($diskon/100));
+
+        $db->prepare("UPDATE trbmasuk_detail SET
+                            diskon              = ?,
+                            hrgsat_dtrbmasuk    = ?,
+                            hrgttl_dtrbmasuk    = ?
+                            WHERE id_dtrbmasuk  = ?")
+            ->execute([$diskon, $harga_satuan, $total_harga, $id_dtrbmasuk]);
+
+        $db->prepare("UPDATE barang SET
+                            hrgsat_barang   = ?,
+                            hrgsat_grosir   = ?
+                            WHERE id_barang = ?")
+            ->execute([$harga_satuan, $harga_grosir, $detail['id_barang']]);
+
+        $hnasat_final = $detail['hnasat_dtrbmasuk'];
+        $diskon_final = $diskon;
+        $qtygrosir_final = $detail['qty_grosir'];
+    } else {
+        $order  = $db->prepare("SELECT * FROM ordersdetail WHERE kd_barang=? AND kd_trbmasuk=?");
+        $order->execute([$kd_barang, $kd_orders]);
+        $odt    = $order->fetch(PDO::FETCH_ASSOC);
+
+        if (!$odt || $odt['masuk'] != '1') {
+            throw new Exception('Item sudah diterima pada transaksi lain. Silakan muat ulang halaman.');
+        }
+
+        $qty_dtrbmasuk  = $qtygrosir_dtrbmasuk * $odt['konversi'];
+
+        $cekstok        = $db->prepare("SELECT * FROM barang WHERE id_barang = ?");
+        $cekstok->execute([$odt['id_barang']]);
+        $rst            = $cekstok->fetch(PDO::FETCH_ASSOC);
+        $stok_barang    = $rst['stok_barang'];
+        $stokakhir      = $stok_barang + $qty_dtrbmasuk;
+
+        $harga_satuan   = round(($rst['hna'] / $odt['konversi']) * (1-($diskon/100)) * 1.11);
+        $total_harga    = round(($rst['hna'] * 1.11) * $qtygrosir_dtrbmasuk) * (1 - ($diskon/100));
+        $waktu          = date('Y-m-d H:i:s', time());
+
+        $hrgjual_barang     = round($odt['hrgjual_dtrbmasuk']);
+
+        $db->prepare("UPDATE barang SET
+                        stok_barang     = stok_barang + ?,
+                        hrgsat_barang   = ?,
+                        hrgjual_barang  = ?
+                        WHERE id_barang = ?")->execute([$qty_dtrbmasuk, $harga_satuan, $hrgjual_barang, $odt['id_barang']]);
+
+        $db->prepare("UPDATE ordersdetail SET masuk = '0' WHERE id_dtrbmasuk = ?")->execute([$odt['id_dtrbmasuk']]);
+
+        $db->prepare("INSERT INTO trbmasuk_detail(
+                                        kd_trbmasuk, kd_orders, id_barang, kd_barang, nmbrg_dtrbmasuk,
+                                        qty_dtrbmasuk, qty_grosir, sat_dtrbmasuk, satgrosir_dtrbmasuk, konversi,
+                                        hnasat_dtrbmasuk, diskon, hrgsat_dtrbmasuk, hrgjual_dtrbmasuk, hrgttl_dtrbmasuk,
+                                        no_batch, exp_date, waktu)
+                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+            ->execute([$kd_trbmasuk, $kd_orders, $odt['id_barang'], $odt['kd_barang'], $odt['nmbrg_dtrbmasuk'], $qty_dtrbmasuk, $qtygrosir_dtrbmasuk, $odt['sat_dtrbmasuk'], $odt['satgrosir_dtrbmasuk'], $odt['konversi'], $rst['hna'], $diskon, $harga_satuan, $hrgjual_barang, $total_harga, $odt['no_batch'], $odt['exp_date'], $waktu]);
+
+        $id_dtrbmasuk = $db->lastInsertId();
+
+        $hnasat_final = $rst['hna'];
+        $diskon_final = $diskon;
+        $qtygrosir_final = $qtygrosir_dtrbmasuk;
     }
 
-    $qty_dtrbmasuk  = $_POST['qtygrosir_dtrbmasuk'] * $odt['konversi'];
-    // Update stok
-    $cekstok        = $db->prepare("SELECT * FROM barang 
-                        WHERE id_barang = ?");
-    $cekstok->execute([$odt['id_barang']]);
-    $rst            = $cekstok->fetch(PDO::FETCH_ASSOC);
-    $stok_barang    = $rst['stok_barang'];
-    $stokakhir      = $stok_barang + ($qty_dtrbmasuk);
-    
-    // $harga_satuan   = round((($odt['hnasat_dtrbmasuk'] * 1.11) * (1 - ($diskon/100))) / $odt['konversi']);
-    // $total_harga    = (($odt['hnasat_dtrbmasuk'] * 1.11) * $odt['qtygrosir_dtrbmasuk']) * (1 - ($diskon/100));
-    // $harga_satuan   = round($rst['hna'] / $odt['konversi']);
-    $harga_satuan   = round(($rst['hna'] / $odt['konversi']) * (1-($diskon/100)) * 1.11);
-    $total_harga    = round(($rst['hna'] * 1.11) * $_POST['qtygrosir_dtrbmasuk']) * (1 - ($odt['diskon']/100));
-    
-    $waktu          = date('Y-m-d H:i:s', time());
-    
-    $hrgjual_barang     = round($odt['hrgjual_dtrbmasuk']);
-    $hrgjual_barang1    = round($odt['hrgjual_dtrbmasuk']*1.05);
-    $hrgjual_barang3    = round($odt['hrgjual_dtrbmasuk']*1.22);
-    
-    // UPDATE STOK ATOMIC - Menambah stok barang (barang baru)
-    // Menggunakan single UPDATE statement untuk menghindari race condition
-    $stmt_update_barang = $db->prepare("UPDATE barang SET 
-                                                stok_barang     = stok_barang + ?,
-                                                hrgsat_barang   = ?,
-                                                hrgjual_barang  = ?
-                                                WHERE id_barang = ?");
-    $stmt_update_barang->execute([$qty_dtrbmasuk, $harga_satuan, $hrgjual_barang, $odt['id_barang']]);
-    
-    // Update order karena barang sudah masuk
-    $stmt_update_orders = $db->prepare("UPDATE ordersdetail SET 
-                                                masuk     = '0'
-                                                WHERE id_dtrbmasuk = ?");
-    $stmt_update_orders->execute([$odt['id_dtrbmasuk']]);
-                                                                   
-    // Insert trbmasuk detail
-    $stmt_insert_detail = $db->prepare("INSERT INTO trbmasuk_detail(
-                                        kd_trbmasuk,
-                                        kd_orders,
-										id_barang,
-										kd_barang,
-										nmbrg_dtrbmasuk,
-										qty_dtrbmasuk,
-										qty_grosir,
-										sat_dtrbmasuk,
-										satgrosir_dtrbmasuk,
-										konversi,
-										hnasat_dtrbmasuk,
-										diskon,
-										hrgsat_dtrbmasuk,										
-										hrgjual_dtrbmasuk,										
-										hrgttl_dtrbmasuk,
-										no_batch,
-										exp_date,
-										waktu)
-								  VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-	$stmt_insert_detail->execute([$kd_trbmasuk, $kd_orders, $odt['id_barang'], $odt['kd_barang'], $odt['nmbrg_dtrbmasuk'], $qty_dtrbmasuk, $_POST['qtygrosir_dtrbmasuk'], $odt['sat_dtrbmasuk'], $odt['satgrosir_dtrbmasuk'], $odt['konversi'], $rst['hna'], $diskon, $harga_satuan, $hrgjual_barang, $total_harga, $odt['no_batch'], $odt['exp_date'], $waktu]);
-
-}
+    $hnadisc = $hnasat_final * (1 - ($diskon_final / 100));
+    $baristotal = round($hnadisc * $qtygrosir_final);
+    $subtotal = hitung_subtotal_pbf($db, $kd_trbmasuk);
 
     $db->commit();
-    echo 'OK';
+
+    echo json_encode([
+        'status'       => 'ok',
+        'id_dtrbmasuk' => $id_dtrbmasuk,
+        'hnadisc_text' => format_rupiah($hnadisc),
+        'total_text'   => format_rupiah($baristotal),
+        'subtotal'     => format_rupiah($subtotal)
+    ]);
 } catch (Exception $e) {
     if ($db->inTransaction()) {
         $db->rollBack();
     }
     http_response_code(500);
-    echo $e->getMessage();
+    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }
-?>
