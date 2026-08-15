@@ -26,7 +26,11 @@ try {
         $hrgttl      = round($hrgbelidisc * $detail['qty_grosir']);
 
         $db->prepare("UPDATE trbmasuk_detail SET hnasat_dtrbmasuk = ?, hrgsat_dtrbmasuk = ?, hrgttl_dtrbmasuk = ? WHERE id_dtrbmasuk = ?")
-            ->execute([$hrgsat_dtrbmasuk, $hrgsat_dtrbmasuk, $hrgttl, $detail['id_dtrbmasuk']]);
+            ->execute([round($hrgsat_dtrbmasuk / 1.11), $hrgsat_dtrbmasuk, $hrgttl, $detail['id_dtrbmasuk']]);
+
+        // sinkronkan harga referensi barang dengan harga beli yang baru
+        $db->prepare("UPDATE barang SET hrgsat_barang = ?, hrgsat_grosir = ? WHERE kd_barang = ?")
+            ->execute([$hrgsat_dtrbmasuk / $detail['konversi'], $hrgsat_dtrbmasuk, $kd_barang]);
 
         $id_dtrbmasuk_final = $detail['id_dtrbmasuk'];
     } else {
@@ -42,14 +46,19 @@ try {
         $hrgbelidisc   = $hrgsat_dtrbmasuk * (1 - ($odt['diskon'] / 100));
         $hrgttl        = round($hrgbelidisc * $qtygrosir_dtrbmasuk);
         $waktu         = date('Y-m-d H:i:s', time());
+        $hnasat_dtrbmasuk = round($hrgsat_dtrbmasuk / 1.11);
 
         $db->prepare("INSERT INTO trbmasuk_detail (kd_trbmasuk, kd_orders, id_barang, kd_barang, nmbrg_dtrbmasuk, qty_dtrbmasuk, qty_grosir, sat_dtrbmasuk, satgrosir_dtrbmasuk, konversi, hnasat_dtrbmasuk, diskon, hrgsat_dtrbmasuk, hrgjual_dtrbmasuk, hrgttl_dtrbmasuk, no_batch, exp_date, waktu) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-            ->execute([$kd_trbmasuk, $kd_orders, $odt['id_barang'], $odt['kd_barang'], $odt['nmbrg_dtrbmasuk'], $qty_dtrbmasuk, $qtygrosir_dtrbmasuk, $odt['sat_dtrbmasuk'], $odt['satgrosir_dtrbmasuk'], $odt['konversi'], $hrgsat_dtrbmasuk, $odt['diskon'], $hrgsat_dtrbmasuk, $odt['hrgjual_dtrbmasuk'], $hrgttl, $odt['no_batch'], $odt['exp_date'], $waktu]);
+            ->execute([$kd_trbmasuk, $kd_orders, $odt['id_barang'], $odt['kd_barang'], $odt['nmbrg_dtrbmasuk'], $qty_dtrbmasuk, $qtygrosir_dtrbmasuk, $odt['sat_dtrbmasuk'], $odt['satgrosir_dtrbmasuk'], $odt['konversi'], $hnasat_dtrbmasuk, $odt['diskon'], $hrgsat_dtrbmasuk, $odt['hrgjual_dtrbmasuk'], $hrgttl, $odt['no_batch'], $odt['exp_date'], $waktu]);
 
         $id_dtrbmasuk_final = $db->lastInsertId();
 
         $db->prepare("UPDATE barang SET stok_barang = stok_barang + ? WHERE id_barang = ?")
             ->execute([$qty_dtrbmasuk, $odt['id_barang']]);
+
+        // sinkronkan harga referensi barang dengan harga beli terima barang ini
+        $db->prepare("UPDATE barang SET hrgsat_barang = ?, hrgsat_grosir = ? WHERE kd_barang = ?")
+            ->execute([$hrgsat_dtrbmasuk / $odt['konversi'], $hrgsat_dtrbmasuk, $kd_barang]);
 
         $db->prepare("UPDATE ordersdetail SET masuk = '0' WHERE id_dtrbmasuk = ?")
             ->execute([$odt['id_dtrbmasuk']]);

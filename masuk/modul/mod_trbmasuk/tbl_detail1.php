@@ -26,6 +26,7 @@
                 <th style="vertical-align: middle; background-color: #008000; text-align: left; ">Nama Barang</th>
                 <th style="vertical-align: middle; background-color: #008000; text-align: right; ">Qty Grosir</th>
                 <th style="vertical-align: middle; background-color: #008000; text-align: center; ">Satuan Grosir</th>
+                <th style="vertical-align: middle; background-color: #008000; text-align: center; ">Konversi</th>
                 <th style="vertical-align: middle; background-color: #008000; text-align: center; ">No. Batch</th>
                 <th style="vertical-align: middle; background-color: #008000; text-align: center; ">Exp. Date</th>
                 <th style="vertical-align: middle; background-color: #008000; text-align: right; ">Harga Beli</th>
@@ -78,6 +79,13 @@
                                             >
                                         </td>
                                         <td align='center'>$trb[satgrosir_dtrbmasuk]</td>
+                                        <td align='center'>
+                                            <input type='number' id='dkonversi' value='$trb[konversi]' style='width: 60px; text-align: center'
+                                                data-id_dtrbmasuk='$trb[id_dtrbmasuk]'
+                                                data-kd_barang='$trb[kd_barang]'
+                                                data-qtygrosir_dtrbmasuk='$trb[qty_grosir]'
+                                            >
+                                        </td>
                                         <td align='center'>
                                             <input type='text' id='dno_batch' value='$trb[no_batch]' style='width: 100px'
                                                 data-id_dtrbmasuk='$trb[id_dtrbmasuk]'
@@ -153,6 +161,13 @@
                                         </td>
                                         <td align='center'>$r[satgrosir_dtrbmasuk]</td>
                                         <td align='center'>
+                                            <input type='number' id='dkonversi' value='$r[konversi]' style='width: 60px; text-align: center'
+                                                data-id_dtrbmasuk='$r[id_dtrbmasuk]'
+                                                data-kd_barang='$r[kd_barang]'
+                                                data-qtygrosir_dtrbmasuk='$r[qtygrosir_dtrbmasuk]'
+                                            >
+                                        </td>
+                                        <td align='center'>
                                             <input type='text' id='dno_batch' value='$r[no_batch]' style='width: 100px' required
                                                 data-id_dtrbmasuk='$r[id_dtrbmasuk]'
                                                 data-kd_barang='$r[kd_barang]'
@@ -204,8 +219,8 @@
 
             echo "</tbody>
                         <tr>
-                            <td colspan='9'><h4><center>Total Harga </center></h4>  </td>
-                            <td colspan='4'><h4><strong> Rp. $grandnya  ,- </strong></h4></td>
+                            <td colspan='10'><h4><center>Total Harga </center></h4>  </td>
+                            <td colspan='4'><h4><strong> Rp. <span id='ttl_harga_display'>$grandnya</span>  ,- </strong></h4></td>
                         </tr>
 </table>
 
@@ -286,14 +301,15 @@
                     }
 
                     if (typeof resp.hrgbelidisc_text !== 'undefined') {
-                        $row.find('td').eq(9).text(resp.hrgbelidisc_text);
+                        $row.find('td').eq(10).text(resp.hrgbelidisc_text);
                     }
                     if (typeof resp.total_text !== 'undefined') {
-                        $row.find('td').eq(11).text(resp.total_text);
+                        $row.find('td').eq(12).text(resp.total_text);
                     }
 
                     if (typeof resp.subtotal !== 'undefined') {
                         document.getElementById('ttl_trkasir').value = resp.subtotal;
+                        document.getElementById('ttl_harga_display').textContent = resp.subtotal;
                         HitungDP();
                     }
                 }
@@ -387,6 +403,48 @@
                                 'kd_orders': kd_orders,
                                 'kd_barang': kd_barang,
                                 'hrgsat_dtrbmasuk': hrgsat_dtrbmasuk,
+                                'qtygrosir_dtrbmasuk': qtygrosir_dtrbmasuk
+                            },
+                            success: function(resp) {
+                                if (resp.status !== 'ok') {
+                                    alert(resp.message || 'Gagal menyimpan perubahan');
+                                    $input.val(originalValue);
+                                    return;
+                                }
+                                applyRowUpdateOrder($input, resp);
+                            },
+                            error: function(xhr) {
+                                tampilkanErrorOrder(xhr, $input, originalValue);
+                            }
+                        });
+                    });
+
+                    $('#example5 tbody').on('change', '#dkonversi', function() {
+                        var $input = $(this);
+                        var originalValue = $input.data('original-value');
+                        var id_dtrbmasuk = $input.data('id_dtrbmasuk');
+                        var kd_barang = $input.data('kd_barang');
+                        var konversi = $input.val();
+                        var qtygrosir_dtrbmasuk = $input.data('qtygrosir_dtrbmasuk');
+                        var kd_orders = $('#kd_orders').val();
+                        var kd_trbmasuk = $('#kd_trbmasuk').val();
+
+                        if (konversi === '' || isNaN(konversi) || parseFloat(konversi) <= 0) {
+                            alert('Konversi harus diisi angka lebih dari 0');
+                            $input.val(originalValue);
+                            return;
+                        }
+
+                        $.ajax({
+                            url: 'modul/mod_trbmasuk/simpandetail_konversi_order.php',
+                            type: 'post',
+                            dataType: 'json',
+                            data: {
+                                'id_dtrbmasuk': id_dtrbmasuk,
+                                'kd_trbmasuk': kd_trbmasuk,
+                                'kd_orders': kd_orders,
+                                'kd_barang': kd_barang,
+                                'konversi': konversi,
                                 'qtygrosir_dtrbmasuk': qtygrosir_dtrbmasuk
                             },
                             success: function(resp) {
@@ -589,6 +647,7 @@
                             table.row($row).remove().draw(false); // false = jangan reset ke halaman 1
 
                             document.getElementById('ttl_trkasir').value = resp.subtotal;
+                            document.getElementById('ttl_harga_display').textContent = resp.subtotal;
                             HitungDP();
                         },
                         error: function(xhr) {

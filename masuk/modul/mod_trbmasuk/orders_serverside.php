@@ -62,6 +62,9 @@ if ($_GET['action'] == "table_data") {
         $totalFiltered = $datacount['jumlah'];
     }
 
+    $stmt_header = $db->prepare("SELECT COUNT(*) as jumlah FROM trbmasuk WHERE kd_orders = ? AND jenis = 'nonpbf'");
+    $stmt_pending = $db->prepare("SELECT COUNT(*) as jumlah FROM ordersdetail WHERE kd_trbmasuk = ? AND masuk = '1'");
+
     $data = array();
     if (!empty($query)) {
         $no = $start + 1;
@@ -77,7 +80,20 @@ if ($_GET['action'] == "table_data") {
             $nestedData['dp_bayar']     = $value['dp_bayar'];
             $nestedData['sisa_bayar']   = $value['sisa_bayar'];
             $nestedData['masuk']        = $value['masuk'];
-            $nestedData['aksi'] = "<a href='?module=trbmasuk&act=orders_detail&id=$value[id_trbmasuk]' title='TERIMA' class='btn btn-warning btn-xs'>TERIMA</a>";
+
+            // Selesai = SIMPAN TRANSAKSI sudah pernah diklik (header trbmasuk ada) DAN semua item sudah diterima
+            $stmt_header->execute([$value['kd_trbmasuk']]);
+            $adaHeader = $stmt_header->fetch(PDO::FETCH_ASSOC)['jumlah'] > 0;
+
+            $stmt_pending->execute([$value['kd_trbmasuk']]);
+            $adaPending = $stmt_pending->fetch(PDO::FETCH_ASSOC)['jumlah'] > 0;
+
+            if ($adaHeader && !$adaPending) {
+                $nestedData['aksi'] = "<a href='?module=trbmasuk&act=orders_detail&id=$value[id_trbmasuk]' title='SELESAI' class='btn btn-success btn-xs'>SELESAI</a>";
+            } else {
+                $nestedData['aksi'] = "<a href='?module=trbmasuk&act=orders_detail&id=$value[id_trbmasuk]' title='TERIMA' class='btn btn-warning btn-xs'>TERIMA</a>";
+            }
+
             $data[] = $nestedData;
             $no++;
         }
