@@ -104,111 +104,113 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
 		case "tambah":
 
+			$stmt = $db->query("SELECT * FROM barang
+                                    WHERE stok_barang > 0
+                                    AND hrgsat_barang > 0
+                                    AND (hrgjual_barang - hrgsat_barang) / hrgsat_barang > 0.5
+                                    ORDER BY nm_barang ASC");
+			$tampil_massal = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			?>
 			<div class='box box-primary box-solid'>
 				<div class='box-header with-border'>
-					<h3 class='box-title'>TAMBAH KOMISI</h3>
+					<h3 class='box-title'>ATUR KOMISI (INPUT MASSAL)</h3>
 					<div class='box-tools pull-right'>
 						<button class='btn btn-box-tool' data-widget='collapse'><i class='fa fa-minus'></i></button>
 					</div><!-- /.box-tools -->
 				</div>
-				<div class='box-body'>
+				<div class='box-body table-responsive'>
 
-					<form method="POST" action="<?= $aksi ?>?module=komisi&act=input_komisi" enctype="multipart/form-data"
-						class="form-horizontal">
+					<a class='btn btn-danger btn-flat' href='?module=komisi'>KEMBALI</a>
+					<small>&nbsp; Barang yang tampil: stok &gt; 0 dan margin (Harga Jual - Harga Beli) / Harga Beli &gt; 50%. Isi Komisi langsung tersimpan otomatis.</small>
+					<br><br>
 
-						<div class='form-group'>
-							<label class='col-sm-2 control-label'>Nama Barang</label>
-							<div class='col-sm-6'>
-								<input type="text" id="nm_barang" name="nm_barang" class="form-control" required="required" autocomplete="off">
-							</div>
-						</div>
-						<div class='form-group'>
-							<label class='col-sm-2 control-label'>Harga Beli</label>
-							<div class='col-sm-6'>
-								<input type="number" name="hrgsat_barang" id="hrgsat_barang" class="form-control" required="required" autocomplete="off">
-							</div>
-						</div>
-						<div class='form-group'>
-							<label class='col-sm-2 control-label'>Harga Jual</label>
-							<div class='col-sm-6'>
-								<input type="number" name="hrgjual_barang" id="hrgjual_barang" class="form-control" required="required" autocomplete="off">
-							</div>
-						</div>
-
-						<div class='form-group'>
-							<label class="col-sm-2 control-label">Metode Pemberian</label>
-							<div class="col-sm-5">
-								<select name="metode" class="form-control">
-									<option value="nominal">Nominal</option>
-									<option value="persentase">Persentase</option>
-								</select>
-							</div>
-						</div>
-
-						<div class='form-group'>
-							<label class='col-sm-2 control-label'>JUMLAH KOMISI</label>
-							<div class='col-sm-6'>
-								<input type="number" name="komisi" class="form-control" required="required" autocomplete="off">
-							</div>
-						</div>
-
-						<div class="form-group">
-							<label class="col-sm-2 control-label"></label>
-							<div class="col-sm-5">
-								<input class="btn btn-primary" type="submit" value="SIMPAN">
-								<input class="btn btn-danger" type="button" value="BATAL" onclick="self.history.back()">
-							</div>
-						</div>
-
-					</form>
-
+					<table id="example_komisi_massal" class="table table-bordered table-striped">
+						<thead>
+							<tr>
+								<th>No</th>
+								<th>Kode Barang</th>
+								<th>Nama Barang</th>
+								<th style="text-align: center;">Satuan</th>
+								<th style="text-align: right;">Harga Beli</th>
+								<th style="text-align: right;">Harga Jual</th>
+								<th style="text-align: right;">Komisi</th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php $no = 1; foreach ($tampil_massal as $r): ?>
+								<tr>
+									<td><?= $no++ ?></td>
+									<td><?= $r['kd_barang'] ?></td>
+									<td><?= $r['nm_barang'] ?></td>
+									<td style="text-align: center;"><?= $r['sat_barang'] ?></td>
+									<td style="text-align: right;"><?= format_rupiah($r['hrgsat_barang']) ?></td>
+									<td style="text-align: right;"><?= format_rupiah($r['hrgjual_barang']) ?></td>
+									<td style="text-align: right;">
+										<input type="text" class="form-control input-komisi-massal" style="text-align: right;"
+											data-id_barang="<?= $r['id_barang'] ?>"
+											value="<?= $r['komisi'] > 0 ? format_rupiah($r['komisi']) : '' ?>">
+									</td>
+								</tr>
+							<?php endforeach; ?>
+						</tbody>
+					</table>
 				</div>
 
 			</div>
 
 			<script>
-				//auto_namabarang
-				$('#nm_barang').typeahead({
-					source: function (query, process) {
-						return $.post('modul/mod_komisi/autonamabarang.php', {
-							query: query
-						}, function (data) {
+				$(document).ready(function () {
+					var tableKomisiMassal = $('#example_komisi_massal').DataTable({
+						"pageLength": 25
+					});
 
-							data = $.parseJSON(data);
-							return process(data);
+					// simpan nilai awal saat fokus, untuk rollback jika gagal / tidak valid
+					$('#example_komisi_massal tbody').on('focus', '.input-komisi-massal', function () {
+						$(this).data('original-value', $(this).val());
+					});
 
-						});
-					}
-				});
+					$('#example_komisi_massal tbody').on('change', '.input-komisi-massal', function () {
+						var $input = $(this);
+						var originalValue = $input.data('original-value');
+						var id_barang = $input.data('id_barang');
+						var komisiRaw = $input.val().split('.').join('').trim();
 
-				//enter barang
-				$('#nm_barang').keydown(function (e) {
-					if (e.which == 13) { // e.which == 13 merupakan kode yang mendeteksi ketika anda   // menekan tombol enter di keyboard
-						//letakan fungsi anda disini
+						if (komisiRaw !== '' && (isNaN(komisiRaw) || parseFloat(komisiRaw) < 0)) {
+							alert('Komisi harus berupa angka dan tidak boleh negatif');
+							$input.val(originalValue);
+							return;
+						}
 
-						var nm_barang = $("#nm_barang").val();
 						$.ajax({
-							url: 'modul/mod_komisi/autonamabarang_enter.php',
+							url: 'modul/mod_komisi/simpandetail_komisi_massal.php',
 							type: 'post',
+							dataType: 'json',
 							data: {
-								'nm_barang': nm_barang
+								id_barang: id_barang,
+								komisi: komisiRaw === '' ? 0 : komisiRaw
 							},
-						}).success(function (data) {
-							var json = data;
-							//replace array [] menjadi ''
-							var res1 = json.replace("[", "");
-							var res2 = res1.replace("]", "");
-							//INI CONTOH ARRAY JASON const json = '{"result":true, "count":42}';
-							datab = JSON.parse(res2);
-							document.getElementById('nm_barang').value = datab.nm_barang;
-							document.getElementById('hrgsat_barang').value = datab.hrgsat_barang;
-							document.getElementById('hrgjual_barang').value = datab.hrgjual_barang;
+							success: function (resp) {
+								if (resp.status !== 'ok') {
+									alert(resp.message || 'Gagal menyimpan komisi');
+									$input.val(originalValue);
+									return;
+								}
+								$input.val(resp.komisi_text === '0' ? '' : resp.komisi_text);
+							},
+							error: function (xhr) {
+								var msg = 'Gagal menyimpan komisi';
+								try {
+									var parsed = JSON.parse(xhr.responseText);
+									if (parsed && parsed.message) {
+										msg = parsed.message;
+									}
+								} catch (e) {}
+								alert(msg);
+								$input.val(originalValue);
+							}
 						});
-
-					}
+					});
 				});
-
 			</script>
 
 
