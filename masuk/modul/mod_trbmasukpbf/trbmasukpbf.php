@@ -1782,11 +1782,20 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             $masuk = $cektrbmasuk->fetch(PDO::FETCH_ASSOC);
             
             if($cektrbmasuk->rowCount() <= 0){
-                $cekkd = $db->prepare("SELECT * FROM kdbm 
-                                        WHERE id_admin=? 
-                                        AND id_resto=? 
-                                        AND stt_kdbm=?");
-                $cekkd->execute([$_SESSION['idadmin'], 'pusat', 'ON']);
+                // draft 'ON' hanya dipakai ulang kalau masih kosong atau seluruh isinya
+                // memang untuk pesanan (kd_orders) yang sama dengan yang sedang diterima,
+                // supaya item pesanan lain yang masih berjalan tidak ikut tercampur
+                $cekkd = $db->prepare("SELECT k.* FROM kdbm k
+                                        WHERE k.id_admin = ?
+                                        AND k.id_resto = ?
+                                        AND k.stt_kdbm = ?
+                                        AND NOT EXISTS (
+                                            SELECT 1 FROM trbmasuk_detail td
+                                            WHERE td.kd_trbmasuk = k.kd_trbmasuk
+                                            AND (td.kd_orders IS NULL OR td.kd_orders = '' OR td.kd_orders <> ?)
+                                        )
+                                        ORDER BY k.id_kdbm DESC LIMIT 1");
+                $cekkd->execute([$_SESSION['idadmin'], 'pusat', 'ON', $re['kd_trbmasuk']]);
                 $ketemucekkd = $cekkd->rowCount();
                 $hcekkd = $cekkd->fetch(PDO::FETCH_ASSOC);
                 $petugas = $_SESSION['namalengkap'];

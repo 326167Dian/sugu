@@ -28,6 +28,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 				<div class="box-body table-responsive">
 					<a class='btn  btn-success btn-flat' href='?module=trbmasuk&act=tambah'>TAMBAH</a>
 					<a class='btn  btn-secondary btn-warning' href='?module=trbmasuk&act=orders'>Cek Pesanan</a>
+					<a class='btn  btn-secondary btn-success' href='?module=trbmasuk&act=evaluasi'>Evaluasi Barang Masuk</a>
 					<a class='btn  btn-info btn-flat' href='?module=trbmasuk&act=cari'>CARI NOMOR BATCH</a>
 					<div></div>
 					<p>
@@ -162,7 +163,17 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
 		case "tambah":
 			//cek apakah ada kode transaksi ON berdasarkan user
-			$cekkd = $db->prepare("SELECT * FROM kdbm WHERE id_admin=? AND id_resto='pusat' AND stt_kdbm='ON'");
+			// draft 'ON' hanya dipakai ulang kalau belum berisi item pesanan apa pun,
+			// supaya input manual (non-pesanan) tidak ikut mencampur ke draft yang
+			// sedang dipakai untuk menerima pesanan tertentu
+			$cekkd = $db->prepare("SELECT k.* FROM kdbm k
+				WHERE k.id_admin = ? AND k.id_resto = 'pusat' AND k.stt_kdbm = 'ON'
+				AND NOT EXISTS (
+					SELECT 1 FROM trbmasuk_detail td
+					WHERE td.kd_trbmasuk = k.kd_trbmasuk
+					AND td.kd_orders IS NOT NULL AND td.kd_orders <> ''
+				)
+				ORDER BY k.id_kdbm DESC LIMIT 1");
 			$cekkd->execute([$_SESSION['id_admin']]);
 			$ketemucekkd = $cekkd->rowCount();
 			$hcekkd = $cekkd->fetch(PDO::FETCH_ASSOC);
@@ -481,8 +492,18 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 			if ($cektrbmasuk->rowCount() > 0) {
 				$kdtransaksi = $masuk['kd_trbmasuk'];
 			} else {
-				$cekkd = $db->prepare("SELECT * FROM kdbm WHERE id_admin=? AND id_resto='pusat' AND stt_kdbm='ON'");
-				$cekkd->execute([$_SESSION['id_admin']]);
+				// draft 'ON' hanya dipakai ulang kalau masih kosong atau seluruh isinya
+				// memang untuk pesanan (kd_orders) yang sama dengan yang sedang diterima,
+				// supaya item pesanan lain yang masih berjalan tidak ikut tercampur
+				$cekkd = $db->prepare("SELECT k.* FROM kdbm k
+					WHERE k.id_admin = ? AND k.id_resto = 'pusat' AND k.stt_kdbm = 'ON'
+					AND NOT EXISTS (
+						SELECT 1 FROM trbmasuk_detail td
+						WHERE td.kd_trbmasuk = k.kd_trbmasuk
+						AND (td.kd_orders IS NULL OR td.kd_orders = '' OR td.kd_orders <> ?)
+					)
+					ORDER BY k.id_kdbm DESC LIMIT 1");
+				$cekkd->execute([$_SESSION['id_admin'], $re['kd_trbmasuk']]);
 				$ketemucekkd = $cekkd->rowCount();
 				$hcekkd = $cekkd->fetch(PDO::FETCH_ASSOC);
 
@@ -936,6 +957,230 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         </div>
         
 <?php
+            break;
+
+        case "evaluasi":
+    ?>
+            <div class="box box-primary box-solid table-responsive">
+                <div class="box-header with-border">
+                    <h3 class="box-title">TRANSAKSI BARANG MASUK (SUDAH TERMASUK PAJAK)</h3>
+                    <div class="box-tools pull-right">
+                        <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    </div><!-- /.box-tools -->
+                </div>
+                <div class="box-body table-responsive">
+                    <form action="modul/mod_trbmasuk/ubah_status_lunas.php" method="post">
+                        <a class='btn  btn-secondary btn-danger' href='javascript:self.history.back()'>Kembali</a>
+                        <hr>
+                        <p>
+                        <p>
+                            <a class='btn  btn-warning  btn-flat' href='#'></a>
+                            <small>* Pembayaran belum lunas</small>
+                            <br><br>
+
+
+                        <table id="tes1" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Kode</th>
+                                    <th>Petugas</th>
+                                    <th>Tanggal</th>
+                                    <th>Supplier</th>
+                                    <th>No Faktur</th>
+                                    <th>Jatuh Tempo</th>
+                                    <th>Total Tagihan</th>
+                                    <th>Status Pembayaran</th>
+                                    <th width="70">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+
+                    </form>
+                </div>
+            </div>
+
+            <script>
+                $(document).ready(function() {
+                    $("#tes1").DataTable({
+                        processing: true,
+                        serverSide: true,
+                        ajax: {
+                            "url": "modul/mod_trbmasuk/evaluasi-serverside.php?action=table_data",
+                            "dataType": "JSON",
+                            "type": "POST"
+                        },
+                        "rowCallback": function(row, data, index) {
+                            if (data['carabayar'] != "LUNAS") {
+                                $(row).find('td:eq(0)').css('background-color', '#ffbf00');
+                                $(row).find('td:eq(1)').css('background-color', '#ffbf00');
+                            }
+                        },
+                        columns: [{
+                                "data": "no",
+                                "className": "text-center"
+                            },
+                            {
+                                "data": "kd_trbmasuk",
+                                "className": "text-left"
+                            },
+                            {
+                                "data": "petugas",
+                                "className": "text-left"
+                            },
+                            {
+                                "data": "tgl_trbmasuk",
+                                "className": "text-center"
+                            },
+                            {
+                                "data": "nm_supplier",
+                                "className": "text-left"
+                            },
+                            {
+                                "data": "ket_trbmasuk",
+                                "className": "text-left"
+                            },
+                            {
+                                "data": "jatuh_tempo",
+                                "className": "text-center"
+                            },
+                            {
+                                "data": "sisa_bayar",
+                                "className": "text-right",
+                                "render": function(data, type, row) {
+                                    return formatRupiah(data);
+                                }
+                            },
+                            {
+                                "data": "carabayar",
+                                "className": "text-center"
+                            },
+                            {
+                                "data": "aksi",
+                                "className": "text-center"
+                            },
+                        ]
+                    });
+                });
+            </script>
+
+    <?php
+            break;
+
+        case "evaluasi_tampil":
+            $id = $_GET['id'];
+
+            $trbmasuk   = $db->prepare("SELECT * FROM trbmasuk
+                            WHERE id_trbmasuk = '$id'
+                            AND kd_orders != ''");
+            $trbmasuk->execute();
+            $data       = $trbmasuk->fetch(PDO::FETCH_ASSOC);
+    ?>
+
+            <div class="box box-primary box-solid table-responsive">
+                <div class="box-header with-border">
+                    <h3 class="box-title">EVALUASI TRANSAKSI BARANG MASUK</h3>
+                    <div class="box-tools pull-right">
+                        <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    </div><!-- /.box-tools -->
+                </div>
+                <div class="box-body table-responsive">
+                    <form action="modul/mod_trbmasuk/ubah_status_lunas.php" method="post">
+                        <a class='btn  btn-secondary btn-danger' href='javascript:self.history.back()'>Kembali</a>
+                        <hr>
+
+                        <div class="form-group row">
+                            <label for="inputEmail3" class="col-sm-2 col-form-label">No Pesanan</label>
+                            <div class="col-sm-10">
+                                <label>: <?= $data['kd_orders'] ?></label>
+                            </div>
+
+                            <label for="inputEmail3" class="col-sm-2 col-form-label">No Kode Masuk</label>
+                            <div class="col-sm-10">
+                                <label>: <?= $data['kd_trbmasuk'] ?></label>
+                            </div>
+
+                            <label for="inputEmail3" class="col-sm-2 col-form-label">Supplier</label>
+                            <div class="col-sm-10">
+                                <label>: <?= $data['nm_supplier'] ?></label>
+                            </div>
+
+                            <label for="inputEmail3" class="col-sm-2 col-form-label">Tgl Masuk</label>
+                            <div class="col-sm-10">
+                                <label>: <?= $data['tgl_trbmasuk'] ?></label>
+                            </div>
+                        </div>
+
+                        <hr>
+                        <table id="example1" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Kode Barang</th>
+                                    <th>Nama Barang</th>
+                                    <th>Satuan</th>
+                                    <th>Qty Pesan</th>
+                                    <th>Qty Masuk</th>
+                                    <th>Harga Pesan</th>
+                                    <th>Harga Masuk</th>
+                                    <th>Total Harga Masuk</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                    $trbmasuk_detail   = $db->prepare("SELECT *, SUM(trbmasuk_detail.qty_dtrbmasuk) AS masuk
+                                                                        FROM trbmasuk_detail
+                                                                        JOIN trbmasuk ON trbmasuk.kd_trbmasuk=trbmasuk_detail.kd_trbmasuk
+                                                                    WHERE trbmasuk.id_trbmasuk = '$id' AND trbmasuk.kd_orders != ''
+                                                                    GROUP BY trbmasuk_detail.kd_barang");
+                                    $trbmasuk_detail->execute();
+                                    $no = 1;
+                                    $total = 0;
+                                    while($detail = $trbmasuk_detail->fetch(PDO::FETCH_ASSOC)):
+                                        $subtotal = $detail['hrgsat_dtrbmasuk'] * $detail['masuk'];
+                                        $total  = $total + $subtotal;
+                                        $orders = $db->prepare("SELECT * FROM ordersdetail
+                                                                    WHERE kd_trbmasuk = ?
+                                                                    AND id_barang = ?");
+                                        $orders->execute([$detail['kd_orders'], $detail['id_barang']]);
+                                        $order  = $orders->fetch(PDO::FETCH_ASSOC);
+                                ?>
+                                <tr>
+                                    <td align="center"><?=$no;?></td>
+                                    <td><?=$detail['kd_barang'];?></td>
+                                    <td><?=$detail['nmbrg_dtrbmasuk'];?></td>
+                                    <td><?=$detail['sat_dtrbmasuk'];?></td>
+                                    <td align="center" >
+                                        <?=$order['qty_dtrbmasuk'];?></td>
+                                    <td align="center" <?=($order['qty_dtrbmasuk'] > $detail['masuk'])?'style="background-color:#f95959"':(($order['qty_dtrbmasuk'] < $detail['masuk'])?'style="background-color:#00bbf0"':'');?>>
+                                        <?=$detail['masuk'];?></td>
+                                    <td align="right"><?=format_rupiah($order['hrgsat_dtrbmasuk']);?></td>
+                                    <td align="right" <?=($order['hrgsat_dtrbmasuk'] < $detail['hrgsat_dtrbmasuk'])?'style="background-color:#f95959"':(($order['hrgsat_dtrbmasuk'] > $detail['hrgsat_dtrbmasuk'])?'style="background-color:#00bbf0"':'');?>>
+                                        <?=format_rupiah($detail['hrgsat_dtrbmasuk']);?></td>
+                                    <td align=right><?=format_rupiah($subtotal);?></td>
+
+                                </tr>
+                                <?php
+                                    $no++;
+                                    endwhile;
+                                ?>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="8" align="right"><h4>Total</h4></td>
+                                    <td align="right"><h4><?=format_rupiah($total)?></h4></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                    </form>
+                </div>
+            </div>
+
+    <?php
             break;
 	}
 }        
