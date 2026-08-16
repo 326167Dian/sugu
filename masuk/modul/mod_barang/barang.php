@@ -210,20 +210,13 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 							  </div>
 							  <!-- tidak bisa tambah stok dari sini
 							  <div class='form-group'>
-									<label class='col-sm-4 control-label'>Qty/Stok</label>        		
+									<label class='col-sm-4 control-label'>Qty/Stok</label>
 									 <div class='col-sm-8'>
 										<input type=number name='stok_barang' class='form-control' required='required' autocomplete='off'>
 									 </div>
 							  </div> -->
-							  
 							  <div class='form-group'>
-									<label class='col-sm-4 control-label'>Stok Buffer</label>        		
-									 <div class='col-sm-8'>
-										<input type=number name='stok_buffer' class='form-control' required='required' autocomplete='off'>
-									 </div>
-							  </div>
-							  <div class='form-group'>
-									<label class='col-sm-4 control-label'>Satuan Retail</label>        		
+									<label class='col-sm-4 control-label'>Satuan Retail</label>
 									 <div class='col-sm-8'>
 										<select name='sat_barang' class='form-control' >";
                             			$tampil = $db->query("SELECT * FROM satuan ORDER BY nm_satuan ASC");
@@ -376,21 +369,13 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 							  </div>
 							  <!-- tidak bisa edit stok dari sini
 							  <div class='form-group'>
-									<label class='col-sm-2 control-label'>Qty/Stok</label>        		
+									<label class='col-sm-2 control-label'>Qty/Stok</label>
 									 <div class='col-sm-3'>
 										<input type=number name='stok_barang' class='form-control' required='required' value='$r[stok_barang]' autocomplete='off'>
 									 </div>
 							  </div> -->
-							  
 							  <div class='form-group'>
-									<label class='col-sm-4 control-label'>Stok Buffer</label>        		
-									 <div class='col-sm-8'>
-										<input type=number name='stok_buffer' class='form-control' required='required' value='$r[stok_buffer]' autocomplete='off'>
-									 </div>
-							  </div>
-							  
-							  <div class='form-group'>
-									<label class='col-sm-4 control-label'>Satuan Retail</label>        		
+									<label class='col-sm-4 control-label'>Satuan Retail</label>
 									 <div class='col-sm-8'>
 										<select name='sat_barang' class='form-control' >
 											 <option  value=$r[sat_barang] selected>$r[sat_barang]</option>";
