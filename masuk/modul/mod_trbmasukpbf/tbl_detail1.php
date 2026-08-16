@@ -274,11 +274,11 @@
     											 						
     						<td align='right'>$hrgttl_dtrbmasuk</td>
     						<td align='center'>
-        						<button class='btn btn-xs btn-danger' id='hapusorder' 
-        							data-id_dtrbmasuk='$r[id_dtrbmasuk]'>
-        						    <i class='glyphicon glyphicon-remove'></i>
+        						<button class='btn btn-xs btn-warning' id='batalkanorder' title='Batalkan item ini dari pesanan (tidak jadi dikirim)'
+        							data-kd_barang='$r[kd_barang]'>
+        						    <i class='glyphicon glyphicon-ban-circle'></i>
         					    </button>
-    												
+
     						</td>
     					</tr>";
     										
