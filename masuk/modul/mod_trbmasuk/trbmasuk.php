@@ -1074,9 +1074,9 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             $id = $_GET['id'];
 
             $trbmasuk   = $db->prepare("SELECT * FROM trbmasuk
-                            WHERE id_trbmasuk = '$id'
+                            WHERE id_trbmasuk = ?
                             AND kd_orders != ''");
-            $trbmasuk->execute();
+            $trbmasuk->execute([$id]);
             $data       = $trbmasuk->fetch(PDO::FETCH_ASSOC);
     ?>
 
@@ -1131,22 +1131,35 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                             </thead>
                             <tbody>
                                 <?php
-                                    $trbmasuk_detail   = $db->prepare("SELECT *, SUM(trbmasuk_detail.qty_dtrbmasuk) AS masuk
-                                                                        FROM trbmasuk_detail
-                                                                        JOIN trbmasuk ON trbmasuk.kd_trbmasuk=trbmasuk_detail.kd_trbmasuk
-                                                                    WHERE trbmasuk.id_trbmasuk = '$id' AND trbmasuk.kd_orders != ''
-                                                                    GROUP BY trbmasuk_detail.kd_barang");
-                                    $trbmasuk_detail->execute();
+                                    // Sumber datanya SELURUH item pesanan (ordersdetail), bukan cuma yang
+                                    // sudah diterima -- supaya item yang dipesan tapi belum pernah diterima
+                                    // sama sekali tetap tampil di evaluasi (qty masuk = 0), tidak hilang begitu saja.
+                                    // Qty & harga masuk diakumulasi dari SEMUA transaksi terima barang milik
+                                    // pesanan ini (bukan cuma transaksi yang sedang dibuka), supaya pesanan yang
+                                    // diterima bertahap lewat beberapa transaksi tetap terhitung utuh.
+                                    $trbmasuk_detail = $db->prepare("SELECT
+                                                od.kd_barang,
+                                                od.id_barang,
+                                                od.nmbrg_dtrbmasuk,
+                                                od.sat_dtrbmasuk,
+                                                od.qty_dtrbmasuk AS qty_pesan,
+                                                od.hrgsat_dtrbmasuk AS hrgsat_pesan,
+                                                COALESCE(SUM(td.qty_dtrbmasuk), 0) AS qty_masuk,
+                                                COALESCE(SUM(td.qty_dtrbmasuk * td.hrgsat_dtrbmasuk), 0) AS totalharga_masuk
+                                            FROM ordersdetail od
+                                            LEFT JOIN trbmasuk_detail td
+                                                ON td.kd_orders = od.kd_trbmasuk AND td.id_barang = od.id_barang
+                                            WHERE od.kd_trbmasuk = ?
+                                            GROUP BY od.id_barang
+                                            ORDER BY od.nmbrg_dtrbmasuk ASC");
+                                    $trbmasuk_detail->execute([$data['kd_orders']]);
                                     $no = 1;
                                     $total = 0;
                                     while($detail = $trbmasuk_detail->fetch(PDO::FETCH_ASSOC)):
-                                        $subtotal = $detail['hrgsat_dtrbmasuk'] * $detail['masuk'];
-                                        $total  = $total + $subtotal;
-                                        $orders = $db->prepare("SELECT * FROM ordersdetail
-                                                                    WHERE kd_trbmasuk = ?
-                                                                    AND id_barang = ?");
-                                        $orders->execute([$detail['kd_orders'], $detail['id_barang']]);
-                                        $order  = $orders->fetch(PDO::FETCH_ASSOC);
+                                        $qty_masuk        = (int) $detail['qty_masuk'];
+                                        $totalharga_masuk = (float) $detail['totalharga_masuk'];
+                                        $hrgsat_masuk     = $qty_masuk > 0 ? round($totalharga_masuk / $qty_masuk) : 0;
+                                        $total += $totalharga_masuk;
                                 ?>
                                 <tr>
                                     <td align="center"><?=$no;?></td>
@@ -1154,13 +1167,13 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                                     <td><?=$detail['nmbrg_dtrbmasuk'];?></td>
                                     <td><?=$detail['sat_dtrbmasuk'];?></td>
                                     <td align="center" >
-                                        <?=$order['qty_dtrbmasuk'];?></td>
-                                    <td align="center" <?=($order['qty_dtrbmasuk'] > $detail['masuk'])?'style="background-color:#f95959"':(($order['qty_dtrbmasuk'] < $detail['masuk'])?'style="background-color:#00bbf0"':'');?>>
-                                        <?=$detail['masuk'];?></td>
-                                    <td align="right"><?=format_rupiah($order['hrgsat_dtrbmasuk']);?></td>
-                                    <td align="right" <?=($order['hrgsat_dtrbmasuk'] < $detail['hrgsat_dtrbmasuk'])?'style="background-color:#f95959"':(($order['hrgsat_dtrbmasuk'] > $detail['hrgsat_dtrbmasuk'])?'style="background-color:#00bbf0"':'');?>>
-                                        <?=format_rupiah($detail['hrgsat_dtrbmasuk']);?></td>
-                                    <td align=right><?=format_rupiah($subtotal);?></td>
+                                        <?=$detail['qty_pesan'];?></td>
+                                    <td align="center" <?=($detail['qty_pesan'] > $qty_masuk)?'style="background-color:#f95959"':(($detail['qty_pesan'] < $qty_masuk)?'style="background-color:#00bbf0"':'');?>>
+                                        <?=$qty_masuk > 0 ? $qty_masuk : 'Belum Diterima';?></td>
+                                    <td align="right"><?=format_rupiah($detail['hrgsat_pesan']);?></td>
+                                    <td align="right" <?=($qty_masuk > 0 && $detail['hrgsat_pesan'] < $hrgsat_masuk)?'style="background-color:#f95959"':(($qty_masuk > 0 && $detail['hrgsat_pesan'] > $hrgsat_masuk)?'style="background-color:#00bbf0"':'');?>>
+                                        <?=$qty_masuk > 0 ? format_rupiah($hrgsat_masuk) : '-';?></td>
+                                    <td align=right><?=$qty_masuk > 0 ? format_rupiah($totalharga_masuk) : '-';?></td>
 
                                 </tr>
                                 <?php
