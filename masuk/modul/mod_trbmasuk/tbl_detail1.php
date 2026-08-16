@@ -54,7 +54,7 @@
             // dibatasi ke kd_trbmasuk milik transaksi berjalan ini sendiri, supaya:
             // - item yang sudah diterima lewat modul trbmasukpbf (kd_trbmasuk berbeda) tidak ikut tampil di sini
             // - tetap tampil walau header trbmasuk belum tersimpan (SIMPAN TRANSAKSI belum ditekan)
-            $stmt_trb = $db->prepare("SELECT * FROM trbmasuk_detail WHERE kd_trbmasuk = ? ORDER BY id_dtrbmasuk ASC");
+            $stmt_trb = $db->prepare("SELECT * FROM trbmasuk_detail WHERE kd_trbmasuk = ? ORDER BY nmbrg_dtrbmasuk ASC");
             $stmt_trb->execute([$kd_trbmasuk]);
             while ($trb = $stmt_trb->fetch(PDO::FETCH_ASSOC)) {
 
@@ -135,7 +135,7 @@
             }
 
             // 2) Item pesanan yang belum diterima
-            $stmt_ord = $db->prepare("SELECT * FROM ordersdetail WHERE kd_trbmasuk = ? AND masuk = '1' ORDER BY id_dtrbmasuk ASC");
+            $stmt_ord = $db->prepare("SELECT * FROM ordersdetail WHERE kd_trbmasuk = ? AND masuk = '1' ORDER BY nmbrg_dtrbmasuk ASC");
             $stmt_ord->execute([$kd_orders]);
             while ($r = $stmt_ord->fetch(PDO::FETCH_ASSOC)) {
 
