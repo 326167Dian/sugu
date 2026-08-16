@@ -28,6 +28,10 @@ try {
         $db->prepare("UPDATE trbmasuk_detail SET hrgjual_dtrbmasuk = ? WHERE id_dtrbmasuk = ?")
             ->execute([$hrgjual_dtrbmasuk, $detail['id_dtrbmasuk']]);
 
+        // sinkronkan harga jual barang dengan Hrg Jual Satuan terima barang ini
+        $db->prepare("UPDATE barang SET hrgjual_barang = ? WHERE kd_barang = ?")
+            ->execute([round($hrgjual_dtrbmasuk), $kd_barang]);
+
         $id_dtrbmasuk_final = $detail['id_dtrbmasuk'];
     } else {
         $order = $db->prepare("SELECT * FROM ordersdetail WHERE kd_barang = ? AND kd_trbmasuk = ? AND id_dtrbmasuk = ?");
@@ -55,6 +59,10 @@ try {
         // sinkronkan harga referensi barang dengan harga beli terima barang ini
         $db->prepare("UPDATE barang SET hrgsat_barang = ?, hrgsat_grosir = ? WHERE kd_barang = ?")
             ->execute([$odt['hrgsat_dtrbmasuk'] / $odt['konversi'], $odt['hrgsat_dtrbmasuk'], $kd_barang]);
+
+        // sinkronkan harga jual barang dengan Hrg Jual Satuan terima barang ini
+        $db->prepare("UPDATE barang SET hrgjual_barang = ? WHERE kd_barang = ?")
+            ->execute([round($hrgjual_dtrbmasuk), $kd_barang]);
 
         $db->prepare("UPDATE ordersdetail SET masuk = '0' WHERE id_dtrbmasuk = ?")
             ->execute([$odt['id_dtrbmasuk']]);
