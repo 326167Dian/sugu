@@ -34,11 +34,16 @@ if ($ketemucekdetail > 0) {
 	$qtygrosirlama =  $rcek['qtygrosir_dtrbmasuk'];
 	$qtygrosirbaru = $qtygrosirlama + $qtygrosir_dtrbmasuk ;
 
+	// masuk dipaksa '1' (belum diterima) karena qty pesanan baru saja ditambah/diubah di sini --
+	// kalau baris lama kebetulan masih membawa status 'sudah diterima' yang salah (mis. data lama
+	// yang belum sempat diterima tapi statusnya keliru), item tidak boleh tetap tersembunyi dari
+	// halaman Terima Barang.
 	$db->prepare("UPDATE ordersdetail SET qty_dtrbmasuk = ?,
 										hrgsat_dtrbmasuk = ?,
 										hrgttl_dtrbmasuk = ?,
 										satgrosir_dtrbmasuk = ?,
-										qtygrosir_dtrbmasuk = ?
+										qtygrosir_dtrbmasuk = ?,
+										masuk = '1'
 										WHERE id_dtrbmasuk = ?")->execute([
 											$ttlqty,
 											$hrgsat_dtrbmasuk,
