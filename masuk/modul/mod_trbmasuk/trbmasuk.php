@@ -937,10 +937,10 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
     				        $caridetail1->execute([$nobatch]);
 			
     				        $no=1;
-    				        while($dt = mysqli_fetch_array($caridetail1)):
+    				        while($dt = $caridetail1->fetch(PDO::FETCH_ASSOC)):
     				    ?>
     				    <tr>
-    				        <td class="text-center"><?= $no++?></t>
+    				        <td class="text-center"><?= $no++?></td>
         					<td class="text-left"><?= $dt['nm_supplier']?></td>
         					<td class="text-center"><?= format_rupiah($dt['hrgsat_dtrbmasuk'])?></td>
         					<td class="text-center"><?= tgl_indo($dt['tgl_trbmasuk'])?></td>
