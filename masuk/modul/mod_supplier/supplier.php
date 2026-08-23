@@ -29,6 +29,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 				</div>
 				<div class="box-body table-responsive">
 					<a class='btn  btn-success btn-flat' href='?module=supplier&act=tambah'>TAMBAH</a>
+					<a class='btn  btn-primary btn-flat' href='modul/mod_supplier/print_supplier.php' target='_blank'>PRINT SUPPLIER</a>
 					<br><br>
 
 
