@@ -25,6 +25,38 @@ function pastikan_skema_perubahan_trkasir($db)
                         ADD COLUMN id_admin_hapus INT(11) NULL AFTER waktu_hapus");
         }
 
+        // Beberapa kolom di trkasir_detail_hist & trkasir_restore masih NOT NULL, padahal kolom
+        // sumbernya (trkasir_detail / trkasir) sudah lama NULLABLE. Transaksi Market Place
+        // (order_online) sering tidak mengisi field seperti no_batch/exp_date/disc/komisi/dp_bayar/dst,
+        // jadi nilainya NULL -- ini bikin proses HAPUS transaksi gagal total (rollback) dengan error
+        // "Column '...' cannot be null" saat mencatat riwayat penghapusan. Disamakan jadi nullable,
+        // konsisten dengan kolom sumbernya.
+        $kolomWajibNullable = [
+            'trkasir_detail_hist' => [
+                'exp_date' => 'DATE',
+                'disc'     => 'INT(2)',
+                'komisi'   => 'INT(11)',
+            ],
+            'trkasir_restore' => [
+                'dp_bayar'    => 'DOUBLE',
+                'diskon1'     => 'DOUBLE',
+                'diskon2'     => 'DOUBLE',
+                'sisa_bayar'  => 'DOUBLE',
+                'ket_trkasir' => 'TEXT',
+            ],
+        ];
+        $cekNullableStmt = $db->prepare("SELECT IS_NULLABLE FROM information_schema.COLUMNS
+                                            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?");
+        foreach ($kolomWajibNullable as $tabel => $kolomList) {
+            foreach ($kolomList as $kolom => $tipe) {
+                $cekNullableStmt->execute([$tabel, $kolom]);
+                $info = $cekNullableStmt->fetch(PDO::FETCH_ASSOC);
+                if ($info && $info['IS_NULLABLE'] === 'NO') {
+                    $db->exec("ALTER TABLE $tabel MODIFY COLUMN $kolom $tipe NULL");
+                }
+            }
+        }
+
         $cek = $db->prepare("SHOW COLUMNS FROM trkasir_restore LIKE 'tipetx'");
         $cek->execute();
         if ($cek->rowCount() == 0) {

@@ -381,6 +381,18 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 				$stmt_del_karstok = $db->prepare("DELETE FROM kartu_stok WHERE kode_transaksi = ?");
 				$stmt_del_karstok->execute([$kd_trkasir]);
 
+				// Transaksi Market Place berasal dari order_online (kd_trkasir = order_online.kode_pesanan).
+				// Ikut dihapus di sini, dalam transaction yang sama, supaya tidak ada data pesanan online
+				// yang nyangkut/yatim setelah transaksi kasirnya dihapus. Untuk transaksi reguler (bukan
+				// Market Place) query ini tidak menemukan apa-apa, jadi aman dijalankan selalu.
+				$cekOrderOnline = $db->prepare("SELECT id FROM order_online WHERE kode_pesanan = ?");
+				$cekOrderOnline->execute([$kd_trkasir]);
+				$orderOnline = $cekOrderOnline->fetch(PDO::FETCH_ASSOC);
+				if ($orderOnline) {
+					$db->prepare("DELETE FROM order_online_item WHERE order_id = ?")->execute([$orderOnline['id']]);
+					$db->prepare("DELETE FROM order_online WHERE id = ?")->execute([$orderOnline['id']]);
+				}
+
 				$db->commit();
 				echo "<script type='text/javascript'>alert('Data berhasil dihapus !');window.location='../../media_admin.php?module=" . $module . "'</script>";
 			} catch (Throwable $e) {
