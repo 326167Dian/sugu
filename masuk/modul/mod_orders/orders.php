@@ -849,7 +849,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 	//auto nama barang
 	$('#nmbrg_dtrbmasuk').typeahead({
 		source: function(query, process) {
-			return $.post('modul/mod_orders/autonamabarang.php', {
+			return $.post('modul/mod_orders/autonamabarang_stok.php', {
 				query: query
 			}, function(data) {
 
@@ -857,11 +857,31 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 				return process(data);
 
 			});
+		},
+		// Tampilkan stok & satuan di sebelah nama barang pada dropdown pencarian. Setelah item
+		// dipilih, plugin ini memanggil displayText() SEKALI LAGI atas hasil updater() sebelum
+		// dimasukkan ke input -- jadi kalau argumennya sudah berupa string polos (hasil updater,
+		// bukan object item), kembalikan apa adanya (jangan didekorasi ulang jadi "undefined (Stok: ...)").
+		displayText: function(item) {
+			if (typeof item === 'string') {
+				return item;
+			}
+			return item.nm_barang + ' (Stok: ' + item.stok_barang + ' ' + item.sat_barang + ')';
+		},
+		// Kalau item dipilih, yang dimasukkan ke input tetap nama barang polos saja
+		// (bukan teks "(Stok: ...)"-nya), supaya pencarian exact-match saat Enter tetap cocok.
+		updater: function(item) {
+			return item.nm_barang;
 		}
 	});
 
-    // event enter nama obat
-	$('#nmbrg_dtrbmasuk').keydown(function(e) {
+    // event enter nama obat -- pakai keyup (bukan keydown) karena plugin typeahead ini baru
+    // benar-benar memasukkan nama barang yang dipilih ke input saat event keyup (lihat method
+    // select() di bootstrap3-typeahead). Kalau dipasang di keydown, kode ini jalan LEBIH DULU
+    // sebelum typeahead sempat mengisi nama barang hasil pilihan, jadi yang terkirim ke
+    // autonamabarang_enter.php masih teks mentah yang sedang diketik (belum ke-resolve),
+    // sehingga field Qty Ecer/Kode Barang dkk gagal terisi.
+	$('#nmbrg_dtrbmasuk').keyup(function(e) {
 		if (e.which == 13) {
 			//letakan fungsi anda disini
 
