@@ -267,11 +267,24 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 				$ambildatadetail = $db->prepare("SELECT * FROM trkasir_detail WHERE kd_trkasir=?");
 				$ambildatadetail->execute([$kd_trkasir]);
 
+				$bundleRestore = [];
+
 				while ($r = $ambildatadetail->fetch(PDO::FETCH_ASSOC)) {
 
 					$id_dtrkasir    = $r['id_dtrkasir'];
 					$id_barang      = $r['id_barang'];
 					$qty_dtrkasir   = $r['qty_dtrkasir'];
+
+					// Kumpulkan qty bundle yang perlu dikembalikan (per kd_bundle, dihitung sekali)
+					$kd_bundle = isset($r['kd_bundle']) ? $r['kd_bundle'] : '';
+					if (substr($kd_bundle, 0, 4) == 'BUND') {
+						$get_bundle_detail = $db->prepare("SELECT qty_barang FROM bundle_detail WHERE kd_bundle = ? AND kd_barang = ?");
+						$get_bundle_detail->execute([$kd_bundle, $r['kd_barang']]);
+						$rbundle = $get_bundle_detail->fetch(PDO::FETCH_ASSOC);
+						if ($rbundle && $rbundle['qty_barang'] > 0) {
+							$bundleRestore[$kd_bundle] = $qty_dtrkasir / $rbundle['qty_barang'];
+						}
+					}
 
 					// update stok
 					$cekstok = $db->prepare("SELECT id_barang, stok_barang FROM barang WHERE id_barang=?");
@@ -352,6 +365,15 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
 					$stmt_del_batch = $db->prepare("DELETE FROM batch WHERE kd_transaksi = ? AND no_batch=? AND status = 'keluar'");
 					$stmt_del_batch->execute([$r['kd_trkasir'], $r['no_batch']]);
+				}
+
+				// Kembalikan stok bundle
+				foreach ($bundleRestore as $kdBundleRestore => $qtyBundleRestore) {
+					$stmt_update_bundle = $db->prepare("UPDATE bundle SET qty_bundle = qty_bundle + :qty_bundle WHERE kd_bundle = :kd_bundle");
+					$stmt_update_bundle->execute([
+						':qty_bundle' => $qtyBundleRestore,
+						':kd_bundle'  => $kdBundleRestore
+					]);
 				}
 
 				// rollback poin pelanggan
