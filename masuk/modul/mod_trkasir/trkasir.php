@@ -289,14 +289,18 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                     </table>
                 </div>
                 <?php
-                $kom = $db->prepare("SELECT sum(komisi) AS tambahan FROM trkasir_detail JOIN trkasir
-                                    ON(trkasir_detail.kd_trkasir=trkasir.kd_trkasir)
-                                    WHERE trkasir_detail.idadmin='$_SESSION[idadmin]' 
-                                    AND trkasir.tgl_trkasir BETWEEN '$awalbulan' AND '$tgl_awal' ");
-                $kom->execute();
-                $misi = $kom->fetch(PDO::FETCH_ASSOC);
-                $pk = format_rupiah($misi['tambahan']);
-                
+                $pk = '0';
+                try {
+                    $kom = $db->prepare("SELECT sum(komisi) AS tambahan FROM trkasir_detail JOIN trkasir
+                                        ON(trkasir_detail.kd_trkasir=trkasir.kd_trkasir)
+                                        WHERE trkasir_detail.idadmin=?
+                                        AND trkasir.tgl_trkasir BETWEEN ? AND ? ");
+                    $kom->execute([$_SESSION['idadmin'], $awalbulan, $tgl_awal]);
+                    $misi = $kom->fetch(PDO::FETCH_ASSOC);
+                    $pk = format_rupiah($misi['tambahan']);
+                } catch (PDOException $e) {
+                    error_log('Gagal mengambil total komisi petugas: ' . $e->getMessage());
+                }
                 ?>
                 <a class='btn  btn-success btn-flat' href='modul/mod_lapstok/sinkronisasi_stok.php'>SINKRONISASI</a>
                 Klik SINKRONISASI sebelum tutup shift
