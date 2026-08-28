@@ -8,16 +8,19 @@ $kd_barang              = $_POST['kd_barang'];
 $kd_trbmasuk            = $_POST['kd_trbmasuk'];
 $kd_orders              = $_POST['kd_orders'];
 $id_dtrbmasuk           = $_POST['id_dtrbmasuk'];
+$no_batch_asal          = isset($_POST['no_batch_asal']) ? $_POST['no_batch_asal'] : '';
 
 header('Content-Type: application/json');
 
 try {
     $db->beginTransaction();
 
-    // dicari cukup dengan kd_barang + kd_trbmasuk (bukan id_dtrbmasuk) karena setelah baris pertama kali
-    // dipindah dari ordersdetail ke trbmasuk_detail, id_dtrbmasuk yang dikirim browser masih milik ordersdetail
-    $trbmasuk = $db->prepare("SELECT * FROM trbmasuk_detail WHERE kd_barang=? AND kd_trbmasuk=?");
-    $trbmasuk->execute([$kd_barang, $kd_trbmasuk]);
+    // dicari dengan kd_barang + kd_trbmasuk + no_batch (bukan id_dtrbmasuk) karena setelah baris pertama kali
+    // dipindah dari ordersdetail ke trbmasuk_detail, id_dtrbmasuk yang dikirim browser masih milik ordersdetail.
+    // no_batch WAJIB ikut jadi syarat supaya barang yang sama dengan beberapa no batch berbeda
+    // (dipisah lewat form tambah item) tidak saling tertukar baris saat salah satu batch-nya diedit.
+    $trbmasuk = $db->prepare("SELECT * FROM trbmasuk_detail WHERE kd_barang=? AND kd_trbmasuk=? AND no_batch = ?");
+    $trbmasuk->execute([$kd_barang, $kd_trbmasuk, $no_batch_asal]);
     $detail = $trbmasuk->fetch(PDO::FETCH_ASSOC);
 
     if ($trbmasuk->rowCount() > 0) {
@@ -52,6 +55,7 @@ try {
         $hnasat_final = $rsto['hna'];
         $diskon_final = $detail['diskon'];
         $qtygrosir_final = $qtygrosir_dtrbmasuk;
+        $no_batch_final = $detail['no_batch'];
     } else {
         $order = $db->prepare("SELECT * FROM ordersdetail WHERE kd_barang = ? AND kd_trbmasuk = ?");
         $order->execute([$kd_barang, $kd_orders]);
@@ -86,6 +90,7 @@ try {
         $hnasat_final = $rst['hna'];
         $diskon_final = $odt['diskon'];
         $qtygrosir_final = $qtygrosir_dtrbmasuk;
+        $no_batch_final = $odt['no_batch'];
     }
 
     // Nilai tampilan HNA+Disc & Total per baris (tanpa PPN, sesuai tampilan tbl_detail1.php)
@@ -99,6 +104,7 @@ try {
         'status'       => 'ok',
         'id_dtrbmasuk' => $id_dtrbmasuk,
         'qty_grosir'   => $qtygrosir_final,
+        'no_batch'     => $no_batch_final,
         'hnadisc_text' => format_rupiah($hnadisc),
         'total_text'   => format_rupiah($baristotal),
         'subtotal'     => format_rupiah($subtotal)

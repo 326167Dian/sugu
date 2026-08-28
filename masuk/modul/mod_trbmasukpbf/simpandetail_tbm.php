@@ -101,7 +101,7 @@ if ($ketemucekdetail > 0){
 				// 						WHERE id_dtrbmasuk = '$id_dtrbmasuk'");
 	$stmt_update_trbmasukdetail = $db->prepare("UPDATE trbmasuk_detail SET
 	                qty_dtrbmasuk       = :ttlqty,
-	                qty_grosir          = qty_grosir - :qty_grosir,
+	                qty_grosir          = qty_grosir + :qty_grosir,
 	                hnasat_dtrbmasuk    = :hnasat_dtrbmasuk,
 	                diskon              = :diskon,
 	                hrgsat_dtrbmasuk    = :hrgsat_dtrbmasuk,

@@ -4,6 +4,7 @@ include "../../../configurasi/fungsi_rupiah.php";
 include "helper_subtotal.php";
 
 $id_dtrbmasuk  = $_POST['id_dtrbmasuk'];
+$kd_barang     = isset($_POST['kd_barang']) ? $_POST['kd_barang'] : '';
 $kd_trbmasuk_draft = isset($_POST['kd_trbmasuk']) ? $_POST['kd_trbmasuk'] : '';
 
 header('Content-Type: application/json');
@@ -16,6 +17,14 @@ $stmt = $db->prepare("SELECT * FROM trbmasuk_detail WHERE id_dtrbmasuk = ? AND k
 $stmt->execute([$id_dtrbmasuk, $_POST['kd_orders']]);
 $r1 = $stmt->fetch(PDO::FETCH_ASSOC);
 $r1_num = $stmt->rowCount();
+
+// id_dtrbmasuk yang dikirim browser adalah PK tabel trbmasuk_detail (baris di atas), BUKAN PK ordersdetail --
+// jangan pernah dipakai untuk mencari baris ordersdetail (di cabang else di bawah), karena kedua tabel
+// itu auto_increment sendiri-sendiri sehingga angkanya bisa kebetulan sama dengan PK barang lain di
+// ordersdetail. kd_barang WAJIB dicocokkan juga supaya tidak salah menyentuh item lain.
+if ($r1_num == 0 && $kd_barang === '') {
+    throw new Exception('Data tidak lengkap untuk menghapus baris ini. Silakan muat ulang halaman.');
+}
 
 if ($r1_num > 0) {
     //update stok
@@ -80,8 +89,12 @@ if ($r1_num > 0) {
     $stmt_hapusbatch = $db->prepare("DELETE FROM batch WHERE kd_transaksi = ? AND kd_barang = ? AND no_batch = ?");
     $stmt_hapusbatch->execute([$r1['kd_trbmasuk'],$r1['kd_barang'],$r1['no_batch']]);
 } else {
-    $stmt_update = $db->prepare("UPDATE ordersdetail SET masuk = '0' WHERE id_dtrbmasuk = ? AND kd_trbmasuk = ?");
-    $stmt_update->execute([$id_dtrbmasuk, $_POST['kd_trbmasuk']]);
+    // Baris ini bukan trbmasuk_detail (sudah dihapus/berubah) -- dicocokkan lewat kd_barang + kd_orders,
+    // BUKAN id_dtrbmasuk (itu PK trbmasuk_detail, bukan PK ordersdetail, jadi tidak boleh dipakai langsung
+    // untuk mencari baris di ordersdetail supaya tidak menyentuh item lain yang kebetulan PK-nya sama).
+    // kd_orders di sini adalah KODE PESANAN, sesuai kolom ordersdetail.kd_trbmasuk.
+    $stmt_update = $db->prepare("UPDATE ordersdetail SET masuk = '0' WHERE kd_barang = ? AND kd_trbmasuk = ?");
+    $stmt_update->execute([$kd_barang, $_POST['kd_orders']]);
 }
 
     $subtotal = hitung_subtotal_pbf($db, $kd_trbmasuk_draft);

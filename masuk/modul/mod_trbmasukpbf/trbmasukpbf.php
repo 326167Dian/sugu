@@ -2729,6 +2729,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
             var $btn = $(this);
             var id_dtrbmasuk = $btn.data('id_dtrbmasuk');
+            var kd_barang = $btn.data('kd_barang');
             var kd_orders = $('#kd_trbmasuk').val();
             var kd_trbmasuk = $('#kd_trbmasuk1').val();
 
@@ -2738,6 +2739,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 dataType: 'json',
                 data: {
                     id_dtrbmasuk: id_dtrbmasuk,
+                    kd_barang: kd_barang,
                     kd_orders: kd_orders,
                     kd_trbmasuk: kd_trbmasuk
                 },

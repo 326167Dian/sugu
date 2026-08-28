@@ -424,9 +424,12 @@ elseif ($module=='trbmasukpbf' AND $act=='input_order_trbmasuk'){
 	$db->prepare("UPDATE kdbm SET stt_kdbm = 'OFF' WHERE id_admin = ? AND id_resto = 'pusat' AND kd_trbmasuk = ?")->execute([$_SESSION['idadmin'], $_POST['kd_trbmasuk1']]);
 										
 	// Update order karena barang sudah masuk
+	// catatan: orders.kd_trbmasuk menyimpan KODE PESANAN (kd_trbmasuk1 justru kode transaksi BMP-...),
+	// jadi harus dicocokkan dengan $_POST['kd_trbmasuk'] -- sebelumnya salah pakai kd_trbmasuk1 sehingga
+	// baris orders ini tidak pernah ketemu dan status pesanan tidak pernah tertutup
     $db->prepare("UPDATE orders SET
                     masuk = '0'
-                    WHERE kd_trbmasuk = ?")->execute([$_POST['kd_trbmasuk1']]);
+                    WHERE kd_trbmasuk = ?")->execute([$_POST['kd_trbmasuk']]);
 
     $db->commit();
   } catch (Exception $e) {

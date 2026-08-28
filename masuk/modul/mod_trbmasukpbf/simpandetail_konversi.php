@@ -9,14 +9,17 @@ $kd_trbmasuk            = $_POST['kd_trbmasuk'];
 $kd_orders              = $_POST['kd_orders'];
 $id_dtrbmasuk           = $_POST['id_dtrbmasuk'];
 $qtygrosir_dtrbmasuk    = isset($_POST['qtygrosir_dtrbmasuk']) ? $_POST['qtygrosir_dtrbmasuk'] : 0;
+$no_batch_asal          = isset($_POST['no_batch_asal']) ? $_POST['no_batch_asal'] : '';
 
 header('Content-Type: application/json');
 
 try {
     $db->beginTransaction();
 
-    $trbmasuk = $db->prepare("SELECT * FROM trbmasuk_detail WHERE kd_barang=? AND kd_trbmasuk=?");
-    $trbmasuk->execute([$kd_barang, $kd_trbmasuk]);
+    // no_batch WAJIB ikut jadi syarat supaya barang yang sama dengan beberapa no batch berbeda
+    // tidak saling tertukar baris saat salah satu batch-nya diedit.
+    $trbmasuk = $db->prepare("SELECT * FROM trbmasuk_detail WHERE kd_barang=? AND kd_trbmasuk=? AND no_batch = ?");
+    $trbmasuk->execute([$kd_barang, $kd_trbmasuk, $no_batch_asal]);
     $detail = $trbmasuk->fetch(PDO::FETCH_ASSOC);
 
     if ($trbmasuk->rowCount() > 0) {
@@ -43,6 +46,7 @@ try {
         $hnasat_final = $detail['hnasat_dtrbmasuk'];
         $diskon_final = $detail['diskon'];
         $qtygrosir_final = $detail['qty_grosir'];
+        $no_batch_final = $detail['no_batch'];
     } else {
         $order = $db->prepare("SELECT * FROM ordersdetail WHERE kd_barang = ? AND kd_trbmasuk = ?");
         $order->execute([$kd_barang, $kd_orders]);
@@ -101,6 +105,7 @@ try {
         $hnasat_final = $rst['hna'];
         $diskon_final = $odt['diskon'];
         $qtygrosir_final = $odt['qtygrosir_dtrbmasuk'];
+        $no_batch_final = $odt['no_batch'];
     }
 
     $hnadisc = $hnasat_final * (1 - ($diskon_final / 100));
@@ -112,6 +117,7 @@ try {
     echo json_encode([
         'status'       => 'ok',
         'id_dtrbmasuk' => $id_dtrbmasuk,
+        'no_batch'     => $no_batch_final,
         'hnadisc_text' => format_rupiah($hnadisc),
         'total_text'   => format_rupiah($baristotal),
         'subtotal'     => format_rupiah($subtotal)

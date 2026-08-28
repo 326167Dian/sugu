@@ -9,14 +9,19 @@ $kd_trbmasuk    = $_POST['kd_trbmasuk'];
 $kd_orders      = $_POST['kd_orders'];
 $id_dtrbmasuk   = $_POST['id_dtrbmasuk'];
 $qtygrosir_dtrbmasuk = isset($_POST['qtygrosir_dtrbmasuk']) ? $_POST['qtygrosir_dtrbmasuk'] : 0;
+// no_batch SEBELUM diedit -- dipakai untuk mencari baris yang benar (lihat catatan di bawah),
+// bukan no_batch yang baru diketik user (yang sudah ada di variabel $no_batch di atas)
+$no_batch_asal  = isset($_POST['no_batch_asal']) ? $_POST['no_batch_asal'] : '';
 
 header('Content-Type: application/json');
 
 try {
     $db->beginTransaction();
 
-    $trbmasuk = $db->prepare("SELECT * FROM trbmasuk_detail WHERE kd_barang=? AND kd_trbmasuk=?");
-    $trbmasuk->execute([$kd_barang, $kd_trbmasuk]);
+    // dicocokkan dengan no_batch LAMA (no_batch_asal), bukan kd_barang+kd_trbmasuk saja, supaya kalau
+    // barang yang sama sudah punya beberapa baris batch berbeda, edit di satu baris tidak nyasar ke baris lain
+    $trbmasuk = $db->prepare("SELECT * FROM trbmasuk_detail WHERE kd_barang=? AND kd_trbmasuk=? AND no_batch = ?");
+    $trbmasuk->execute([$kd_barang, $kd_trbmasuk, $no_batch_asal]);
     $detail = $trbmasuk->fetch(PDO::FETCH_ASSOC);
 
     if ($trbmasuk->rowCount() > 0) {
@@ -25,16 +30,17 @@ try {
 
         $db->prepare("UPDATE trbmasuk_detail SET no_batch = ? WHERE id_dtrbmasuk = ?")->execute([$no_batch, $id_dtrbmasuk]);
 
-        $stmt_batch = $db->prepare("SELECT * FROM batch WHERE kd_barang=? AND kd_transaksi=?");
-        $stmt_batch->execute([$kd_barang, $kd_trbmasuk]);
+        $stmt_batch = $db->prepare("SELECT * FROM batch WHERE kd_barang=? AND kd_transaksi=? AND no_batch=?");
+        $stmt_batch->execute([$kd_barang, $kd_trbmasuk, $no_batch_lama]);
         if ($stmt_batch->rowCount() > 0) {
-            $db->prepare("UPDATE batch SET no_batch = ? WHERE kd_barang = ? AND kd_transaksi = ?")
-                ->execute([$no_batch, $kd_barang, $kd_trbmasuk]);
+            $db->prepare("UPDATE batch SET no_batch = ? WHERE kd_barang = ? AND kd_transaksi = ? AND no_batch = ?")
+                ->execute([$no_batch, $kd_barang, $kd_trbmasuk, $no_batch_lama]);
         }
 
         $hnasat_final = $detail['hnasat_dtrbmasuk'];
         $diskon_final = $detail['diskon'];
         $qtygrosir_final = $detail['qty_grosir'];
+        $no_batch_final = $no_batch;
     } else {
         $stmt_order = $db->prepare("SELECT * FROM ordersdetail WHERE kd_barang=? AND kd_trbmasuk=?");
         $stmt_order->execute([$kd_barang, $kd_orders]);
@@ -94,6 +100,7 @@ try {
         $hnasat_final = $rst['hna'];
         $diskon_final = $odt['diskon'];
         $qtygrosir_final = $qtygrosir_dtrbmasuk;
+        $no_batch_final = $no_batch;
     }
 
     $hnadisc = $hnasat_final * (1 - ($diskon_final / 100));
@@ -105,6 +112,7 @@ try {
     echo json_encode([
         'status'       => 'ok',
         'id_dtrbmasuk' => $id_dtrbmasuk,
+        'no_batch'     => $no_batch_final,
         'hnadisc_text' => format_rupiah($hnadisc),
         'total_text'   => format_rupiah($baristotal),
         'subtotal'     => format_rupiah($subtotal)

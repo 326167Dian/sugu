@@ -53,10 +53,15 @@
         $carabayar = $rf['carabayar'];**/
 
             
-            // dibatasi jenis='pbf' supaya item yang sudah diterima lewat modul trbmasuk (non PBF) tidak ikut tampil/bisa diedit di sini
+            // dibatasi jenis='pbf' supaya item yang sudah diterima lewat modul trbmasuk (non PBF) tidak ikut tampil/bisa diedit di sini.
+            // LEFT JOIN (bukan JOIN) karena baris header `trbmasuk` baru dibuat saat SIMPAN TRANSAKSI --
+            // selama masih draft (item sudah dipindah ke trbmasuk_detail tapi transaksi belum final-submit),
+            // header itu belum ada sama sekali. Kalau pakai INNER JOIN, item yang baru saja diterima
+            // langsung hilang dari tabel & tidak ikut kehitung di Total Harga selama masih draft.
             $stmt_trb = $db->prepare("SELECT trbmasuk_detail.* FROM trbmasuk_detail
-                                        JOIN trbmasuk ON trbmasuk.kd_trbmasuk = trbmasuk_detail.kd_trbmasuk
-                                        WHERE trbmasuk_detail.kd_orders = ? AND trbmasuk.jenis = 'pbf'
+                                        LEFT JOIN trbmasuk ON trbmasuk.kd_trbmasuk = trbmasuk_detail.kd_trbmasuk
+                                        WHERE trbmasuk_detail.kd_orders = ?
+                                        AND (trbmasuk.jenis = 'pbf' OR trbmasuk.kd_trbmasuk IS NULL)
                                         ORDER BY trbmasuk_detail.nmbrg_dtrbmasuk ASC");
             $stmt_trb->execute([$kd_trbmasuk]);
             $ctrb = $stmt_trb->rowCount();
@@ -107,8 +112,9 @@
 											    <input type='number' id='dqtygrosir_dtrbmasuk' value='$trb[qty_grosir]' style='width: 50px; text-align: center'
 											    data-id_dtrbmasuk           = '$trb[id_dtrbmasuk]'
 											    data-kd_barang              = '$trb[kd_barang]'
+											    data-no_batch               = '$trb[no_batch]'
 											    >
-											
+
 											 </td>
 											 <td align='center'>$trb[satgrosir_dtrbmasuk]</td>
 											 <td align='center'>
@@ -116,6 +122,7 @@
 											    data-id_dtrbmasuk           = '$trb[id_dtrbmasuk]'
 											    data-kd_barang              = '$trb[kd_barang]'
 											    data-qtygrosir_dtrbmasuk    = '$trb[qty_grosir]'
+											    data-no_batch               = '$trb[no_batch]'
 											    >
 											 </td>
 											 <td align='center'>
@@ -131,38 +138,43 @@
 											    data-id_dtrbmasuk           = '$trb[id_dtrbmasuk]'
 											    data-kd_barang              = '$trb[kd_barang]'
 											    data-qtygrosir_dtrbmasuk    = '$trb[qty_grosir]'
+											    data-no_batch               = '$trb[no_batch]'
 											    >
-											    
+
 											 </td>
 											 <td align='right'>
 											    <input type='text' id='dhnasat_dtrbmasuk' value='$hnasat_dtrbmasuk' style='width: 100px'
 											    data-id_dtrbmasuk           = '$trb[id_dtrbmasuk]'
 											    data-kd_barang              = '$trb[kd_barang]'
 											    data-qtygrosir_dtrbmasuk    = '$trb[qty_grosir]'
-											    > 
-											 
+											    data-no_batch               = '$trb[no_batch]'
+											    >
+
 											 </td>
 											 <td align='right'>
 											    <input type='text' id='ddiskon' value='$trb[diskon]' style='width: 50px'
 											    data-id_dtrbmasuk           = '$trb[id_dtrbmasuk]'
 											    data-kd_barang              = '$trb[kd_barang]'
 											    data-qtygrosir_dtrbmasuk    = '$trb[qty_grosir]'
+											    data-no_batch               = '$trb[no_batch]'
 											    >
-											 
+
 											 </td>
-											 <td align='right'>$hnadisc12</td>											
+											 <td align='right'>$hnadisc12</td>
 											 <td align='right'>
 											    <input type='text' id='dhrgjual_dtrbmasuk' value='$hrgjual_dtrbmasuk' style='width: 100px'
 											    data-id_dtrbmasuk           = '$trb[id_dtrbmasuk]'
 											    data-kd_barang              = '$trb[kd_barang]'
 											    data-qtygrosir_dtrbmasuk    = '$trb[qty_grosir]'
+											    data-no_batch               = '$trb[no_batch]'
 											    >
-											 </td>											
+											 </td>
 											 						
 											 <td align='right'>$hrgttl_dtrbmasuk1</td>
 											 <td align='center'>
-    											 <button class='btn btn-xs btn-danger' id='hapusorder' 
-    												 data-id_dtrbmasuk='$trb[id_dtrbmasuk]'>
+    											 <button class='btn btn-xs btn-danger' id='hapusorder'
+    												 data-id_dtrbmasuk='$trb[id_dtrbmasuk]'
+    												 data-kd_barang='$trb[kd_barang]'>
     												 <i class='glyphicon glyphicon-remove'></i>
     											</button>
 												
@@ -221,6 +233,7 @@
     						    <input type='number' id='dqtygrosir_dtrbmasuk' value='$r[qtygrosir_dtrbmasuk]' style='width: 50px; text-align: center'
     							    data-id_dtrbmasuk           = '$r[id_dtrbmasuk]'
     								data-kd_barang              = '$r[kd_barang]'
+    								data-no_batch               = '$no_batch'
     								>
     						</td>
     						<td align='center'>$r[satgrosir_dtrbmasuk]</td>
@@ -229,6 +242,7 @@
     							    data-id_dtrbmasuk           = '$r[id_dtrbmasuk]'
     								data-kd_barang              = '$r[kd_barang]'
     								data-qtygrosir_dtrbmasuk    = '$r[qtygrosir_dtrbmasuk]'
+    								data-no_batch               = '$no_batch'
     								>
     						</td>
     						<td align='center'>
@@ -244,33 +258,37 @@
     							data-id_dtrbmasuk           = '$r[id_dtrbmasuk]'
     							data-kd_barang              = '$r[kd_barang]'
     							data-qtygrosir_dtrbmasuk    = '$r[qtygrosir_dtrbmasuk]'
+    							data-no_batch               = '$no_batch'
     							>
-    											    
+
     						</td>
     						<td align='right'>
     							<input type='text' id='dhnasat_dtrbmasuk' value='$hnasat_dtrbmasuk' style='width: 100px'
     							data-id_dtrbmasuk           = '$r[id_dtrbmasuk]'
     							data-kd_barang              = '$r[kd_barang]'
     							data-qtygrosir_dtrbmasuk    = '$r[qtygrosir_dtrbmasuk]'
-    							> 
-    											 
+    							data-no_batch               = '$no_batch'
+    							>
+
     						</td>
     						<td align='right'>
     							<input type='number' id='ddiskon' value='$r[diskon]' style='width: 50px'
     							data-id_dtrbmasuk           = '$r[id_dtrbmasuk]'
     							data-kd_barang              = '$r[kd_barang]'
     							data-qtygrosir_dtrbmasuk    = '$r[qtygrosir_dtrbmasuk]'
+    							data-no_batch               = '$no_batch'
     							>
-    											 
+
     						</td>
-    						<td align='right'>$hnadisc1</td>											
+    						<td align='right'>$hnadisc1</td>
     						<td align='right'>
     							<input type='text' id='dhrgjual_dtrbmasuk' value='$hrgjual_dtrbmasuk' style='width: 100px'
     							data-id_dtrbmasuk           ='$r[id_dtrbmasuk]'
     							data-kd_barang              = '$r[kd_barang]'
     							data-qtygrosir_dtrbmasuk    = '$r[qtygrosir_dtrbmasuk]'
+    							data-no_batch               = '$no_batch'
     						    >
-    						</td>											
+    						</td>
     											 						
     						<td align='right'>$hrgttl_dtrbmasuk</td>
     						<td align='center'>
@@ -378,6 +396,16 @@
                         });
                     }
 
+                    // no_batch dipakai sebagai bagian dari identitas baris (kd_barang+kd_trbmasuk+no_batch)
+                    // supaya edit selanjutnya di baris ini tidak nyasar ke baris batch lain barang yang sama
+                    if (typeof resp.no_batch !== 'undefined') {
+                        $row.find('[data-no_batch]').each(function() {
+                            $(this).data('no_batch', resp.no_batch);
+                            $(this).attr('data-no_batch', resp.no_batch);
+                        });
+                        $row.find('#dno_batch').data('original-value', resp.no_batch);
+                    }
+
                     if (typeof resp.hnadisc_text !== 'undefined') {
                         $row.find('td').eq(10).text(resp.hnadisc_text);
                     }
@@ -424,6 +452,7 @@
             		    var qtygrosir_dtrbmasuk = $input.val();
             		    var kd_orders           = $('#kd_trbmasuk').val();
             		    var kd_trbmasuk         = $('#kd_trbmasuk1').val();
+            		    var no_batch_asal       = $input.data('no_batch');
 
                         if (qtygrosir_dtrbmasuk === '' || isNaN(qtygrosir_dtrbmasuk) || parseFloat(qtygrosir_dtrbmasuk) <= 0) {
                             alert('Qty Grosir harus diisi angka lebih dari 0');
@@ -441,6 +470,7 @@
                                 'kd_orders'             : kd_orders,
                                 'kd_barang'             : kd_barang,
                                 'qtygrosir_dtrbmasuk'   : qtygrosir_dtrbmasuk,
+                                'no_batch_asal'         : no_batch_asal,
                             },
                             success: function (resp) {
                                 if (resp.status !== 'ok') {
@@ -464,6 +494,7 @@
             		    var konversi            = $input.val();
             		    var kd_orders           = $('#kd_trbmasuk').val();
             		    var kd_trbmasuk         = $('#kd_trbmasuk1').val();
+            		    var no_batch_asal       = $input.data('no_batch');
 
                         if (konversi === '' || isNaN(konversi) || parseFloat(konversi) <= 0) {
                             alert('Konversi harus diisi angka lebih dari 0');
@@ -481,6 +512,7 @@
                                 'kd_orders'             : kd_orders,
                                 'kd_barang'             : kd_barang,
                                 'konversi'              : konversi,
+                                'no_batch_asal'         : no_batch_asal,
                             },
                             success: function (resp) {
                                 if (resp.status !== 'ok') {
@@ -505,6 +537,7 @@
             		    var hnasat_dtrbmasuk    = $input.val();
             		    var kd_orders           = $('#kd_trbmasuk').val();
             		    var kd_trbmasuk         = $('#kd_trbmasuk1').val();
+            		    var no_batch_asal       = $input.data('no_batch');
 
                         $.ajax({
                             url: 'modul/mod_trbmasukpbf/simpandetail_hna.php',
@@ -516,7 +549,8 @@
                                 'kd_orders'             : kd_orders,
                                 'kd_barang'             : kd_barang,
                                 'hnasat_dtrbmasuk'      : hnasat_dtrbmasuk,
-                                'qtygrosir_dtrbmasuk'   : qtygrosir_dtrbmasuk
+                                'qtygrosir_dtrbmasuk'   : qtygrosir_dtrbmasuk,
+                                'no_batch_asal'         : no_batch_asal
                             },
                             success: function (resp) {
                                 if (resp.status !== 'ok') {
@@ -541,6 +575,7 @@
             		    var qtygrosir_dtrbmasuk = $input.data('qtygrosir_dtrbmasuk');
             		    var kd_orders           = $('#kd_trbmasuk').val();
             		    var kd_trbmasuk         = $('#kd_trbmasuk1').val();
+            		    var no_batch_asal       = originalValue;
 
             		    $.ajax({
                             url: 'modul/mod_trbmasukpbf/simpandetail_batch.php',
@@ -552,6 +587,7 @@
                                 'kd_orders'             : kd_orders,
                                 'kd_barang'             : kd_barang,
                                 'no_batch'              : no_batch,
+                                'no_batch_asal'         : no_batch_asal,
                                 'qtygrosir_dtrbmasuk'   : qtygrosir_dtrbmasuk,
                             },
                             success: function (resp) {
@@ -577,6 +613,7 @@
             		    var exp_date            = $input.val();
             		    var kd_orders           = $('#kd_trbmasuk').val();
             		    var kd_trbmasuk         = $('#kd_trbmasuk1').val();
+            		    var no_batch_asal       = $input.data('no_batch');
             		    var tgl_trbmasuk = document.getElementById('tgl_trbmasuk').value;
             		    var min_exp_date = document.getElementById('min_exp_date').value;
 
@@ -599,7 +636,8 @@
                                 'kd_orders'             : kd_orders,
                                 'kd_barang'             : kd_barang,
                                 'exp_date'              : exp_date,
-                                'qtygrosir_dtrbmasuk'   : qtygrosir_dtrbmasuk
+                                'qtygrosir_dtrbmasuk'   : qtygrosir_dtrbmasuk,
+                                'no_batch_asal'         : no_batch_asal
                             },
                             success: function (resp) {
                                 if (resp.status !== 'ok') {
@@ -624,6 +662,7 @@
             		    var hrgjual_dtrbmasuk   = $input.val();
             		    var kd_orders           = $('#kd_trbmasuk').val();
             		    var kd_trbmasuk         = $('#kd_trbmasuk1').val();
+            		    var no_batch_asal       = $input.data('no_batch');
 
                         $.ajax({
                             url: 'modul/mod_trbmasukpbf/simpandetail_hrgjual.php',
@@ -635,7 +674,8 @@
                                 'kd_orders'             : kd_orders,
                                 'kd_barang'             : kd_barang,
                                 'hrgjual_dtrbmasuk'     : hrgjual_dtrbmasuk,
-                                'qtygrosir_dtrbmasuk'   : qtygrosir_dtrbmasuk
+                                'qtygrosir_dtrbmasuk'   : qtygrosir_dtrbmasuk,
+                                'no_batch_asal'         : no_batch_asal
                             },
                             success: function (resp) {
                                 if (resp.status !== 'ok') {
@@ -660,6 +700,7 @@
             		    var diskon              = $input.val();
             		    var kd_orders           = $('#kd_trbmasuk').val();
             		    var kd_trbmasuk         = $('#kd_trbmasuk1').val();
+            		    var no_batch_asal       = $input.data('no_batch');
 
                         $.ajax({
                             url: 'modul/mod_trbmasukpbf/simpandetail_diskon.php',
@@ -672,6 +713,7 @@
                                 'kd_barang'             : kd_barang,
                                 'diskon'                : diskon,
                                 'qtygrosir_dtrbmasuk'   : qtygrosir_dtrbmasuk,
+                                'no_batch_asal'         : no_batch_asal,
                             },
                             success: function (resp) {
                                 if (resp.status !== 'ok') {
