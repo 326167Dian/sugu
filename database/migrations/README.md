@@ -19,6 +19,7 @@ Jalankan file sesuai urutan nama (timestamp di awal nama file):
 11. `20260807_create_table_ujian_progress.sql`
 12. `20260807_fix_hasil_ujian_auto_increment.sql`
 13. `20260810_extend_trkasir_restore_header.sql`
+14. `20260828_add_tipe_barang_trbmasuk_detail.sql`
 
 ## Cara menjalankan
 
@@ -100,7 +101,11 @@ mysql -u USERNAME -p NAMA_DATABASE < database/migrations/20260223_add_indexes_si
 
 - kolom `id_user`, `id_pelanggan`, `kodetx`, `jenistx`, `waktu_trx`, `poin_awal`, `tambahan_poin`, `redeem_poin` pada `trkasir_restore` — sebelumnya tidak tersimpan sama sekali saat transaksi dihapus, sehingga proses restore terpaksa memakai nilai default (petugas = yang klik restore, poin tidak dikembalikan). Transaksi yang dihapus SEBELUM migrasi ini tetap bisa direstore, hanya saja kolom-kolom baru ini bernilai NULL dan proses restore akan memakai default yang sama seperti sebelumnya.
 
-Migrasi index (1-9) bersifat **idempotent**, begitu juga migrasi ke-11 dan ke-12. Migrasi ke-10 dan ke-13 (`ADD COLUMN`) **tidak idempotent** (MySQL/MariaDB versi ini tidak mendukung `ADD COLUMN IF NOT EXISTS`) — jangan dijalankan dua kali. Sebagai jaring pengaman, `configurasi/fungsi_perubahan_trkasir.php` melakukan pengecekan `SHOW COLUMNS` di runtime dan akan menambahkan kolom/tabel yang belum ada secara otomatis jika migrasi ini belum sempat dijalankan manual.
+`20260828_add_tipe_barang_trbmasuk_detail.sql` menambahkan penanda item bonus pada barang masuk PBF (fitur "beli 10 box gratis 1 box"):
+
+- kolom `tipe_barang` ENUM('reguler','bonus') DEFAULT 'reguler' pada `trbmasuk_detail` — item bertipe bonus tidak mengubah data master `barang` (HNA, harga jual, harga satuan, konversi) saat diterima/diedit, hanya menambah `stok_barang`
+
+Migrasi index (1-9) bersifat **idempotent**, begitu juga migrasi ke-11 dan ke-12. Migrasi ke-10, ke-13, dan ke-14 (`ADD COLUMN`) **tidak idempotent** (MySQL/MariaDB versi ini tidak mendukung `ADD COLUMN IF NOT EXISTS`) — jangan dijalankan dua kali. Sebagai jaring pengaman, `configurasi/fungsi_perubahan_trkasir.php` (migrasi 10, 13) dan `configurasi/fungsi_perubahan_trbmasuk.php` (migrasi 14) melakukan pengecekan `SHOW COLUMNS` di runtime dan akan menambahkan kolom/tabel yang belum ada secara otomatis jika migrasi ini belum sempat dijalankan manual.
 
 ## Verifikasi setelah eksekusi
 

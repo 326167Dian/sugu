@@ -1,6 +1,7 @@
 <?php
 include "../../../configurasi/koneksi.php";
 include "../../../configurasi/fungsi_rupiah.php";
+include "../../../configurasi/fungsi_perubahan_trbmasuk.php";
 include "helper_subtotal.php";
 
 // input ditampilkan dalam format rupiah, jadi titik ribuan harus dibuang dulu
@@ -13,6 +14,8 @@ $qtygrosir_dtrbmasuk    = isset($_POST['qtygrosir_dtrbmasuk']) ? $_POST['qtygros
 $no_batch_asal          = isset($_POST['no_batch_asal']) ? $_POST['no_batch_asal'] : '';
 
 header('Content-Type: application/json');
+
+pastikan_kolom_tipe_barang_trbmasuk($db);
 
 try {
     $db->beginTransaction();
@@ -30,7 +33,11 @@ try {
             ->execute([$hrgjual_dtrbmasuk, $id_dtrbmasuk]);
 
         $hrgjual_barang = round($hrgjual_dtrbmasuk);
-        $db->prepare("UPDATE barang SET hrgjual_barang = ? WHERE id_barang = ?")->execute([$hrgjual_barang, $detail['id_barang']]);
+        // Item bonus TIDAK BOLEH mengubah field apapun di tabel barang (endpoint ini tidak menyentuh
+        // stok_barang sama sekali, jadi untuk bonus cukup lewati update barang seluruhnya).
+        if ($detail['tipe_barang'] !== 'bonus') {
+            $db->prepare("UPDATE barang SET hrgjual_barang = ? WHERE id_barang = ?")->execute([$hrgjual_barang, $detail['id_barang']]);
+        }
 
         $hnasat_final = $detail['hnasat_dtrbmasuk'];
         $diskon_final = $detail['diskon'];

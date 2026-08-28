@@ -42,6 +42,8 @@
             include "../../../configurasi/koneksi.php";
             include "../../../configurasi/fungsi_rupiah.php";
             include "../../../configurasi/fungsi_indotgl.php";
+            include "../../../configurasi/fungsi_perubahan_trbmasuk.php";
+            pastikan_kolom_tipe_barang_trbmasuk($db);
 
             $kd_trbmasuk = isset($_POST['kd_trbmasuk'])? $_POST['kd_trbmasuk'] : '';
 

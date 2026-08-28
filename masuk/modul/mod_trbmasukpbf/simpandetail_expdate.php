@@ -1,6 +1,7 @@
 <?php
 include "../../../configurasi/koneksi.php";
 include "../../../configurasi/fungsi_rupiah.php";
+include "../../../configurasi/fungsi_perubahan_trbmasuk.php";
 include "helper_subtotal.php";
 
 $exp_date               = date('Y-m-d', strtotime($_POST['exp_date']));
@@ -12,6 +13,8 @@ $qtygrosir_dtrbmasuk    = isset($_POST['qtygrosir_dtrbmasuk']) ? $_POST['qtygros
 $no_batch_asal          = isset($_POST['no_batch_asal']) ? $_POST['no_batch_asal'] : '';
 
 header('Content-Type: application/json');
+
+pastikan_kolom_tipe_barang_trbmasuk($db);
 
 try {
     $db->beginTransaction();

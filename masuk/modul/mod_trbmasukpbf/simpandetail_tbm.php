@@ -1,6 +1,7 @@
 <?php
 error_reporting(E_ALL);
 include "../../../configurasi/koneksi.php";
+include "../../../configurasi/fungsi_perubahan_trbmasuk.php";
 $kd_trbmasuk        = $_POST['kd_trbmasuk1'];
 $kd_orders          = $_POST['kd_trbmasuk'];
 $id_barang          = $_POST['id_barang'];
@@ -37,6 +38,11 @@ if($diskon == ""){
     $diskon = "0";
 }
 
+// tipe_barang = 'bonus' berarti item ini tidak dibayar (mis. beli 10 box gratis 1 box) --
+// tidak boleh ikut mengubah data master barang (HNA/harga jual/harga satuan/konversi),
+// hanya menambah stok_barang saja
+$tipe_barang = (isset($_POST['tipe_barang']) && $_POST['tipe_barang'] === 'bonus') ? 'bonus' : 'reguler';
+
 // $daray = array(
 //     'kode trbmasuk' => $kd_trbmasuk,
 //     'kode orders'   => $kd_orders,
@@ -61,6 +67,8 @@ if($diskon == ""){
 
 // $ketemucekdetail=mysqli_num_rows($cekdetail);
 // $rcek=mysqli_fetch_array($cekdetail);
+
+pastikan_kolom_tipe_barang_trbmasuk($db);
 
 try {
     $db->beginTransaction();
@@ -108,39 +116,54 @@ if ($ketemucekdetail > 0){
 	                hrgjual_dtrbmasuk   = :hrgjual_dtrbmasuk,
 	                hrgttl_dtrbmasuk    = :hrgttl_dtrbmasuk,
 	                no_batch            = :no_batch,
-	                exp_date            = :exp_date
+	                exp_date            = :exp_date,
+	                tipe_barang         = :tipe_barang
 	                WHERE id_dtrbmasuk  = :id_dtrbmasuk");
-	                
+
 	$stmt_update_trbmasukdetail->execute([
-	    ':ttlqty'               => $ttlqty, 
-	    ':qty_grosir'           => $qty_dtrbmasuk, 
-	    ':hnasat_dtrbmasuk'     => $hnasat_dtrbmasuk, 
-	    ':diskon'               => $diskon, 
-	    ':hrgsat_dtrbmasuk'     => $hrgsat_dtrbmasuk, 
-	    ':hrgjual_dtrbmasuk'    => $hrgjual_dtrbmasuk, 
-	    ':hrgttl_dtrbmasuk'     => $ttlharga, 
-	    ':no_batch'             => $no_batch, 
-	    ':exp_date'             => $exp_date, 
+	    ':ttlqty'               => $ttlqty,
+	    ':qty_grosir'           => $qty_dtrbmasuk,
+	    ':hnasat_dtrbmasuk'     => $hnasat_dtrbmasuk,
+	    ':diskon'               => $diskon,
+	    ':hrgsat_dtrbmasuk'     => $hrgsat_dtrbmasuk,
+	    ':hrgjual_dtrbmasuk'    => $hrgjual_dtrbmasuk,
+	    ':hrgttl_dtrbmasuk'     => $ttlharga,
+	    ':no_batch'             => $no_batch,
+	    ':exp_date'             => $exp_date,
+	    ':tipe_barang'          => $tipe_barang,
 	    ':id_dtrbmasuk'         => $id_dtrbmasuk]);
 
     // UPDATE STOK ATOMIC - Menambah stok barang (barang sudah ada di detail)
-    // Menggunakan single UPDATE statement untuk menghindari race condition
+    // Menggunakan single UPDATE statement untuk menghindari race condition.
+    // Item bonus TIDAK BOLEH mengubah field lain di tabel barang (HNA/harga satuan/harga jual),
+    // hanya stok_barang saja.
     $hrgjual_barang=round($hrgjual_dtrbmasuk) ;
-    
-    $stmt_update = $db->prepare("UPDATE barang SET 
-                                          stok_barang = stok_barang - :qtylama + :ttlqty, 
-                                          hna = :hnasat,
-                                          hrgsat_barang = :hrgsat,
-                                          hrgjual_barang=:hrgjual
-                                          WHERE id_barang = :id_barang");
-    $stmt_update->execute([
-        ':qtylama' => $qtylama,
-        ':ttlqty' => $ttlqty,
-        ':hnasat' => $hnasat_dtrbmasuk,
-        ':hrgsat' => $hrgsat_dtrbmasuk,
-        ':hrgjual' => $hrgjual_barang,
-        ':id_barang' => $id_barang
-    ]);
+
+    if ($tipe_barang === 'bonus') {
+        $stmt_update = $db->prepare("UPDATE barang SET
+                                              stok_barang = stok_barang - :qtylama + :ttlqty
+                                              WHERE id_barang = :id_barang");
+        $stmt_update->execute([
+            ':qtylama' => $qtylama,
+            ':ttlqty' => $ttlqty,
+            ':id_barang' => $id_barang
+        ]);
+    } else {
+        $stmt_update = $db->prepare("UPDATE barang SET
+                                              stok_barang = stok_barang - :qtylama + :ttlqty,
+                                              hna = :hnasat,
+                                              hrgsat_barang = :hrgsat,
+                                              hrgjual_barang=:hrgjual
+                                              WHERE id_barang = :id_barang");
+        $stmt_update->execute([
+            ':qtylama' => $qtylama,
+            ':ttlqty' => $ttlqty,
+            ':hnasat' => $hnasat_dtrbmasuk,
+            ':hrgsat' => $hrgsat_dtrbmasuk,
+            ':hrgjual' => $hrgjual_barang,
+            ':id_barang' => $id_barang
+        ]);
+    }
 
 }else{
     $faktordiskon = (1-($diskon/100));
@@ -171,12 +194,13 @@ if ($ketemucekdetail > 0){
 										konversi,
 										hnasat_dtrbmasuk,
 										diskon,
-										hrgsat_dtrbmasuk,										
-										hrgjual_dtrbmasuk,										
+										hrgsat_dtrbmasuk,
+										hrgjual_dtrbmasuk,
 										hrgttl_dtrbmasuk,
 										no_batch,
 										exp_date,
-										tipe)
+										tipe,
+										tipe_barang)
 								  VALUES(:kd_trbmasuk,
 								        :kd_orders,
 										:id_barang,
@@ -194,14 +218,15 @@ if ($ketemucekdetail > 0){
 										:ttlharga,
 										:no_batch,
 										:exp_date,
-										:tipe										
+										:tipe,
+										:tipe_barang
 										)");
 
     $stmt_insert_trbmasukdetail->execute([
         ':kd_trbmasuk'          => $kd_trbmasuk,
 		':kd_orders'            => $kd_orders,
 		':id_barang'            => $id_barang,
-		':kd_barang'            => $kd_barang,   
+		':kd_barang'            => $kd_barang,
 		':nmbrg_dtrbmasuk'      => $nmbrg_dtrbmasuk,
 		':qty_retail'           => $qty_retail,
 		':qty_dtrbmasuk'        => $qty_dtrbmasuk,
@@ -215,29 +240,43 @@ if ($ketemucekdetail > 0){
 		':ttlharga'             => $ttlharga,
 		':no_batch'             => $no_batch,
 		':exp_date'             => $exp_date,
-		':tipe'                 => $tipe
+		':tipe'                 => $tipe,
+		':tipe_barang'          => $tipe_barang
     ]);
-    
-    
-    $stmt_update = $db->prepare("UPDATE barang SET 
-                                                stok_barang = stok_barang + :stokakhir,
-                                                hna = :hnasat,
-                                                konversi = :konversion,
-                                                sat_grosir = :satgrosir,
-                                                hrgsat_barang = :hrgsat,
-                                                hrgjual_barang = :hrgjual
-                                                WHERE id_barang = :id_barangg
-                                                AND kd_barang = :kd_barangg");
-    $stmt_update->execute([
-        ':stokakhir'    => $stokakhir,
-        ':hnasat'       => $hnasat_dtrbmasuk,
-        ':konversion'   => $konversi,
-        ':satgrosir'    => $sat_dtrbmasuk,
-        ':hrgsat'       => $hrgsat_dtrbmasuk,
-        ':hrgjual'      => $hrgjual_barang,
-        ':id_barangg'   => $id_barang,
-        ':kd_barangg'   => $kd_barang
-    ]);
+
+    // Item bonus TIDAK BOLEH mengubah field lain di tabel barang (HNA/konversi/satuan grosir/
+    // harga satuan/harga jual), hanya stok_barang saja.
+    if ($tipe_barang === 'bonus') {
+        $stmt_update = $db->prepare("UPDATE barang SET
+                                                    stok_barang = stok_barang + :stokakhir
+                                                    WHERE id_barang = :id_barangg
+                                                    AND kd_barang = :kd_barangg");
+        $stmt_update->execute([
+            ':stokakhir'    => $stokakhir,
+            ':id_barangg'   => $id_barang,
+            ':kd_barangg'   => $kd_barang
+        ]);
+    } else {
+        $stmt_update = $db->prepare("UPDATE barang SET
+                                                    stok_barang = stok_barang + :stokakhir,
+                                                    hna = :hnasat,
+                                                    konversi = :konversion,
+                                                    sat_grosir = :satgrosir,
+                                                    hrgsat_barang = :hrgsat,
+                                                    hrgjual_barang = :hrgjual
+                                                    WHERE id_barang = :id_barangg
+                                                    AND kd_barang = :kd_barangg");
+        $stmt_update->execute([
+            ':stokakhir'    => $stokakhir,
+            ':hnasat'       => $hnasat_dtrbmasuk,
+            ':konversion'   => $konversi,
+            ':satgrosir'    => $sat_dtrbmasuk,
+            ':hrgsat'       => $hrgsat_dtrbmasuk,
+            ':hrgjual'      => $hrgjual_barang,
+            ':id_barangg'   => $id_barang,
+            ':kd_barangg'   => $kd_barang
+        ]);
+    }
 
 
     if($no_batch != ""){

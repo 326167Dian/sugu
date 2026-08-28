@@ -254,6 +254,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 						
 						        <input type=hidden name='id_trbmasuk' id='id_trbmasuk' value='$re[id_trbmasuk]'>
 							   <input type=hidden name='kd_trbmasuk' id='kd_trbmasuk' value='$kdtransaksi'>
+							   <input type=hidden name='kd_orders' id='kd_trbmasuk1' value=''>
 							   <input type=hidden name='stt_aksi' id='stt_aksi' value='input_trbmasuk'>
 							    <input type=hidden name='id_supplier' id='id_supplier'>
 							    <input type=hidden name='petugas' id='petugas' value='$petugas'>
@@ -331,6 +332,14 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 								<div class='form-group'>
 								
 									
+									<label class='col-sm-4 control-label'>Tipe Barang</label>
+										<div class='col-sm-7'>
+											<select name='tipe_barang' id='tipe_barang' class='form-control'>
+												<option value='reguler' selected>REGULER</option>
+												<option value='bonus'>BONUS</option>
+											</select>
+										</div>
+
 									<label class='col-sm-4 control-label'>Kode Barang</label>        		
 										<div class='col-sm-7'>
 											<div class='input-group'>
@@ -1922,6 +1931,14 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 								<div class='form-group'>
 								
 									
+									<label class='col-sm-4 control-label'>Tipe Barang</label>
+										<div class='col-sm-7'>
+											<select name='tipe_barang' id='tipe_barang' class='form-control'>
+												<option value='reguler' selected>REGULER</option>
+												<option value='bonus'>BONUS</option>
+											</select>
+										</div>
+
 									<label class='col-sm-4 control-label'>Kode Barang</label>        		
 										<div class='col-sm-7'>
 											<div class='input-group'>
@@ -2624,6 +2641,10 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             var kd_barang           = document.getElementById('kd_barang').value;
             var nmbrg_dtrbmasuk     = document.getElementById('nmbrg_dtrbmasuk').value;
             var stok_barang         = document.getElementById('stok_barang').value;
+            // hanya ada di form "TAMBAH" -- di form lain (ubah, orders_detail) elemen ini tidak dirender,
+            // jadi defaultnya 'reguler' supaya perilaku form lain tidak berubah
+            var tipeBarangEl        = document.getElementById('tipe_barang');
+            var tipe_barang         = tipeBarangEl ? tipeBarangEl.value : 'reguler';
             var qty_dtrbmasuk       = document.getElementById('qty_dtrbmasuk').value;
             var sat_dtrbmasuk       = document.getElementById('sat_dtrbmasuk').value;
             var konversi            = document.getElementById('konversi').value;
@@ -2675,7 +2696,8 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                         'diskon'            : diskon,
                         'no_batch'          : no_batch,
                         'exp_date'          : exp_date,
-                        'stt_aksi'          : stt_aksi
+                        'stt_aksi'          : stt_aksi,
+                        'tipe_barang'       : tipe_barang
                     },
                     success: function(data) {
                         //alert('Tambah data detail berhasil');
@@ -2690,6 +2712,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                         document.getElementById("diskon").value = "";
                         document.getElementById("no_batch").value = "";
                         document.getElementById("exp_date").value = "";
+                        if (tipeBarangEl) { tipeBarangEl.value = "reguler"; }
                         tabel_detail1();
                         tabel_detail();
                     }
