@@ -1,3 +1,9 @@
+<?php
+header("Content-type: application/vnd-ms-excel");
+header("Content-Disposition: attachment; filename=Laporan_data_penjualan.xls");
+include_once '../../../configurasi/koneksi.php';
+include "../../../configurasi/fungsi_rupiah.php";
+?>
 <!DOCTYPE html>
 <html>
 
@@ -32,15 +38,6 @@
         }
     </style>
 
-    <?php
-    header("Content-type: application/vnd-ms-excel");
-    header("Content-Disposition: attachment; filename=Laporan_data_penjualan.xls");
-    include_once '../../../configurasi/koneksi.php';
-    include "../../../configurasi/fungsi_rupiah.php";
-
-    
-    ?>
-
     <CENTER>
         <h4>MySIFA LAPORAN PENJUALAN</h4>
     </CENTER>
@@ -63,20 +60,28 @@
             $tgl_awal = $_GET['tgl_awal'];
             $tgl_akhir = $_GET['tgl_akhir'];
             $shift = $_GET['shift'];
+            $petugas = isset($_GET['petugas']) && $_GET['petugas'] !== '' ? $_GET['petugas'] : 'ALL';
              if ($_GET['shift']<4){
 	            $shift = $_GET['shift'];}
                 else {
                     $shift=("1,2,3");
                 }
-    
+
+            $paramsDetail = [$tgl_awal, $tgl_akhir];
+            $filterPetugasSql = "";
+            if ($petugas !== 'ALL') {
+                $filterPetugasSql = " AND trkasir.petugas = ?";
+                $paramsDetail[] = $petugas;
+            }
+
             $no = 1;
-            $stmt = $db->prepare("SELECT *, 
+            $stmt = $db->prepare("SELECT *,
                     SUM(trkasir_detail.qty_dtrkasir) as q30,
                     SUM(trkasir_detail.hrgttl_dtrkasir) as om30 FROM trkasir_detail
                     JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                    WHERE shift in ($shift) AND trkasir.tgl_trkasir BETWEEN ? AND ?
+                    WHERE shift in ($shift) AND trkasir.tgl_trkasir BETWEEN ? AND ?$filterPetugasSql
                     GROUP BY trkasir_detail.kd_barang");
-            $stmt->execute([$tgl_awal, $tgl_akhir]);
+            $stmt->execute($paramsDetail);
                     
             
             while($value = $stmt->fetch(PDO::FETCH_ASSOC)):
@@ -104,6 +109,7 @@
             $tgl_awal = $_GET['tgl_awal'];
             $tgl_akhir = $_GET['tgl_akhir'];
             $shift = $_GET['shift'];
+            $petugas = isset($_GET['petugas']) && $_GET['petugas'] !== '' ? $_GET['petugas'] : 'ALL';
              if ($_GET['shift']<4){
 	            $shift = $_GET['shift'];}
                 else {
@@ -114,16 +120,26 @@ $no3 = 1;
 
 $grandtotal = 0;   // <-- tambahkan ini
 
+$filterPetugasSql = "";
+if ($petugas !== 'ALL') {
+    $filterPetugasSql = " AND petugas = ?";
+}
+
 while ($tt = $tamtot->fetch(PDO::FETCH_ASSOC)){
+
+    $paramsTotal = [$tgl_awal, $tgl_akhir, $tt['id_carabayar']];
+    if ($petugas !== 'ALL') {
+        $paramsTotal[] = $petugas;
+    }
 
     $tcb= $db->prepare( "
         SELECT id_trkasir, kd_trkasir, SUM(ttl_trkasir) as ttlskrg1
-        FROM trkasir 
-        WHERE shift in ($shift) 
-        and tgl_trkasir BETWEEN ? AND ? 
-        AND id_carabayar=?
+        FROM trkasir
+        WHERE shift in ($shift)
+        and tgl_trkasir BETWEEN ? AND ?
+        AND id_carabayar=?$filterPetugasSql
     ");
-    $tcb->execute([$tgl_awal, $tgl_akhir, $tt['id_carabayar']]);
+    $tcb->execute($paramsTotal);
 
     $tamtcb = $tcb->fetch(PDO::FETCH_ASSOC);
     $dtamtcb = format_rupiah($tamtcb['ttlskrg1']);
