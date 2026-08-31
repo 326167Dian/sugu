@@ -21,6 +21,42 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 </div>
                 <div class="box-body">
 
+                    <?php
+                    $ceksstok = $db->query("SELECT COUNT(*) AS x FROM barang WHERE stok_barang > 0");
+                    $jumlahStokAda = $ceksstok->fetch(PDO::FETCH_ASSOC)['x'];
+                    echo "<div class='alert alert-info'>Jumlah barang dengan stok lebih dari 0 (x) : <b>$jumlahStokAda</b> item</div>";
+
+                    $cekjenisobat = $db->query("
+                        SELECT b.jenisobat, COUNT(*) AS jumlah
+                        FROM barang b
+                        LEFT JOIN jenis_obat j ON j.jenisobat = b.jenisobat
+                        WHERE j.jenisobat IS NULL
+                        GROUP BY b.jenisobat
+                        ORDER BY b.jenisobat ASC
+                    ");
+                    $daftarJenisobatAsing = $cekjenisobat->fetchAll(PDO::FETCH_ASSOC);
+
+                    if (count($daftarJenisobatAsing) > 0) {
+                        echo "<div class='alert alert-warning'>";
+                        echo "<b>Perhatian:</b> ditemukan barang dengan field <b>jenisobat</b> yang tidak terdaftar di tabel Jenis Obat / Rak Obat:";
+                        echo "<ul style='margin-top:8px;'>";
+                        foreach ($daftarJenisobatAsing as $ja) {
+                            $labelJenisobat = ($ja['jenisobat'] === '') ? '(kosong)' : htmlspecialchars($ja['jenisobat']);
+                            echo "<li>Jenis Obat <b>$labelJenisobat</b> — $ja[jumlah] item";
+                            echo "<details style='margin:4px 0 8px 16px;'><summary style='cursor:pointer;'>Lihat daftar barang</summary><ul>";
+                            $itemBarang = $db->prepare("SELECT kd_barang, nm_barang FROM barang WHERE jenisobat = ? ORDER BY nm_barang ASC");
+                            $itemBarang->execute([$ja['jenisobat']]);
+                            while ($ib = $itemBarang->fetch(PDO::FETCH_ASSOC)) {
+                                echo "<li>$ib[kd_barang] - " . htmlspecialchars($ib['nm_barang']) . "</li>";
+                            }
+                            echo "</ul></details>";
+                            echo "</li>";
+                        }
+                        echo "</ul>";
+                        echo "</div>";
+                    }
+                    ?>
+
                     <form method="POST" action="modul/mod_laporan/tampil_stokopname.php" target="_blank" enctype="multipart/form-data" class="form-horizontal">
 
                         </br></br>
