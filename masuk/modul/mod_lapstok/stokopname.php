@@ -55,6 +55,26 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                         echo "</ul>";
                         echo "</div>";
                     }
+
+                    $cekjenisobatTakTerpakai = $db->query("
+                        SELECT j.jenisobat, j.ket
+                        FROM jenis_obat j
+                        LEFT JOIN barang b ON b.jenisobat = j.jenisobat
+                        WHERE b.jenisobat IS NULL
+                        ORDER BY j.jenisobat ASC
+                    ");
+                    $daftarJenisobatTakTerpakai = $cekjenisobatTakTerpakai->fetchAll(PDO::FETCH_ASSOC);
+
+                    if (count($daftarJenisobatTakTerpakai) > 0) {
+                        echo "<div class='alert alert-warning'>";
+                        echo "<b>Perhatian:</b> ditemukan Jenis Obat / Rak Obat di tabel Jenis Obat yang belum dipakai barang apa pun:";
+                        echo "<ul style='margin-top:8px;'>";
+                        foreach ($daftarJenisobatTakTerpakai as $jt) {
+                            echo "<li><b>" . htmlspecialchars($jt['jenisobat']) . "</b> — " . htmlspecialchars($jt['ket']) . "</li>";
+                        }
+                        echo "</ul>";
+                        echo "</div>";
+                    }
                     ?>
 
                     <form method="POST" action="modul/mod_laporan/tampil_stokopname.php" target="_blank" enctype="multipart/form-data" class="form-horizontal">
