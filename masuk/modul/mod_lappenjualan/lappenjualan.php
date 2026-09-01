@@ -9,6 +9,9 @@ else{
     switch($_GET['act']){
         default:
 
+            $stmtPetugas = $db->query("SELECT DISTINCT petugas FROM trkasir WHERE petugas IS NOT NULL AND petugas <> '' ORDER BY petugas ASC");
+            $daftarPetugas = $stmtPetugas->fetchAll(PDO::FETCH_COLUMN);
+
             ?>
 
 
@@ -51,6 +54,18 @@ else{
                             </div>
                         </div>
 
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">PETUGAS</label>
+                            <div class="col-sm-4">
+                                <select name="petugas" class="form-control" id="petugas">
+                                    <option value="ALL">ALL</option>
+                                    <?php foreach ($daftarPetugas as $nmPetugas): ?>
+                                        <option value="<?= htmlspecialchars($nmPetugas) ?>"><?= htmlspecialchars($nmPetugas) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+
                         <div class='form-group'>
                             <label class='col-sm-2 control-label'>SHIFT</label>
                             <div class='col-sm-3'>
@@ -81,8 +96,9 @@ else{
                     let tgl_awal = $('#tgl_awal').val()
                     let tgl_akhir = $('#tgl_akhir').val()
                     let shift = $('#shift').val()
+                    let petugas = $('#petugas').val()
 
-                    window.open('modul/mod_lappenjualan/lappenjualan_excel.php?tgl_awal='+tgl_awal+'&tgl_akhir='+tgl_akhir+'&shift='+shift, '_blank');
+                    window.open('modul/mod_lappenjualan/lappenjualan_excel.php?tgl_awal='+tgl_awal+'&tgl_akhir='+tgl_akhir+'&shift='+shift+'&petugas='+encodeURIComponent(petugas), '_blank');
                 }
             </script>
 
@@ -95,18 +111,24 @@ else{
                 $tgl_awal  = $_POST['tgl_awal'];
                 $tgl_akhir = $_POST['tgl_akhir'];
                 $shift     = $_POST['shift'];
+                $petugas   = isset($_POST['petugas']) && $_POST['petugas'] !== '' ? $_POST['petugas'] : 'ALL';
                 if ($_POST['shift']<4){
 	                $shift = $_POST['shift'];
-                    
+
                 } else {
                     $shift=("1,2,3");
+                }
+
+                $filterPetugasSql = "";
+                if ($petugas !== 'ALL') {
+                    $filterPetugasSql = " AND petugas = " . $db->quote($petugas);
                 }
                 ?>
 
                 <div class="box box-primary box-solid table-responsive">
                     <div class="box-header with-border">
                         <h3 class="box-title">
-                            TAMPIL PENJUALAN PRODUK SHIFT <?php echo $shift; ?> TANGGAL <?php echo $tgl_awal; ?> s/d <?php echo $tgl_akhir; ?>
+                            TAMPIL PENJUALAN PRODUK SHIFT <?php echo $shift; ?> TANGGAL <?php echo $tgl_awal; ?> s/d <?php echo $tgl_akhir; ?> PETUGAS <?php echo htmlspecialchars($petugas); ?>
                         </h3>
                         <div class="box-tools pull-right">
                             <button class="btn btn-box-tool" data-widget="collapse">
@@ -119,7 +141,7 @@ else{
 
                         <?php
                         $tabelbesar = $db->prepare("
-                            SELECT * FROM trkasir WHERE shift in ($shift) AND tgl_trkasir BETWEEN '$tgl_awal' AND '$tgl_akhir'
+                            SELECT * FROM trkasir WHERE shift in ($shift) AND tgl_trkasir BETWEEN '$tgl_awal' AND '$tgl_akhir'$filterPetugasSql
                         ");
                         $tabelbesar->execute();
 
@@ -254,14 +276,15 @@ else{
             
             // Query gabungan
             $sql = "
-                SELECT 
+                SELECT
                     cb.nm_carabayar,
                     SUM(tk.ttl_trkasir) AS total
                 FROM carabayar cb
-                LEFT JOIN trkasir tk 
+                LEFT JOIN trkasir tk
                     ON tk.id_carabayar = cb.id_carabayar
                     AND tk.shift IN ($shiftList)
                     AND tk.tgl_trkasir BETWEEN '$tgl_awal' AND '$tgl_akhir'
+                    $filterPetugasSql
                 GROUP BY cb.id_carabayar
             ";
             
