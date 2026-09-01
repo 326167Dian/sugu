@@ -273,6 +273,83 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                     </form>
                 </div>
             </div>
+
+            <div class="box box-primary box-solid">
+                <div class="box-header with-border">
+                    <h3 class="box-title">REKAP PER JENIS OBAT (RAK) - SUDAH/BELUM DICEK</h3>
+                    <div class="box-tools pull-right">
+                        <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    </div><!-- /.box-tools -->
+                </div>
+                <div class="box-body table-responsive">
+                    <table id="example3" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th style="text-align: left; ">Jenis Obat (Rak)</th>
+                                <th style="text-align: center; ">Total Item</th>
+                                <th style="text-align: center; ">Sudah Dicek</th>
+                                <th style="text-align: center; ">Belum Dicek</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            // Rekap per jenisobat (rak) berapa item yang sudah & belum di-stok-opname
+                            // pada rentang tanggal + shift yang sama dengan laporan di atas.
+                            $rekap_jenis = $db->prepare("SELECT b.jenisobat,
+                                                    COUNT(DISTINCT b.id_barang) AS total_item,
+                                                    COUNT(DISTINCT so.id_barang) AS sudah_dicek
+                                                FROM barang b
+                                                LEFT JOIN stok_opname so
+                                                    ON so.id_barang = b.id_barang
+                                                    AND so.shift = :shift
+                                                    AND so.tgl_stokopname BETWEEN :tgl_awal AND :tgl_akhir
+                                                GROUP BY b.jenisobat
+                                                ORDER BY b.jenisobat ASC");
+                            $rekap_jenis->execute([
+                                ':shift'     => $shift,
+                                ':tgl_awal'  => $tgl_awal,
+                                ':tgl_akhir' => $tgl_akhir
+                            ]);
+
+                            $no3 = 1;
+                            $total_item_semua = 0;
+                            $total_sudah_semua = 0;
+                            $total_belum_semua = 0;
+                            while ($rj = $rekap_jenis->fetch(PDO::FETCH_ASSOC)) {
+                                $namajenis = ($rj['jenisobat'] == '') ? '(Tanpa Jenis Obat)' : $rj['jenisobat'];
+                                $belum_dicek = $rj['total_item'] - $rj['sudah_dicek'];
+
+                                $total_item_semua += $rj['total_item'];
+                                $total_sudah_semua += $rj['sudah_dicek'];
+                                $total_belum_semua += $belum_dicek;
+
+                                $warnabelum = ($belum_dicek > 0) ? "style='color:#dd4b39;font-weight:bold;'" : "";
+
+                                echo "
+                                <tr>
+                                    <td style='text-align:center;'>$no3</td>
+                                    <td>$namajenis</td>
+                                    <td style='text-align:center;'>$rj[total_item]</td>
+                                    <td style='text-align:center;'>$rj[sudah_dicek]</td>
+                                    <td style='text-align:center;' $warnabelum>$belum_dicek</td>
+                                </tr>
+                                ";
+                                $no3++;
+                            }
+                            ?>
+                        </tbody>
+                        <tfoot style="background-color:aqua; font-weight:bold;">
+                            <tr>
+                                <td colspan="2" style="text-align:right;">TOTAL</td>
+                                <td style="text-align:center;"><?= $total_item_semua ?></td>
+                                <td style="text-align:center;"><?= $total_sudah_semua ?></td>
+                                <td style="text-align:center;"><?= $total_belum_semua ?></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
             <?PHP
             break;
         case "sinkron_min":
