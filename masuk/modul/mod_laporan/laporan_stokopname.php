@@ -290,6 +290,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                                 <th style="text-align: center; ">Total Item</th>
                                 <th style="text-align: center; ">Sudah Dicek</th>
                                 <th style="text-align: center; ">Belum Dicek</th>
+                                <th style="text-align: center; ">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -327,6 +328,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                                 $total_belum_semua += $belum_dicek;
 
                                 $warnabelum = ($belum_dicek > 0) ? "style='color:#dd4b39;font-weight:bold;'" : "";
+                                $linkdetail = "?module=lapstokopname&act=detail_belum_dicek&jenisobat=" . urlencode($rj['jenisobat']) . "&tgl_awal=$tgl_awal&tgl_akhir=$tgl_akhir&shift=$shift";
 
                                 echo "
                                 <tr>
@@ -335,6 +337,9 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                                     <td style='text-align:center;'>$rj[total_item]</td>
                                     <td style='text-align:center;'>$rj[sudah_dicek]</td>
                                     <td style='text-align:center;' $warnabelum>$belum_dicek</td>
+                                    <td style='text-align:center;'>
+                                        <a class='btn btn-xs btn-primary' target='_blank' href='$linkdetail'>Detail</a>
+                                    </td>
                                 </tr>
                                 ";
                                 $no3++;
@@ -347,8 +352,76 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                                 <td style="text-align:center;"><?= $total_item_semua ?></td>
                                 <td style="text-align:center;"><?= $total_sudah_semua ?></td>
                                 <td style="text-align:center;"><?= $total_belum_semua ?></td>
+                                <td></td>
                             </tr>
                         </tfoot>
+                    </table>
+                </div>
+            </div>
+            <?PHP
+            break;
+        case "detail_belum_dicek":
+            $jenisobat  = isset($_GET['jenisobat']) ? $_GET['jenisobat'] : '';
+            $tgl_awal   = $_GET['tgl_awal'];
+            $tgl_akhir  = $_GET['tgl_akhir'];
+            $shift      = $_GET['shift'];
+            $namajenis  = ($jenisobat == '') ? '(Tanpa Jenis Obat)' : $jenisobat;
+
+            // Barang stok > 0 di jenisobat (rak) ini yang BELUM punya catatan stok_opname
+            // pada rentang tanggal + shift yang sama dengan laporan.
+            $belum = $db->prepare("SELECT b.* FROM barang b
+                                    WHERE b.jenisobat = :jenisobat
+                                        AND b.stok_barang > 0
+                                        AND NOT EXISTS (
+                                            SELECT 1 FROM stok_opname so
+                                            WHERE so.id_barang = b.id_barang
+                                                AND so.shift = :shift
+                                                AND so.tgl_stokopname BETWEEN :tgl_awal AND :tgl_akhir
+                                        )
+                                    ORDER BY b.nm_barang ASC");
+            $belum->execute([
+                ':jenisobat' => $jenisobat,
+                ':shift'     => $shift,
+                ':tgl_awal'  => $tgl_awal,
+                ':tgl_akhir' => $tgl_akhir
+            ]);
+            ?>
+            <div class="box box-primary box-solid">
+                <div class="box-header with-border">
+                    <h3 class="box-title">BARANG BELUM DICEK - RAK <?= htmlspecialchars($namajenis) ?> (<?= $tgl_awal ?> SD <?= $tgl_akhir ?>)</h3>
+                    <div class="box-tools pull-right">
+                        <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    </div><!-- /.box-tools -->
+                </div>
+                <a class='btn btn-danger btn-flat' href='javascript:window.close();'>TUTUP</a>
+                <div class="box-body table-responsive">
+                    <table id="example1" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th style="text-align: left; ">Kode Barang</th>
+                                <th style="text-align: left; ">Nama Barang</th>
+                                <th style="text-align: center; ">Satuan</th>
+                                <th style="text-align: center; ">Stok</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $no4 = 1;
+                            while ($rb = $belum->fetch(PDO::FETCH_ASSOC)) {
+                                echo "
+                                <tr>
+                                    <td style='text-align:center;'>$no4</td>
+                                    <td>$rb[kd_barang]</td>
+                                    <td>$rb[nm_barang]</td>
+                                    <td style='text-align:center;'>$rb[sat_barang]</td>
+                                    <td style='text-align:center;'>$rb[stok_barang]</td>
+                                </tr>
+                                ";
+                                $no4++;
+                            }
+                            ?>
+                        </tbody>
                     </table>
                 </div>
             </div>
