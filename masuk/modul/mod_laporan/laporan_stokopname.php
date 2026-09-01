@@ -296,10 +296,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                             <?php
                             // Rekap per jenisobat (rak) berapa item yang sudah & belum di-stok-opname
                             // pada rentang tanggal + shift yang sama dengan laporan di atas.
-                            // Item yang dihitung (Total Item) dibatasi: stok_barang > 0, DAN pernah
-                            // ada transaksi keluar (trkasir_detail) maupun masuk (trbmasuk_detail) untuk
-                            // kd_barang tsb -- supaya SKU yang tidak pernah bergerak sama sekali tidak
-                            // ikut dihitung sebagai item yang "harus" dicek.
+                            // Item yang dihitung (Total Item) dibatasi stok_barang > 0 saja.
                             $rekap_jenis = $db->prepare("SELECT b.jenisobat,
                                                     COUNT(DISTINCT b.id_barang) AS total_item,
                                                     COUNT(DISTINCT so.id_barang) AS sudah_dicek
@@ -309,8 +306,6 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                                                     AND so.shift = :shift
                                                     AND so.tgl_stokopname BETWEEN :tgl_awal AND :tgl_akhir
                                                 WHERE b.stok_barang > 0
-                                                    AND EXISTS (SELECT 1 FROM trkasir_detail td WHERE td.kd_barang = b.kd_barang)
-                                                    AND EXISTS (SELECT 1 FROM trbmasuk_detail tb WHERE tb.kd_barang = b.kd_barang)
                                                 GROUP BY b.jenisobat
                                                 ORDER BY b.jenisobat ASC");
                             $rekap_jenis->execute([
