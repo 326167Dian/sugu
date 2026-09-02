@@ -26,8 +26,7 @@ else{
                                     GROUP BY kd_barang
                                 ) jual ON jual.kd_barang = b.kd_barang
                                 SET b.stok_barang = (COALESCE(beli.totalbeli, 0) - COALESCE(jual.totaljual, 0))
-                                WHERE b.stok_barang <> (COALESCE(beli.totalbeli, 0) - COALESCE(jual.totaljual, 0))
-                                AND (COALESCE(beli.totalbeli, 0) - COALESCE(jual.totaljual, 0)) >= 0");
+                                WHERE b.stok_barang <> (COALESCE(beli.totalbeli, 0) - COALESCE(jual.totaljual, 0))");
         $sinkron->execute();
 
         $db->commit();

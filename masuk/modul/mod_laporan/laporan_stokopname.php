@@ -460,15 +460,15 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                                             waktu)
                                         VALUES(?,?,?,?,?,?,?,?,?)");
                 $inserttrkasir->execute([$kdtransaksi, $so['id_barang'], $so['kd_barang'], $brg['nm_barang'], $qtymin, $brg['sat_barang'], $brg['hrgjual_barang'], $hrgtot,$tgl_sekarang]);
+
+                $db->prepare("UPDATE barang SET stok_barang = stok_barang - ? WHERE id_barang = ?")
+                    ->execute([$qtymin, $so['id_barang']]);
+
                 $no1++;
             }
 
             $tglharini = date('Y-m-d');
-            $cekshift = $db->prepare("SELECT * FROM waktukerja WHERE tanggal = '$tglharini'
-                            AND status='ON' ");
-            $cekshift->execute();
-            $sshift = $cekshift->fetch(PDO::FETCH_ASSOC);
-            $shiftin = $sshift['shift'];
+            $shiftin = $shift;
 
             $db->prepare("INSERT INTO trkasir(
                                 kd_trkasir,
@@ -512,6 +512,10 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                                             waktu)
                                         VALUES(?,?,?,?,?,?,?,?,?)");
                 $inserttrbmasuk->execute([$kdtransaksi, $so['id_barang'], $so['kd_barang'], $brg['nm_barang'], $so['selisih'], $brg['sat_barang'], $so['hrgsat_barang'], $so['ttl_hrgbrg'],$tgl_sekarang]);
+
+                $db->prepare("UPDATE barang SET stok_barang = stok_barang + ? WHERE id_barang = ?")
+                    ->execute([$so['selisih'], $so['id_barang']]);
+
                 $no1++;
             }
 
