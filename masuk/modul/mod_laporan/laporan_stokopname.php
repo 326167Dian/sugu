@@ -435,52 +435,59 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             $kdtransaksi = "MINUS-" . $kdunik;
             $petugas = $_SESSION['namalengkap'];
 
-            $sominus = $db->prepare("SELECT * FROM stok_opname 
-                WHERE ttl_hrgbrg<0 AND shift='$shift' AND tgl_stokopname BETWEEN '$tgl_awal' AND '$tgl_akhir' ");
-            $sominus->execute();
-            $no1 = 1;
-            $tgl_sekarang = date("Y-m-d H:i:s", time());
-            
-            while ($so = $sominus->fetch(PDO::FETCH_ASSOC)) {
-                $barang = $db->prepare("SELECT nm_barang,sat_barang,hrgjual_barang FROM barang WHERE id_barang=?");
-                $barang->execute([$so['id_barang']]);
-                $brg = $barang->fetch(PDO::FETCH_ASSOC);
-                $qtymin = abs($so['selisih']);
-                $hrgtot = $brg['hrgjual_barang'] * $qtymin;
-                
-                $inserttrkasir = $db->prepare("INSERT INTO trkasir_detail(
-                                            kd_trkasir,
-                                            id_barang,
-                                            kd_barang,
-                                            nmbrg_dtrkasir,
-                                            qty_dtrkasir,
-                                            sat_dtrkasir,
-                                            hrgjual_dtrkasir,
-                                            hrgttl_dtrkasir,
-                                            waktu)
-                                        VALUES(?,?,?,?,?,?,?,?,?)");
-                $inserttrkasir->execute([$kdtransaksi, $so['id_barang'], $so['kd_barang'], $brg['nm_barang'], $qtymin, $brg['sat_barang'], $brg['hrgjual_barang'], $hrgtot,$tgl_sekarang]);
+            $db->beginTransaction();
+            try {
+                $sominus = $db->prepare("SELECT * FROM stok_opname
+                    WHERE ttl_hrgbrg<0 AND shift='$shift' AND tgl_stokopname BETWEEN '$tgl_awal' AND '$tgl_akhir' ");
+                $sominus->execute();
+                $no1 = 1;
+                $tgl_sekarang = date("Y-m-d H:i:s", time());
 
-                $db->prepare("UPDATE barang SET stok_barang = stok_barang - ? WHERE id_barang = ?")
-                    ->execute([$qtymin, $so['id_barang']]);
+                while ($so = $sominus->fetch(PDO::FETCH_ASSOC)) {
+                    $barang = $db->prepare("SELECT nm_barang,sat_barang,hrgjual_barang FROM barang WHERE id_barang=?");
+                    $barang->execute([$so['id_barang']]);
+                    $brg = $barang->fetch(PDO::FETCH_ASSOC);
+                    $qtymin = abs($so['selisih']);
+                    $hrgtot = $brg['hrgjual_barang'] * $qtymin;
 
-                $no1++;
+                    $inserttrkasir = $db->prepare("INSERT INTO trkasir_detail(
+                                                kd_trkasir,
+                                                id_barang,
+                                                kd_barang,
+                                                nmbrg_dtrkasir,
+                                                qty_dtrkasir,
+                                                sat_dtrkasir,
+                                                hrgjual_dtrkasir,
+                                                hrgttl_dtrkasir,
+                                                waktu)
+                                            VALUES(?,?,?,?,?,?,?,?,?)");
+                    $inserttrkasir->execute([$kdtransaksi, $so['id_barang'], $so['kd_barang'], $brg['nm_barang'], $qtymin, $brg['sat_barang'], $brg['hrgjual_barang'], $hrgtot,$tgl_sekarang]);
+
+                    $db->prepare("UPDATE barang SET stok_barang = stok_barang - ? WHERE id_barang = ?")
+                        ->execute([$qtymin, $so['id_barang']]);
+
+                    $no1++;
+                }
+
+                $tglharini = date('Y-m-d');
+                $shiftin = $shift;
+
+                $db->prepare("INSERT INTO trkasir(
+                                    kd_trkasir,
+                                    petugas,
+                                    shift,
+                                    tgl_trkasir,
+                                    nm_pelanggan,
+                                    id_carabayar)
+                                VALUES(?,?,?,?,?,?)
+                ")->execute([$kdtransaksi, $petugas, $shiftin, $tglharini, 'SINKRONISASI MINUS', '1']);
+
+                $db->commit();
+                echo '<script>window.location.href = "?module=trkasir";</script>';
+            } catch (Exception $e) {
+                $db->rollBack();
+                echo "<div class='error msg'>Sinkronisasi minus gagal, tidak ada data yang diubah: " . htmlspecialchars($e->getMessage()) . "</div>";
             }
-
-            $tglharini = date('Y-m-d');
-            $shiftin = $shift;
-
-            $db->prepare("INSERT INTO trkasir(
-                                kd_trkasir,
-                                petugas,
-                                shift,
-                                tgl_trkasir,
-                                nm_pelanggan,
-                                id_carabayar)
-                            VALUES(?,?,?,?,?,?)
-            ")->execute([$kdtransaksi, $petugas, $shiftin, $tglharini, 'SINKRONISASI MINUS', '1']);
-
-            echo '<script>window.location.href = "?module=trkasir";</script>';
             break;
         case "sinkron_plus":
             $tgl_awal = $_GET['tgl_awal'];
@@ -490,49 +497,57 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             $kdtransaksi = "PLUS-" . $kdunik;
             $petugas = $_SESSION['namalengkap'];
 
-            $soplus = $db->prepare("SELECT * FROM stok_opname 
-                WHERE selisih>0 AND shift='$shift' AND tgl_stokopname BETWEEN '$tgl_awal' AND '$tgl_akhir' ");
-            $soplus->execute();
-            $no1 = 1;
-            $tgl_sekarang = date("Y-m-d H:i:s", time());
-            while ($so = $soplus->fetch(PDO::FETCH_ASSOC)) {
-                $barang = $db->prepare("SELECT nm_barang,sat_barang FROM barang WHERE id_barang=?");
-                $barang->execute([$so['id_barang']]);
-                $brg = $barang->fetch(PDO::FETCH_ASSOC);
+            $db->beginTransaction();
+            try {
+                $soplus = $db->prepare("SELECT * FROM stok_opname
+                    WHERE selisih>0 AND shift='$shift' AND tgl_stokopname BETWEEN '$tgl_awal' AND '$tgl_akhir' ");
+                $soplus->execute();
+                $no1 = 1;
+                $tgl_sekarang = date("Y-m-d H:i:s", time());
+                while ($so = $soplus->fetch(PDO::FETCH_ASSOC)) {
+                    $barang = $db->prepare("SELECT nm_barang,sat_barang FROM barang WHERE id_barang=?");
+                    $barang->execute([$so['id_barang']]);
+                    $brg = $barang->fetch(PDO::FETCH_ASSOC);
 
-                $inserttrbmasuk = $db->prepare("INSERT INTO trbmasuk_detail(
-                                            kd_trbmasuk,
-                                            id_barang,
-                                            kd_barang,
-                                            nmbrg_dtrbmasuk,
-                                            qty_dtrbmasuk,
-                                            sat_dtrbmasuk,
-                                            hrgsat_dtrbmasuk,
-                                            hrgttl_dtrbmasuk,
-                                            waktu)
-                                        VALUES(?,?,?,?,?,?,?,?,?)");
-                $inserttrbmasuk->execute([$kdtransaksi, $so['id_barang'], $so['kd_barang'], $brg['nm_barang'], $so['selisih'], $brg['sat_barang'], $so['hrgsat_barang'], $so['ttl_hrgbrg'],$tgl_sekarang]);
+                    $inserttrbmasuk = $db->prepare("INSERT INTO trbmasuk_detail(
+                                                kd_trbmasuk,
+                                                id_barang,
+                                                kd_barang,
+                                                nmbrg_dtrbmasuk,
+                                                qty_dtrbmasuk,
+                                                sat_dtrbmasuk,
+                                                hrgsat_dtrbmasuk,
+                                                hrgttl_dtrbmasuk,
+                                                waktu)
+                                            VALUES(?,?,?,?,?,?,?,?,?)");
+                    $inserttrbmasuk->execute([$kdtransaksi, $so['id_barang'], $so['kd_barang'], $brg['nm_barang'], $so['selisih'], $brg['sat_barang'], $so['hrgsat_barang'], $so['ttl_hrgbrg'],$tgl_sekarang]);
 
-                $db->prepare("UPDATE barang SET stok_barang = stok_barang + ? WHERE id_barang = ?")
-                    ->execute([$so['selisih'], $so['id_barang']]);
+                    $db->prepare("UPDATE barang SET stok_barang = stok_barang + ? WHERE id_barang = ?")
+                        ->execute([$so['selisih'], $so['id_barang']]);
 
-                $no1++;
+                    $no1++;
+                }
+
+                $tglharini = date('Y-m-d');
+
+                $db->prepare("INSERT INTO trbmasuk(
+                                    id_resto,
+                                    kd_trbmasuk,
+                                    petugas,
+                                    tgl_trbmasuk,
+                                    id_supplier,
+                                    nm_supplier,
+                                    carabayar,
+                                    jenis)
+                                VALUES(?,?,?,?,?,?,?,?)
+                ")->execute(['pusat', $kdtransaksi, $petugas, $tglharini, '0', 'SINKRONISASI PLUS', 'TUNAI', 'nonpbf']);
+
+                $db->commit();
+                echo '<script>window.location.href = "?module=byrkredit";</script>';
+            } catch (Exception $e) {
+                $db->rollBack();
+                echo "<div class='error msg'>Sinkronisasi plus gagal, tidak ada data yang diubah: " . htmlspecialchars($e->getMessage()) . "</div>";
             }
-
-            $tglharini = date('Y-m-d');
-
-            $db->prepare("INSERT INTO trbmasuk(
-                                id_resto,
-                                kd_trbmasuk,
-                                petugas,                                
-                                tgl_trbmasuk,
-                                id_supplier,
-                                nm_supplier,
-                                carabayar,
-                                jenis)
-                            VALUES(?,?,?,?,?,?,?,?)
-            ")->execute(['pusat', $kdtransaksi, $petugas, $tglharini, '0', 'SINKRONISASI PLUS', 'TUNAI', 'nonpbf']);
-            echo '<script>window.location.href = "?module=byrkredit";</script>';
             break;
     }
 }
