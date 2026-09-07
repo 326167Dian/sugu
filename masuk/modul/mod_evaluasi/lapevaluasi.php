@@ -107,12 +107,11 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 							$totalpk = array();
 							$totglobal = array();
 							while ($min = $admin->fetch(PDO::FETCH_ASSOC)) {
-								$kom = $db->query("select sum(profit) as tambahan,qty_dtrkasir,id_user from trkasir_detail join trkasir
-															on(trkasir_detail.kd_trkasir=trkasir.kd_trkasir) 
+								$kom = $db->query("select sum(profit) as tambahan from trkasir_detail join trkasir
+															on(trkasir_detail.kd_trkasir=trkasir.kd_trkasir)
 															where trkasir_detail.idadmin='$min[id_admin]' and trkasir.tgl_trkasir between '$tgl_awal' and '$tgl_akhir' ");
 								$misi = $kom->fetch(PDO::FETCH_ASSOC);
-								$qty = $misi['qty_dtrkasir'];
-								$pk = $misi['tambahan']*$qty;
+								$pk = $misi['tambahan'];
 								$pk1 = format_rupiah(round(($pk),0));
 								$petugas = $min['nama_lengkap'];
 								
@@ -202,7 +201,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 							$kumulatif = array();
 							while ($per = $person->fetch(PDO::FETCH_ASSOC)) {
 								$satuan = format_rupiah($per['profit']);
-								$subttl = format_rupiah($per['profit']*$per['qty_dtrkasir']);
+								$subttl = format_rupiah($per['profit']);
 								echo "
 																<tr>
 																<td width='30'>$no2</td>
@@ -213,7 +212,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 																</tr>
 																";
 								$no2++;
-								$kumulatif[] = $per['profit'] * $per['qty_dtrkasir'];
+								$kumulatif[] = $per['profit'];
 							}
 
 							?>
