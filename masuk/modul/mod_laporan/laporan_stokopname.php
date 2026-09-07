@@ -435,6 +435,8 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             $kdtransaksi = "MINUS-" . $kdunik;
             $petugas = $_SESSION['namalengkap'];
 
+            include_once __DIR__ . "/../../../configurasi/fungsi_batch.php";
+
             $db->beginTransaction();
             try {
                 $sominus = $db->prepare("SELECT * FROM stok_opname
@@ -448,20 +450,45 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                     $barang->execute([$so['id_barang']]);
                     $brg = $barang->fetch(PDO::FETCH_ASSOC);
                     $qtymin = abs($so['selisih']);
-                    $hrgtot = $brg['hrgjual_barang'] * $qtymin;
 
-                    $inserttrkasir = $db->prepare("INSERT INTO trkasir_detail(
-                                                kd_trkasir,
-                                                id_barang,
-                                                kd_barang,
-                                                nmbrg_dtrkasir,
-                                                qty_dtrkasir,
-                                                sat_dtrkasir,
-                                                hrgjual_dtrkasir,
-                                                hrgttl_dtrkasir,
-                                                waktu)
-                                            VALUES(?,?,?,?,?,?,?,?,?)");
-                    $inserttrkasir->execute([$kdtransaksi, $so['id_barang'], $so['kd_barang'], $brg['nm_barang'], $qtymin, $brg['sat_barang'], $brg['hrgjual_barang'], $hrgtot,$tgl_sekarang]);
+                    // ambil batch & exp dengan tanggal terdekat (FIFO), sama seperti transaksi penjualan
+                    $databatch = get_batch_fifo($qtymin, $so['kd_barang']);
+                    $databatch = json_decode($databatch, true);
+
+                    foreach ($databatch as $bt) {
+                        $no_batch = $bt['no_batch'];
+                        $exp_date = $bt['exp_date'];
+                        $qty_ambil = $bt['qty_ambil'];
+                        $hrgtot = $brg['hrgjual_barang'] * $qty_ambil;
+
+                        $stmt_insert_batch = $db->prepare("INSERT INTO batch(
+                                                        tgl_transaksi,
+                                                        no_batch,
+                                                        exp_date,
+                                                        qty,
+                                                        satuan,
+                                                        kd_transaksi,
+                                                        kd_barang,
+                                                        status
+                                                        )
+                                                  VALUES(?,?,?,?,?,?,?,?)");
+                        $stmt_insert_batch->execute([$tgl_sekarang, $no_batch, $exp_date, $qty_ambil, $brg['sat_barang'], $kdtransaksi, $so['kd_barang'], 'keluar']);
+
+                        $inserttrkasir = $db->prepare("INSERT INTO trkasir_detail(
+                                                    kd_trkasir,
+                                                    id_barang,
+                                                    kd_barang,
+                                                    nmbrg_dtrkasir,
+                                                    qty_dtrkasir,
+                                                    sat_dtrkasir,
+                                                    hrgjual_dtrkasir,
+                                                    hrgttl_dtrkasir,
+                                                    no_batch,
+                                                    exp_date,
+                                                    waktu)
+                                                VALUES(?,?,?,?,?,?,?,?,?,?,?)");
+                        $inserttrkasir->execute([$kdtransaksi, $so['id_barang'], $so['kd_barang'], $brg['nm_barang'], $qty_ambil, $brg['sat_barang'], $brg['hrgjual_barang'], $hrgtot, $no_batch, $exp_date, $tgl_sekarang]);
+                    }
 
                     $db->prepare("UPDATE barang SET stok_barang = stok_barang - ? WHERE id_barang = ?")
                         ->execute([$qtymin, $so['id_barang']]);

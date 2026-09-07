@@ -32,6 +32,12 @@ try {
         $db->prepare("UPDATE barang SET stok_barang = stok_barang + ? WHERE id_barang = ?")
             ->execute([$selisih_qty, $detail['id_barang']]);
 
+        if (!empty($detail['no_batch'])) {
+            $db->prepare("UPDATE batch SET qty = ?
+                            WHERE kd_transaksi = ? AND kd_barang = ? AND no_batch = ? AND status = 'masuk'")
+                ->execute([$qty_dtrbmasuk, $kd_trbmasuk, $kd_barang, $detail['no_batch']]);
+        }
+
         // sinkronkan harga referensi barang (konversi baru mengubah harga per satuan eceran)
         $db->prepare("UPDATE barang SET hrgsat_barang = ?, hrgsat_grosir = ? WHERE kd_barang = ?")
             ->execute([$detail['hrgsat_dtrbmasuk'] / $konversi, $detail['hrgsat_dtrbmasuk'], $kd_barang]);

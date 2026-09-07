@@ -35,7 +35,7 @@ try {
         if (!empty($no_batch)) {
             $waktu = date('Y-m-d H:i:s', time());
             $db->prepare("INSERT INTO batch (tgl_transaksi, no_batch, exp_date, qty, satuan, kd_transaksi, kd_barang, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'masuk')")
-                ->execute([$waktu, $no_batch, $detail['exp_date'], $detail['qty_grosir'], $detail['sat_dtrbmasuk'], $kd_trbmasuk, $kd_barang]);
+                ->execute([$waktu, $no_batch, $detail['exp_date'], $detail['qty_dtrbmasuk'], $detail['sat_dtrbmasuk'], $kd_trbmasuk, $kd_barang]);
         }
 
         $id_dtrbmasuk_final = $detail['id_dtrbmasuk'];
@@ -71,7 +71,7 @@ try {
 
         if (!empty($no_batch)) {
             $db->prepare("INSERT INTO batch (tgl_transaksi, no_batch, exp_date, qty, satuan, kd_transaksi, kd_barang, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'masuk')")
-                ->execute([$waktu, $no_batch, $odt['exp_date'], $qtygrosir_dtrbmasuk, $odt['sat_dtrbmasuk'], $kd_trbmasuk, $kd_barang]);
+                ->execute([$waktu, $no_batch, $odt['exp_date'], $qty_dtrbmasuk, $odt['sat_dtrbmasuk'], $kd_trbmasuk, $kd_barang]);
         }
     }
 

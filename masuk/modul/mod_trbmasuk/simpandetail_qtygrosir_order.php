@@ -35,7 +35,7 @@ try {
         if (!empty($detail['no_batch'])) {
             $db->prepare("UPDATE batch SET qty = ?
                             WHERE kd_transaksi = ? AND kd_barang = ? AND no_batch = ? AND status = 'masuk'")
-                ->execute([$qtygrosir_dtrbmasuk, $kd_trbmasuk, $kd_barang, $detail['no_batch']]);
+                ->execute([$qty_dtrbmasuk, $kd_trbmasuk, $kd_barang, $detail['no_batch']]);
         }
 
         $id_dtrbmasuk_final = $detail['id_dtrbmasuk'];
@@ -71,7 +71,7 @@ try {
 
         if (!empty($odt['no_batch'])) {
             $db->prepare("INSERT INTO batch (tgl_transaksi, no_batch, exp_date, qty, satuan, kd_transaksi, kd_barang, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'masuk')")
-                ->execute([$waktu, $odt['no_batch'], $odt['exp_date'], $qtygrosir_dtrbmasuk, $odt['sat_dtrbmasuk'], $kd_trbmasuk, $kd_barang]);
+                ->execute([$waktu, $odt['no_batch'], $odt['exp_date'], $qty_dtrbmasuk, $odt['sat_dtrbmasuk'], $kd_trbmasuk, $kd_barang]);
         }
     }
 
