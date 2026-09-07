@@ -193,6 +193,9 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                             "dataType": "JSON",
                             "type": "POST"
                         },
+                        "order": [
+                            [4, "desc"]
+                        ],
                         "rowCallback": function(row, data, index) {
                             // warna for nomor
                             if (data['t30'] <= 0) {
