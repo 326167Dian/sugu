@@ -444,11 +444,19 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 $sominus->execute();
                 $no1 = 1;
                 $tgl_sekarang = date("Y-m-d H:i:s", time());
+                $dilewati = array();
 
                 while ($so = $sominus->fetch(PDO::FETCH_ASSOC)) {
                     $barang = $db->prepare("SELECT nm_barang,sat_barang,hrgjual_barang FROM barang WHERE id_barang=?");
                     $barang->execute([$so['id_barang']]);
                     $brg = $barang->fetch(PDO::FETCH_ASSOC);
+
+                    if (!$brg) {
+                        // barang sudah dihapus dari master barang, lewati baris opname ini
+                        $dilewati[] = $so['kd_barang'];
+                        continue;
+                    }
+
                     $qtymin = abs($so['selisih']);
 
                     // ambil batch & exp dengan tanggal terdekat (FIFO), sama seperti transaksi penjualan
@@ -510,7 +518,12 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 ")->execute([$kdtransaksi, $petugas, $shiftin, $tglharini, 'SINKRONISASI MINUS', '1']);
 
                 $db->commit();
-                echo '<script>window.location.href = "?module=trkasir";</script>';
+                if (count($dilewati) > 0) {
+                    echo "<div class='error msg'>Sinkronisasi minus berhasil, tapi " . count($dilewati) . " barang dilewati karena sudah tidak ada di master barang: " . htmlspecialchars(implode(', ', $dilewati)) . "</div>";
+                    echo '<script>setTimeout(function(){ window.location.href = "?module=trkasir"; }, 4000);</script>';
+                } else {
+                    echo '<script>window.location.href = "?module=trkasir";</script>';
+                }
             } catch (Exception $e) {
                 $db->rollBack();
                 echo "<div class='error msg'>Sinkronisasi minus gagal, tidak ada data yang diubah: " . htmlspecialchars($e->getMessage()) . "</div>";
@@ -531,10 +544,17 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 $soplus->execute();
                 $no1 = 1;
                 $tgl_sekarang = date("Y-m-d H:i:s", time());
+                $dilewati = array();
                 while ($so = $soplus->fetch(PDO::FETCH_ASSOC)) {
                     $barang = $db->prepare("SELECT nm_barang,sat_barang FROM barang WHERE id_barang=?");
                     $barang->execute([$so['id_barang']]);
                     $brg = $barang->fetch(PDO::FETCH_ASSOC);
+
+                    if (!$brg) {
+                        // barang sudah dihapus dari master barang, lewati baris opname ini
+                        $dilewati[] = $so['kd_barang'];
+                        continue;
+                    }
 
                     $inserttrbmasuk = $db->prepare("INSERT INTO trbmasuk_detail(
                                                 kd_trbmasuk,
@@ -570,7 +590,12 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 ")->execute(['pusat', $kdtransaksi, $petugas, $tglharini, '0', 'SINKRONISASI PLUS', 'TUNAI', 'nonpbf']);
 
                 $db->commit();
-                echo '<script>window.location.href = "?module=byrkredit";</script>';
+                if (count($dilewati) > 0) {
+                    echo "<div class='error msg'>Sinkronisasi plus berhasil, tapi " . count($dilewati) . " barang dilewati karena sudah tidak ada di master barang: " . htmlspecialchars(implode(', ', $dilewati)) . "</div>";
+                    echo '<script>setTimeout(function(){ window.location.href = "?module=byrkredit"; }, 4000);</script>';
+                } else {
+                    echo '<script>window.location.href = "?module=byrkredit";</script>';
+                }
             } catch (Exception $e) {
                 $db->rollBack();
                 echo "<div class='error msg'>Sinkronisasi plus gagal, tidak ada data yang diubah: " . htmlspecialchars($e->getMessage()) . "</div>";
