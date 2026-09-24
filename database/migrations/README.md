@@ -20,6 +20,7 @@ Jalankan file sesuai urutan nama (timestamp di awal nama file):
 12. `20260807_fix_hasil_ujian_auto_increment.sql`
 13. `20260810_extend_trkasir_restore_header.sql`
 14. `20260828_add_tipe_barang_trbmasuk_detail.sql`
+15. `20260924_create_table_apoteker_profesi.sql`
 
 ## Cara menjalankan
 
@@ -104,6 +105,10 @@ mysql -u USERNAME -p NAMA_DATABASE < database/migrations/20260223_add_indexes_si
 `20260828_add_tipe_barang_trbmasuk_detail.sql` menambahkan penanda item bonus pada barang masuk PBF (fitur "beli 10 box gratis 1 box"):
 
 - kolom `tipe_barang` ENUM('reguler','bonus') DEFAULT 'reguler' pada `trbmasuk_detail` — item bertipe bonus tidak mengubah data master `barang` (HNA, harga jual, harga satuan, konversi) saat diterima/diedit, hanya menambah `stok_barang`
+
+`20260924_create_table_apoteker_profesi.sql` menambahkan tabel data keprofesian apoteker untuk laporan "Rekap Administratif Keprofesian":
+
+- tabel `apoteker_profesi` (`id_admin`, `nama_gelar`, `jabatan`, `no_stra`, `no_sipa`, `sipa_berlaku`) — satu baris per admin yang dipilih sebagai apoteker, diisi/diperbarui otomatis dari form laporan. Idempotent (`CREATE TABLE IF NOT EXISTS`), dan juga dibuat otomatis saat runtime jika migrasi belum dijalankan.
 
 Migrasi index (1-9) bersifat **idempotent**, begitu juga migrasi ke-11 dan ke-12. Migrasi ke-10, ke-13, dan ke-14 (`ADD COLUMN`) **tidak idempotent** (MySQL/MariaDB versi ini tidak mendukung `ADD COLUMN IF NOT EXISTS`) — jangan dijalankan dua kali. Sebagai jaring pengaman, `configurasi/fungsi_perubahan_trkasir.php` (migrasi 10, 13) dan `configurasi/fungsi_perubahan_trbmasuk.php` (migrasi 14) melakukan pengecekan `SHOW COLUMNS` di runtime dan akan menambahkan kolom/tabel yang belum ada secara otomatis jika migrasi ini belum sempat dijalankan manual.
 

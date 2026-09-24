@@ -581,6 +581,10 @@ elseif ($_GET['module'] == 'ujian') {
 elseif ($_GET['module'] == 'lapbatch') {
     include "modul/mod_batch/laporan_batch.php";
 }
+// Rekap Administratif Keprofesian
+elseif ($_GET['module'] == 'rekapkeprofesian') {
+    include "modul/mod_rekapkeprofesian/rekapkeprofesian.php";
+}
 
 // $getkdon = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT kd_trkasir FROM kdtk WHERE id_admin = '$_SESSION[idadmin]' AND stt_kdtk ='ON' ORDER BY id_kdtk DESC");
 // $kdon = mysqli_fetch_array($getkdon);
