@@ -12,10 +12,10 @@ if ($_GET['action'] == "table_data") {
         5 => 't60',
         6 => 'gr',
         7 => 'q30',
-        8 => 'satuan',
-        9 => 'harga_beli',
+        8 => 'sat_barang',
+        9 => 'hrgsat_barang',
         10 => 'nilai_barang',
-        11 => 'kartu_stok'
+        11 => 'kd_barang'
     );
 
     $querycount = $db->prepare("SELECT count(id_barang) as jumlah, SUM(hrgsat_barang*stok_barang) as totalNilaiStok FROM barang");
@@ -27,211 +27,73 @@ if ($_GET['action'] == "table_data") {
     $totalFiltered = $totalData;
     $totalNilaiStok = $datacount['totalNilaiStok'];
 
-    $limit = $_POST['length'];
-    $start = $_POST['start'];
-    $order = $columns[$_POST['order']['0']['column']];
-    $dir = $_POST['order']['0']['dir'];
+    $limit = intval($_POST['length']);
+    $start = intval($_POST['start']);
+    $orderIdx = intval($_POST['order']['0']['column']);
+    $order = isset($columns[$orderIdx]) ? $columns[$orderIdx] : 'nm_barang';
+    $dir = (strtolower($_POST['order']['0']['dir']) == 'asc') ? 'ASC' : 'DESC';
+    if ($limit < 1) {
+        $limit = 10;
+    }
 
-    if (empty($_POST['search']['value'])) {
-        $tgl60 = date('Y-m-d', strtotime('-30 days', strtotime($_GET['start'])));
-        $query = $db->prepare("SELECT a.kd_barang, a.nm_barang, a.stok_barang,
-            (
-                SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
-                JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                AND trkasir_detail.kd_barang = a.kd_barang
-            ) AS t30,
-            (
-                (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
-                JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                WHERE trkasir.tgl_trkasir BETWEEN '$tgl60' AND '$_GET[finish]'
-                AND trkasir_detail.kd_barang = a.kd_barang) -
-                (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
-                JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                AND trkasir_detail.kd_barang = a.kd_barang)
-            ) AS t60,
-            (
-                SELECT SUM(trkasir_detail.qty_dtrkasir) FROM trkasir_detail
-                JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                AND trkasir_detail.kd_barang = a.kd_barang
-            ) AS q30,
-            (
-                ROUND((
-                    (
-                        (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
-                        JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                        WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                        AND trkasir_detail.kd_barang = a.kd_barang)/
-                        (
-                            (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
-                            JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                            WHERE trkasir.tgl_trkasir BETWEEN '$tgl60' AND '$_GET[finish]'
-                            AND trkasir_detail.kd_barang = a.kd_barang) -
-                            (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
-                            JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                            WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                            AND trkasir_detail.kd_barang = a.kd_barang)
-                        )
-                    )*100
-                )-100)
-            )AS gr,
+    $tglStart = date('Y-m-d', strtotime($_GET['start']));
+    $tglFinish = date('Y-m-d', strtotime($_GET['finish']));
+    $tgl60 = date('Y-m-d', strtotime('-30 days', strtotime($tglStart)));
+
+    // Penjualan 60 hari dihitung sekali per kd_barang, lalu di-join ke barang.
+    // (Dulu memakai subquery per baris, sangat lambat saat diurutkan berdasarkan T30.)
+    // kd_num: barang.kd_barang BIGINT sedangkan trkasir_detail.kd_barang VARCHAR, disamakan ke angka agar join cepat.
+    $penjualan = "SELECT d.kd_barang,
+            MAX(CAST(d.kd_barang AS DECIMAL(20,0))) AS kd_num,
+            SUM(CASE WHEN t.tgl_trkasir BETWEEN :start1 AND :finish1 THEN 1 ELSE 0 END) AS cnt30,
+            COUNT(d.id_dtrkasir) AS cnt60,
+            SUM(CASE WHEN t.tgl_trkasir BETWEEN :start2 AND :finish2 THEN d.qty_dtrkasir ELSE 0 END) AS qty30
+        FROM trkasir_detail d
+        JOIN trkasir t ON t.kd_trkasir = d.kd_trkasir
+        WHERE t.tgl_trkasir BETWEEN :tgl60 AND :finish3
+        GROUP BY d.kd_barang";
+
+    $params = array(
+        ':start1' => $tglStart,
+        ':finish1' => $tglFinish,
+        ':start2' => $tglStart,
+        ':finish2' => $tglFinish,
+        ':tgl60' => $tgl60,
+        ':finish3' => $tglFinish
+    );
+
+    $where = "";
+    if (!empty($_POST['search']['value'])) {
+        $where = "WHERE a.kd_barang LIKE :s1
+                OR a.nm_barang LIKE :s2
+                OR a.stok_barang LIKE :s3
+                OR a.sat_barang LIKE :s4
+                OR a.hrgsat_barang LIKE :s5";
+        $search = '%' . $_POST['search']['value'] . '%';
+        $searchParams = array(':s1' => $search, ':s2' => $search, ':s3' => $search, ':s4' => $search, ':s5' => $search);
+
+        $querycount = $db->prepare("SELECT count(a.id_barang) as jumlah FROM barang a $where");
+        $querycount->execute($searchParams);
+        $datacount = $querycount->fetch(PDO::FETCH_ASSOC);
+        $totalFiltered = $datacount['jumlah'];
+
+        $params = array_merge($params, $searchParams);
+    }
+
+    $query = $db->prepare("SELECT a.id_barang, a.kd_barang, a.nm_barang, a.stok_barang,
+            COALESCE(s.cnt30, 0) AS t30,
+            COALESCE(s.cnt60, 0) - COALESCE(s.cnt30, 0) AS t60,
+            s.qty30 AS q30,
+            ROUND((COALESCE(s.cnt30, 0) / (COALESCE(s.cnt60, 0) - COALESCE(s.cnt30, 0))) * 100 - 100) AS gr,
             a.sat_barang,
             a.hrgsat_barang,
             (a.hrgsat_barang * a.stok_barang) as nilai_barang
-        FROM barang a 
+        FROM barang a
+        LEFT JOIN ($penjualan) s ON s.kd_num = a.kd_barang
+        $where
         ORDER BY $order $dir LIMIT $limit OFFSET $start");
-        // $query = $db->query("SELECT id_barang,
-        //                             kd_barang,
-        //                             nm_barang,
-        //                             stok_barang,
-        //                             sat_barang,
-        //                             jenisobat,
-        //                             hrgsat_barang,
-        //                             hrgjual_barang,
-        //                             indikasi
-        //     FROM barang ORDER BY $order $dir LIMIT $limit OFFSET $start");
-    } else {
-        $tgl60 = date('Y-m-d', strtotime('-30 days', strtotime($_GET['start'])));
-        $search = $_POST['search']['value'];
-        $query = $db->prepare("SELECT a.kd_barang, a.nm_barang, a.stok_barang,
-                (
-                    SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
-                    JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                    WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                    AND trkasir_detail.kd_barang = a.kd_barang
-                ) AS t30,
-                (
-                    (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
-                    JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                    WHERE trkasir.tgl_trkasir BETWEEN '$tgl60' AND '$_GET[finish]'
-                    AND trkasir_detail.kd_barang = a.kd_barang) -
-                    (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
-                    JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                    WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                    AND trkasir_detail.kd_barang = a.kd_barang)
-                ) AS t60,
-                (
-                    SELECT SUM(trkasir_detail.qty_dtrkasir) FROM trkasir_detail
-                    JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                    WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                    AND trkasir_detail.kd_barang = a.kd_barang
-                ) AS q30,
-                (
-                    ROUND((
-                        (
-                            (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
-                            JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                            WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                            AND trkasir_detail.kd_barang = a.kd_barang)/
-                            (
-                                (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
-                                JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                                WHERE trkasir.tgl_trkasir BETWEEN '$tgl60' AND '$_GET[finish]'
-                                AND trkasir_detail.kd_barang = a.kd_barang) -
-                                (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
-                                JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                                WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                                AND trkasir_detail.kd_barang = a.kd_barang)
-                            )
-                        )*100
-                    )-100)
-                )AS gr,
-                a.sat_barang,
-                a.hrgsat_barang,
-                (a.hrgsat_barang * a.stok_barang) as nilai_barang
-            FROM barang a
-            WHERE a.kd_barang LIKE '%$search%'
-                OR a.nm_barang LIKE '%$search%'
-                OR a.stok_barang LIKE '%$search%'
-                OR a.sat_barang LIKE '%$search%'
-                OR a.hrgsat_barang LIKE '%$search%'
-            ORDER BY $order $dir LIMIT $limit OFFSET $start");
-        // $query = $db->query("SELECT id_barang,
-        //                             kd_barang,
-        //                             nm_barang,
-        //                             stok_barang,
-        //                             sat_barang,
-        //                             jenisobat,
-        //                             hrgsat_barang,
-        //                             hrgjual_barang,
-        //                             indikasi 
-        //     FROM barang WHERE kd_barang LIKE '%$search%' 
-        //                 OR nm_barang LIKE '%$search%'
-        //                 OR stok_barang LIKE '%$search%'
-        //                 OR sat_barang LIKE '%$search%'
-        //                 OR jenisobat LIKE '%$search%'
-        //                 OR hrgsat_barang LIKE '%$search%'
-        //                 OR hrgjual_barang LIKE '%$search%'
-        //                 OR indikasi LIKE '%$search%' 
-        //     ORDER BY $order $dir LIMIT $limit OFFSET $start");
-
-        // $querycount = $db->query("SELECT count(id_barang) as jumlah 
-        //     FROM barang WHERE kd_barang LIKE '%$search%' 
-        //                 OR nm_barang LIKE '%$search%'
-        //                 OR stok_barang LIKE '%$search%'
-        //                 OR sat_barang LIKE '%$search%'
-        //                 OR jenisobat LIKE '%$search%'
-        //                 OR hrgsat_barang LIKE '%$search%'
-        //                 OR hrgjual_barang LIKE '%$search%'
-        //                 OR indikasi LIKE '%$search%'");
-        $querycount = $db->prepare("SELECT count(a.id_barang) as jumlah, a.kd_barang, a.nm_barang, a.stok_barang,
-                (
-                    SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
-                    JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                    WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                    AND trkasir_detail.kd_barang = a.kd_barang
-                ) AS t30,
-                (
-                    (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
-                    JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                    WHERE trkasir.tgl_trkasir BETWEEN '$tgl60' AND '$_GET[finish]'
-                    AND trkasir_detail.kd_barang = a.kd_barang) -
-                    (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
-                    JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                    WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                    AND trkasir_detail.kd_barang = a.kd_barang)
-                ) AS t60,
-                (
-                    SELECT SUM(trkasir_detail.qty_dtrkasir) FROM trkasir_detail
-                    JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                    WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                    AND trkasir_detail.kd_barang = a.kd_barang
-                ) AS q30,
-                (
-                    ROUND((
-                        (
-                            (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
-                            JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                            WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                            AND trkasir_detail.kd_barang = a.kd_barang)/
-                            (
-                                (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
-                                JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                                WHERE trkasir.tgl_trkasir BETWEEN '$tgl60' AND '$_GET[finish]'
-                                AND trkasir_detail.kd_barang = a.kd_barang) -
-                                (SELECT COUNT(trkasir_detail.id_dtrkasir) FROM trkasir_detail
-                                JOIN trkasir ON trkasir.kd_trkasir = trkasir_detail.kd_trkasir
-                                WHERE trkasir.tgl_trkasir BETWEEN '$_GET[start]' AND '$_GET[finish]'
-                                AND trkasir_detail.kd_barang = a.kd_barang)
-                            )
-                        )*100
-                    )-100)
-                )AS gr,
-                a.sat_barang,
-                a.hrgsat_barang,
-                (a.hrgsat_barang * a.stok_barang) as nilai_barang
-            FROM barang a
-            WHERE a.kd_barang LIKE '%$search%'
-                OR a.nm_barang LIKE '%$search%'
-                OR a.stok_barang LIKE '%$search%'
-                OR a.sat_barang LIKE '%$search%'
-                OR a.hrgsat_barang LIKE '%$search%'");
-
-        $querycount->execute();
-        $datacount = $querycount->fetch(PDO::FETCH_ASSOC);
-        $totalFiltered = $datacount['jumlah'];
+    foreach ($params as $key => $val) {
+        $query->bindValue($key, $val);
     }
 
     $data = array();
@@ -280,9 +142,9 @@ if ($_GET['action'] == "table_data") {
             $nestedData['kd_barang'] = (string)$value['kd_barang'];
             $nestedData['nm_barang'] = $value['nm_barang'];
             $nestedData['stok_barang'] = $value['stok_barang'];
-            $nestedData['t30'] = $value['t30'];
-            $nestedData['t60'] = $value['t60'];
-            $nestedData['gr'] = ($value['t60'] == 0) ? 0 : $value['gr'];
+            $nestedData['t30'] = intval($value['t30']);
+            $nestedData['t60'] = intval($value['t60']);
+            $nestedData['gr'] = ($value['t60'] == 0) ? 0 : intval($value['gr']);
             $nestedData['q30'] = ($value['q30'] <= 0) ? 0 : $value['q30'];
             $nestedData['satuan'] = $value['sat_barang'];
             $nestedData['harga_beli'] = $value['hrgsat_barang'];
