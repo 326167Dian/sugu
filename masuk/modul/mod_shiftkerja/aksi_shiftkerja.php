@@ -56,58 +56,40 @@ else{
      $stmt = $db->prepare("UPDATE waktukerja SET petugastutup=?, waktututup=?, status=?, saldoakhir=? WHERE shift=? AND tanggal=?");
      $stmt->execute([$_POST['petugastutup'], $_POST['waktututup'], $_POST['status'], $_POST['saldoakhir'], $_POST['shift'], $_POST['tanggal']]);
 
+    // Catat pendapatan harian shift ini ke jurnal kas, dipisah TUNAI dan TRANSFER
+    $bulanindo = [1=>'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    $tsshift = strtotime($_POST['tanggal']);
+    $tglindo = (int)date('j', $tsshift) . ' ' . $bulanindo[(int)date('n', $tsshift)] . ' ' . date('Y', $tsshift);
+
+    $namashift = $db->prepare("SELECT nama_shift FROM namashift WHERE shift = ?");
+    $namashift->execute([$_POST['shift']]);
+    $rshift = $namashift->fetch(PDO::FETCH_ASSOC);
+    $namashiftteks = !empty($rshift['nama_shift']) ? $rshift['nama_shift'] : ($_POST['shift'] == 1 ? 'PAGI' : 'SORE');
+
+    $ket = 'shift ' . strtolower($namashiftteks) . ' ' . $tglindo;
+    $idjenis_pendapatan = 1; // Pendapatan Harian Apotek
+    $curtime = date('ymdHis');
+
+    $carabayarmap = [1 => 'TUNAI', 2 => 'TRANSFER'];
+    foreach ($carabayarmap as $id_carabayar => $carabayar) {
+        $jual = $db->prepare("SELECT SUM(ttl_trkasir) AS total FROM trkasir WHERE shift = ? AND tgl_trkasir = ? AND id_carabayar = ?");
+        $jual->execute([$_POST['shift'], $_POST['tanggal'], $id_carabayar]);
+        $rjual = $jual->fetch(PDO::FETCH_ASSOC);
+        $total = $rjual['total'] ? $rjual['total'] : 0;
+
+        if ($total > 0) {
+            $db->prepare("INSERT INTO jurnal (tanggal, ket, petugas, idjenis, carabayar, debit, kredit, current) VALUES (?, ?, ?, ?, ?, 0, ?, ?)")
+               ->execute([date('Y-m-d'), $ket, $_POST['petugastutup'], $idjenis_pendapatan, $carabayar, $total, $curtime]);
+
+            $kas = $db->prepare("SELECT saldo FROM kas WHERE id_kas = ?");
+            $kas->execute(['1']);
+            $rkas = $kas->fetch(PDO::FETCH_ASSOC);
+            $saldobaru = $rkas['saldo'] + $total;
+            $db->prepare("UPDATE kas SET saldo = ? WHERE id_kas = ?")->execute([$saldobaru, '1']);
+        }
+    }
+
 	//echo "<script type='text/javascript'>alert('Data berhasil diubah !');window.location='../../media_admin.php?module=".$module."'</script>";
-
-// if($_POST['shift']=1)
-//  { $idtx = 1;}
-// elseif($_POST['shift']=2) 
-//  { $idtx = 2;}
- 
-//     mysqli_query($GLOBALS["___mysqli_ston"],"insert into jurnal (
-//         tanggal,
-//         ket,
-//         petugas,
-//         idjenis,
-//         debit,
-//         kredit,
-//         carabayar,
-//         current
-//         )
-// values( '$_POST[tanggal]',
-//         'Tutup Kasir Shift $_POST[shift]',
-//         '$_POST[petugastutup]',
-//         '$idtx',
-//         '0',
-//         '$_POST[saldoakhir]',
-//         'TUNAI',
-//         '$waktu'
-//         )
-//         ");
-
-
-//     $transfer = $db->query("select sum(ttl_trkasir) as tf from trkasir 
-//                 where shift='$_POST[shift]' and tgl_trkasir='$_POST[tanggal]' and id_carabayar='2' ");   
-//     $tfr = $transfer->fetch_array();
-//     mysqli_query($GLOBALS["___mysqli_ston"],"insert into jurnal (
-//         tanggal,
-//         ket,
-//         petugas,
-//         idjenis,
-//         debit,
-//         kredit,
-//         carabayar,
-//         current
-//         )
-// values( '$_POST[tanggal]',
-//         'Tutup Kasir Shift $_POST[shift]',
-//         '$_POST[petugastutup]',
-//         '$idtx',
-//         '0',
-//         '$tfr[tf]',
-//         'TRANSFER',
-//         '$waktu'
-//         )
-//         ");
 
     header('location:../../media_admin.php?module='.$module);
  }
