@@ -2741,9 +2741,9 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         } else if (qty_dtrkasir == "") {
             alert('Qty tidak boleh kosong');
         }
-        // else if (parseInt(stok_barang) < parseInt(qty_dtrkasir)) {
-        //     alert('Stok barang tidak mencukupi');
-        // }
+         else if (parseInt(stok_barang) < parseInt(qty_dtrkasir)) {
+             alert('Stok barang tidak mencukupi');
+         }
         else if (parseInt(disc || 0, 10) > 100) {
             alert('Input Diskon lebih kecil dari 100');
         } else {
