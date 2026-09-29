@@ -11,7 +11,7 @@ Jalankan file sesuai urutan nama (timestamp di awal nama file):
 3. `20260225_add_indexes_byrkredit_serverside.sql`
 4. `20260225_add_indexes_stok_kritis_analisa.sql`
 5. `20260516_add_column_admin_ujian.sql`
-6. `20260516_create_table_soal_ujian.sql`
+6. `20260516_create_table_soal_header.sql` + `20260516_create_table_soal_ujian.sql`
 7. `20260516_create_table_hasil_ujian.sql`
 8. `20260516_add_fk_soal_to_soal_header.sql`
 9. `20260516_add_columns_hasil_ujian_for_report.sql`
@@ -21,6 +21,10 @@ Jalankan file sesuai urutan nama (timestamp di awal nama file):
 13. `20260810_extend_trkasir_restore_header.sql`
 14. `20260828_add_tipe_barang_trbmasuk_detail.sql`
 15. `20260924_create_table_apoteker_profesi.sql`
+
+Alternatif: `all_migrations_idempotent.sql` menggabungkan semua migrasi di atas dalam
+urutan yang benar, dan setiap kolom/index/tabel dicek dulu sebelum dibuat, jadi aman
+dijalankan berkali-kali pada database yang sebagian migrasinya sudah pernah dijalankan.
 
 ## Cara menjalankan
 

@@ -22,6 +22,15 @@ if (empty($_SESSION['login']) || $_SESSION['login'] != 1) {
     exit;
 }
 
+if (empty($_SESSION['level']) || $_SESSION['level'] != 'pemilik') {
+    http_response_code(403);
+    echo json_encode([
+        'status' => false,
+        'message' => 'Hanya pemilik yang dapat melihat data ini'
+    ]);
+    exit;
+}
+
 include "../configurasi/koneksi.php";
 
 function realtimeTableExists($db, $tableName)

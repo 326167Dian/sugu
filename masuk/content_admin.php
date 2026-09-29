@@ -60,7 +60,7 @@ if ($_GET['module'] == 'home') {
                 </p>
             </div>
 
-
+            <?php if (isset($_SESSION['level']) && $_SESSION['level'] == 'pemilik') { ?>
             <div class="col-md-12">
                 <div class="box box-primary" style="margin:20px;">
                     <div class="box-header with-border">
@@ -359,8 +359,7 @@ if ($_GET['module'] == 'home') {
                         });
                 });
             </script>
-
-
+            <?php } ?>
 
         </div>
 
