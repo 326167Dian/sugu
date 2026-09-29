@@ -60,7 +60,7 @@ if ($_GET['action'] == "table_data") {
             $nestedData['no'] = $no;
             $nestedData['petugasbuka'] = $value['petugasbuka'];
             $nestedData['petugastutup'] = $value['petugastutup'];
-            $nestedData['nama_shift'] = $value['nama_shift'];
+            $nestedData['nama_shift'] = !empty($value['nama_shift']) ? $value['nama_shift'] : ($value['shift'] == 1 ? 'SHIFT PAGI' : 'SHIFT SORE');
             $nestedData['tanggal'] = $value['tanggal'];
             $nestedData['waktubuka'] = $value['waktubuka'];
             $nestedData['waktututup'] = $value['waktututup'];
