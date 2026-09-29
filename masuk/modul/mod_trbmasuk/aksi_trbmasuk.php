@@ -54,9 +54,7 @@ if ($module=='trbmasuk' AND $act=='input_trbmasuk'){
 
         $db->commit();
 
-        if ($_POST['carabayar'] == 'LUNAS') {
-            catat_jurnal_pembayaran_distributor($db, $_POST['kd_trbmasuk'], $_POST['nm_supplier'], $_POST['ttl_trkasir'], $petugas_sesi);
-        }
+        sinkron_jurnal_pembayaran_distributor($db, $_POST['kd_trbmasuk'], $_POST['nm_supplier'], $_POST['carabayar'], $_POST['ttl_trkasir'], $petugas_sesi);
 
         //echo "<script type='text/javascript'>alert('Transkasi berhasil ditambahkan !');window.location='../../media_admin.php?module=".$module."'</script>";
     } catch (Exception $e) {
@@ -74,9 +72,8 @@ elseif ($module=='trbmasuk' AND $act=='input_order_trbmasuk'){
     try {
         $db->beginTransaction();
 
-        $cektrbmasuk = $db->prepare("SELECT id_trbmasuk, carabayar FROM trbmasuk WHERE kd_trbmasuk = ?");
+        $cektrbmasuk = $db->prepare("SELECT id_trbmasuk FROM trbmasuk WHERE kd_trbmasuk = ?");
         $cektrbmasuk->execute([$_POST['kd_trbmasuk']]);
-        $rtrbmasuklama = $cektrbmasuk->fetch(PDO::FETCH_ASSOC);
 
         if ($cektrbmasuk->rowCount() > 0) {
             $stmt = $db->prepare("UPDATE trbmasuk SET tgl_trbmasuk = ?,
@@ -91,10 +88,6 @@ elseif ($module=='trbmasuk' AND $act=='input_order_trbmasuk'){
 												carabayar = ?
 												WHERE kd_trbmasuk = ?");
             $stmt->execute([$_POST['tgl_trbmasuk'], $_POST['id_supplier'], $_POST['nm_supplier'], $_POST['tlp_supplier'], $_POST['alamat_trbmasuk'], $_POST['ttl_trkasir'], $_POST['dp_bayar'], $_POST['sisa_bayar'], $_POST['ket_trbmasuk'], $_POST['carabayar'], $_POST['kd_trbmasuk']]);
-
-            if ($_POST['carabayar'] == 'LUNAS' && $rtrbmasuklama['carabayar'] != 'LUNAS') {
-                catat_jurnal_pembayaran_distributor($db, $_POST['kd_trbmasuk'], $_POST['nm_supplier'], $_POST['ttl_trkasir'], $petugas_sesi);
-            }
         } else {
             $stmt = $db->prepare("INSERT INTO trbmasuk(id_resto,
 												kd_trbmasuk,
@@ -117,8 +110,6 @@ elseif ($module=='trbmasuk' AND $act=='input_order_trbmasuk'){
             $tgl_sekarang = date('Y-m-d H:i:s', time());
             $stmt2 = $db->prepare("INSERT INTO kartu_stok(kode_transaksi, tgl_sekarang) VALUES(?,?)");
             $stmt2->execute([$_POST['kd_trbmasuk'], $tgl_sekarang]);
-
-            $trbmasukbaru = true;
         }
 
         $stmt3 = $db->prepare("UPDATE kdbm SET stt_kdbm = 'OFF' WHERE id_admin = ? AND id_resto = 'pusat' AND kd_trbmasuk = ?");
@@ -126,9 +117,7 @@ elseif ($module=='trbmasuk' AND $act=='input_order_trbmasuk'){
 
         $db->commit();
 
-        if (!empty($trbmasukbaru) && $_POST['carabayar'] == 'LUNAS') {
-            catat_jurnal_pembayaran_distributor($db, $_POST['kd_trbmasuk'], $_POST['nm_supplier'], $_POST['ttl_trkasir'], $petugas_sesi);
-        }
+        sinkron_jurnal_pembayaran_distributor($db, $_POST['kd_trbmasuk'], $_POST['nm_supplier'], $_POST['carabayar'], $_POST['ttl_trkasir'], $petugas_sesi);
     } catch (Exception $e) {
         if ($db->inTransaction()) {
             $db->rollBack();
@@ -140,10 +129,6 @@ elseif ($module=='trbmasuk' AND $act=='input_order_trbmasuk'){
 }
  //updata trbmasuk
  elseif ($module=='trbmasuk' AND $act=='ubah_trbmasuk'){
-
-    $cektrbmasuklama = $db->prepare("SELECT carabayar, kd_trbmasuk FROM trbmasuk WHERE id_trbmasuk = ?");
-    $cektrbmasuklama->execute([$_POST['id_trbmasuk']]);
-    $rtrbmasuklama = $cektrbmasuklama->fetch(PDO::FETCH_ASSOC);
 
     $stmt = $db->prepare("UPDATE trbmasuk SET tgl_trbmasuk = ?,
 									id_supplier = ?,
@@ -158,9 +143,7 @@ elseif ($module=='trbmasuk' AND $act=='input_order_trbmasuk'){
 									WHERE id_trbmasuk = ?");
     $stmt->execute([$_POST['tgl_trbmasuk'], $_POST['id_supplier'], $_POST['nm_supplier'], $_POST['tlp_supplier'], $_POST['alamat_trbmasuk'], $_POST['ttl_trkasir'], $_POST['dp_bayar'], $_POST['sisa_bayar'], $_POST['ket_trbmasuk'], $_POST['carabayar'], $_POST['id_trbmasuk']]);
 
-    if ($_POST['carabayar'] == 'LUNAS' && !empty($rtrbmasuklama) && $rtrbmasuklama['carabayar'] != 'LUNAS') {
-        catat_jurnal_pembayaran_distributor($db, $rtrbmasuklama['kd_trbmasuk'], $_POST['nm_supplier'], $_POST['ttl_trkasir'], $petugas_sesi);
-    }
+    sinkron_jurnal_pembayaran_distributor($db, $_POST['kd_trbmasuk'], $_POST['nm_supplier'], $_POST['carabayar'], $_POST['ttl_trkasir'], $petugas_sesi);
 
 	//echo "<script type='text/javascript'>alert('Transkasi berhasil Ubah !');window.location='../../media_admin.php?module=".$module."'</script>";
 
@@ -178,7 +161,10 @@ elseif ($module=='trbmasuk' AND $act=='hapus'){
 	$ambildatainduk->execute([$_GET['id']]);
 	$r1 = $ambildatainduk->fetch(PDO::FETCH_ASSOC);
 	$kd_trbmasuk = $r1['kd_trbmasuk'];
-	
+
+	// batalkan entri jurnal pembayaran distributor yang terhubung (jika transaksi ini sudah LUNAS)
+	sinkron_jurnal_pembayaran_distributor($db, $kd_trbmasuk, '', 'BATAL', 0, $petugas_sesi);
+
 	//loop data detail
 	//ambil data induk
 	$ambildatadetail = $db->prepare("SELECT * FROM trbmasuk_detail WHERE kd_trbmasuk=?");

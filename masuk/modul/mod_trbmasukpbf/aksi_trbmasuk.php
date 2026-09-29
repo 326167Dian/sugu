@@ -98,9 +98,7 @@ if ($module=='trbmasukpbf' AND $act=='input_trbmasuk'){
 
     $db->commit();
 
-    if ($_POST['carabayar'] == 'LUNAS') {
-        catat_jurnal_pembayaran_distributor($db, $_POST['kd_trbmasuk'], $_POST['nm_supplier'], $_POST['ttl_trkasir'], $petugas_sesi);
-    }
+    sinkron_jurnal_pembayaran_distributor($db, $_POST['kd_trbmasuk'], $_POST['nm_supplier'], $_POST['carabayar'], $_POST['ttl_trkasir'], $petugas_sesi);
 
 	//echo "<script type='text/javascript'>alert('Transkasi berhasil ditambahkan !');window.location='../../media_admin.php?module=".$module."'</script>";
 
@@ -115,10 +113,6 @@ if ($module=='trbmasukpbf' AND $act=='input_trbmasuk'){
 }
  //updata trbmasukpbf
  elseif ($module=='trbmasukpbf' AND $act=='ubah_trbmasuk'){
-
-    $cektrbmasuklama = $db->prepare("SELECT carabayar, kd_trbmasuk FROM trbmasuk WHERE id_trbmasuk = ?");
-    $cektrbmasuklama->execute([$_POST['id_trbmasuk']]);
-    $rtrbmasuklama = $cektrbmasuklama->fetch(PDO::FETCH_ASSOC);
 
     if($_POST['carabayar'] == 'LUNAS'){
         $tgl_lunas      = date('Y-m-d', time());
@@ -159,9 +153,7 @@ if ($module=='trbmasukpbf' AND $act=='input_trbmasuk'){
 										$_POST['id_trbmasuk']
 									]);
 
-    if ($_POST['carabayar'] == 'LUNAS' && !empty($rtrbmasuklama) && $rtrbmasuklama['carabayar'] != 'LUNAS') {
-        catat_jurnal_pembayaran_distributor($db, $rtrbmasuklama['kd_trbmasuk'], $_POST['nm_supplier'], $_POST['ttl_trkasir'], $petugas_sesi);
-    }
+    sinkron_jurnal_pembayaran_distributor($db, $_POST['kd_trbmasuk'], $_POST['nm_supplier'], $_POST['carabayar'], $_POST['ttl_trkasir'], $petugas_sesi);
 
 										
 	//echo "<script type='text/javascript'>alert('Transkasi berhasil Ubah !');window.location='../../media_admin.php?module=".$module."'</script>";
@@ -180,7 +172,10 @@ elseif ($module=='trbmasukpbf' AND $act=='hapus'){
 	$ambildatainduk->execute([$_GET['id']]);
 	$r1 = $ambildatainduk->fetch(PDO::FETCH_ASSOC);
 	$kd_trbmasuk = $r1['kd_trbmasuk'];
-	
+
+	// batalkan entri jurnal pembayaran distributor yang terhubung (jika transaksi ini sudah LUNAS)
+	sinkron_jurnal_pembayaran_distributor($db, $kd_trbmasuk, '', 'BATAL', 0, $petugas_sesi);
+
 	//loop data detail
 	//ambil data induk
 	$ambildatadetail = $db->prepare("SELECT * FROM trbmasuk_detail WHERE kd_trbmasuk=?");
@@ -447,9 +442,7 @@ elseif ($module=='trbmasukpbf' AND $act=='input_order_trbmasuk'){
 
     $db->commit();
 
-    if ($_POST['carabayar'] == 'LUNAS') {
-        catat_jurnal_pembayaran_distributor($db, $_POST['kd_trbmasuk1'], $_POST['nm_supplier'], $_POST['ttl_trkasir'], $petugas_sesi);
-    }
+    sinkron_jurnal_pembayaran_distributor($db, $_POST['kd_trbmasuk1'], $_POST['nm_supplier'], $_POST['carabayar'], $_POST['ttl_trkasir'], $petugas_sesi);
   } catch (Exception $e) {
     if ($db->inTransaction()) {
         $db->rollBack();

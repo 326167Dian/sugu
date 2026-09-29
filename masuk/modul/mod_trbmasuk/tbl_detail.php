@@ -77,8 +77,10 @@ padding: 2px 6px;
                 			}
                 			
                 			
-							/**$dp_bayar = format_rupiah($rf['dp_bayar']);
-							$carabayar = $rf['carabayar'];**/
+							$carabayar = isset($rf['carabayar']) ? $rf['carabayar'] : '';
+						$selkredit = ($carabayar == 'KREDIT') ? 'selected' : '';
+						$sellunas = ($carabayar == 'LUNAS') ? 'selected' : '';
+						$selkonsinyasi = ($carabayar == 'KONSINYASI') ? 'selected' : '';
 
 							$sumprice = $db->prepare("SELECT kd_trbmasuk, SUM(hrgttl_dtrbmasuk) as grandnya FROM trbmasuk_detail 
 							                           WHERE kd_trbmasuk=?");
@@ -192,12 +194,12 @@ padding: 2px 6px;
 								<div class='text-right'>
 									<label class='col-sm-6 control-label'>CARA BAYAR</label>        		
 									 <div class='col-sm-6'>
-										<select name='carabayar' id='carabayar' class='form-control' 
+										<select name='carabayar' id='carabayar' class='form-control'
 										style='font-size: 13px; color: #000000; font-weight: bold;'>
-										    <option value='KREDIT'>KREDIT</option>
-										    <option value='LUNAS'>TUNAI</option>                                            
-                                            <option value='KONSINYASI'>KONSINYASI</option>
-                                         </select>  
+										    <option value='KREDIT' $selkredit>KREDIT</option>
+										    <option value='LUNAS' $sellunas>TUNAI</option>
+                                            <option value='KONSINYASI' $selkonsinyasi>KONSINYASI</option>
+                                         </select>
 										
 									 </div>
 								</div>

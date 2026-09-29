@@ -12,7 +12,7 @@ $petugas    = $_SESSION['namalengkap'];
 for ($i = 0; $i < count($count); $i++) {
     echo $count[$i] . '<br>';
 
-    $cektrbmasuklama = $db->prepare("SELECT carabayar, nm_supplier, ttl_trbmasuk FROM trbmasuk WHERE kd_trbmasuk = ?");
+    $cektrbmasuklama = $db->prepare("SELECT nm_supplier, ttl_trbmasuk FROM trbmasuk WHERE kd_trbmasuk = ?");
     $cektrbmasuklama->execute([$count[$i]]);
     $rtrbmasuklama = $cektrbmasuklama->fetch(PDO::FETCH_ASSOC);
 
@@ -23,8 +23,8 @@ for ($i = 0; $i < count($count); $i++) {
                                                 WHERE kd_trbmasuk = ?");
     $stmt_update->execute(['LUNAS', $tgl_lunas, $petugas, $count[$i]]);
 
-    if (!empty($rtrbmasuklama) && $rtrbmasuklama['carabayar'] != 'LUNAS') {
-        catat_jurnal_pembayaran_distributor($db, $count[$i], $rtrbmasuklama['nm_supplier'], $rtrbmasuklama['ttl_trbmasuk'], $petugas);
+    if (!empty($rtrbmasuklama)) {
+        sinkron_jurnal_pembayaran_distributor($db, $count[$i], $rtrbmasuklama['nm_supplier'], 'LUNAS', $rtrbmasuklama['ttl_trbmasuk'], $petugas);
     }
 }
 
