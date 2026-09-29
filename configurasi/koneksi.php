@@ -28,4 +28,8 @@ $db = $databaseConnector->connect();
 // Alias untuk kompatibilitas file lama yang memakai variabel $conn.
 $conn = $db;
 
+// Reset saldo kas otomatis setiap awal bulan (lihat fungsi_reset_saldo_bulanan.php).
+include_once __DIR__ . DIRECTORY_SEPARATOR . 'fungsi_reset_saldo_bulanan.php';
+reset_saldo_bulanan_jika_perlu($db);
+
 ?>
