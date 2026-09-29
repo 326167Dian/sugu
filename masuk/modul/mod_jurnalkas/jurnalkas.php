@@ -382,15 +382,20 @@ case "jenistransaksi" :
                     {$tipe = 'KELUAR';}
                     elseif ($r['tipe']==2)
                     {$tipe = 'MASUK';}
+                    if ($r['idjenis'] > 4) {
+                        $aksijenis = "<a href='?module=jurnalkas&act=ubah&id=$r[idjenis]' title='UBAH' class='btn btn-warning btn-xs'>UBAH</a>
+									     <a href=javascript:confirmdelete('$aksi2?module=jurnalkas&act=hapus&id=$r[idjenis]') title='HAPUS' class='btn btn-danger btn-xs'>HAPUS</a>";
+                    } else {
+                        $aksijenis = "<span class='label label-default'>Bawaan Sistem</span>";
+                    }
                     echo "<tr class='warnabaris' >
-											<td>$no</td>           
+											<td>$no</td>
 											 <td>$r[idjenis]</td>
 											 <td>$r[nm_jurnal]</td>
 											 <td style='text-align: center;'>$tipe</td>
-											 
+
 											 <td>
-											 <a href='?module=jurnalkas&act=ubah&id=$r[idjenis]' title='UBAH' class='btn btn-warning btn-xs'>UBAH</a> 											
-										     <a href=javascript:confirmdelete('$aksi2?module=jurnalkas&act=hapus&id=$r[idjenis]') title='HAPUS' class='btn btn-danger btn-xs'>HAPUS</a>
+											 $aksijenis
 											</td>
 										</tr>";
                     $no++;

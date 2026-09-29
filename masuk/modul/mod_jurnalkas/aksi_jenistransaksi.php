@@ -39,13 +39,17 @@ else{
     //updata jurnalkas
     elseif ($module=='jurnalkas' AND $act=='update_jenistransaksi'){
 
-        $stmt = $db->prepare("UPDATE jenis_jurnal SET   
-                                    nm_jurnal = ?
-									WHERE idjenis = ?");
-        $stmt->execute([$_POST['nm_jurnal'], $_POST['id']]);
+        if ($_POST['id'] <= 4) {
+            echo "<script type='text/javascript'>alert('Jenis transaksi bawaan sistem tidak bisa diubah!');history.go(-1);</script>";
+        } else {
+            $stmt = $db->prepare("UPDATE jenis_jurnal SET
+                                        nm_jurnal = ?
+										WHERE idjenis = ?");
+            $stmt->execute([$_POST['nm_jurnal'], $_POST['id']]);
 
-        //echo "<script type='text/javascript'>alert('Data berhasil diubah !');window.location='../../media_admin.php?module=".$module."'</script>";
-        header('location:../../media_admin.php?module='.$module. '&act=jenistransaksi');
+            //echo "<script type='text/javascript'>alert('Data berhasil diubah !');window.location='../../media_admin.php?module=".$module."'</script>";
+            header('location:../../media_admin.php?module='.$module. '&act=jenistransaksi');
+        }
 
     }
 //Hapus Proyek
@@ -55,7 +59,10 @@ else{
         $delete->execute([$_GET['id']]);
         $r = $delete->fetch(PDO::FETCH_ASSOC);
 
-        if ( $petugas !== $r['petugas'] && $_SESSION['level']!=='pemilik')
+        if ($_GET['id'] <= 4) {
+            echo "<script type='text/javascript'>alert('Jenis transaksi bawaan sistem tidak bisa dihapus!');history.go(-1);</script>";
+        }
+        elseif ( $petugas !== $r['petugas'] && $_SESSION['level']!=='pemilik')
         { echo "<script type='text/javascript'>alert('jurnal kas harus dihapus orang yang sama atau pemilik apotek!');history.go(-1);</script>";}
         else{
             $stmt = $db->prepare("DELETE FROM jenis_jurnal WHERE idjenis = ?");
