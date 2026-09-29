@@ -10,8 +10,10 @@ else{
 include "../../../configurasi/koneksi.php";
 include "../../../configurasi/fungsi_thumb.php";
 include "../../../configurasi/library.php";
+include "../../../configurasi/fungsi_jurnal_pembayaran_distributor.php";
 
 $module= "trbmasukpbf";
+$petugas_sesi = $_SESSION['namalengkap'];
 $stt_aksi=$_POST['stt_aksi'];
 if($stt_aksi == "input_trbmasuk" || $stt_aksi == "ubah_trbmasuk" || $stt_aksi == "input_order_trbmasuk"){
 $act=$stt_aksi;
@@ -96,6 +98,10 @@ if ($module=='trbmasukpbf' AND $act=='input_trbmasuk'){
 
     $db->commit();
 
+    if ($_POST['carabayar'] == 'LUNAS') {
+        catat_jurnal_pembayaran_distributor($db, $_POST['kd_trbmasuk'], $_POST['nm_supplier'], $_POST['ttl_trkasir'], $petugas_sesi);
+    }
+
 	//echo "<script type='text/javascript'>alert('Transkasi berhasil ditambahkan !');window.location='../../media_admin.php?module=".$module."'</script>";
 
   } catch (Exception $e) {
@@ -109,7 +115,11 @@ if ($module=='trbmasukpbf' AND $act=='input_trbmasuk'){
 }
  //updata trbmasukpbf
  elseif ($module=='trbmasukpbf' AND $act=='ubah_trbmasuk'){
- 
+
+    $cektrbmasuklama = $db->prepare("SELECT carabayar, kd_trbmasuk FROM trbmasuk WHERE id_trbmasuk = ?");
+    $cektrbmasuklama->execute([$_POST['id_trbmasuk']]);
+    $rtrbmasuklama = $cektrbmasuklama->fetch(PDO::FETCH_ASSOC);
+
     if($_POST['carabayar'] == 'LUNAS'){
         $tgl_lunas      = date('Y-m-d', time());
         $petugas_lunas  = $_POST['petugas'];
@@ -117,8 +127,8 @@ if ($module=='trbmasukpbf' AND $act=='input_trbmasuk'){
         $tgl_lunas      = '0000-00-00';
         $petugas_lunas  = '';
     }
-    
-    
+
+
     $db->prepare("UPDATE trbmasuk SET tgl_trbmasuk = ?,
 									id_supplier     = ?,
 									nm_supplier     = ?,
@@ -148,7 +158,11 @@ if ($module=='trbmasukpbf' AND $act=='input_trbmasuk'){
 										$petugas_lunas,
 										$_POST['id_trbmasuk']
 									]);
-										
+
+    if ($_POST['carabayar'] == 'LUNAS' && !empty($rtrbmasuklama) && $rtrbmasuklama['carabayar'] != 'LUNAS') {
+        catat_jurnal_pembayaran_distributor($db, $rtrbmasuklama['kd_trbmasuk'], $_POST['nm_supplier'], $_POST['ttl_trkasir'], $petugas_sesi);
+    }
+
 										
 	//echo "<script type='text/javascript'>alert('Transkasi berhasil Ubah !');window.location='../../media_admin.php?module=".$module."'</script>";
 	
@@ -432,6 +446,10 @@ elseif ($module=='trbmasukpbf' AND $act=='input_order_trbmasuk'){
                     WHERE kd_trbmasuk = ?")->execute([$_POST['kd_trbmasuk']]);
 
     $db->commit();
+
+    if ($_POST['carabayar'] == 'LUNAS') {
+        catat_jurnal_pembayaran_distributor($db, $_POST['kd_trbmasuk1'], $_POST['nm_supplier'], $_POST['ttl_trkasir'], $petugas_sesi);
+    }
   } catch (Exception $e) {
     if ($db->inTransaction()) {
         $db->rollBack();
